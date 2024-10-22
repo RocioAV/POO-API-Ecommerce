@@ -1,0 +1,20 @@
+package ar.edu.unju.fi.poo.tp8poo.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@DiscriminatorValue("ESTANDAR")
+public class ClienteEstandar extends Cliente {
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "CUPON_ID", referencedColumnName = "ID", unique = true)
+	private Cupon cupon;
+}
