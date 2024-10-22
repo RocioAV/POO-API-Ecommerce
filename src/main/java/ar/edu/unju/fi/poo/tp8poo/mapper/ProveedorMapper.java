@@ -8,8 +8,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-
+@Mapper(componentModel = "spring")
 public interface ProveedorMapper {
     ProveedorDTO toProveedorDTO(Proveedor proveedor);
 
