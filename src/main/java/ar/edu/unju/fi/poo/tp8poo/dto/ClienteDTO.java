@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,6 +24,7 @@ public class ClienteDTO implements Serializable {
 	    private String email;
 	    private String foto;
 	    private String estado; // Convertido de Enum a String
-	    private String created; // Fecha en formato String
-	    private String updated; // Fecha en formato String
+		private LocalDateTime created;
+		private LocalDateTime updated;
+// Fecha en formato String
 }

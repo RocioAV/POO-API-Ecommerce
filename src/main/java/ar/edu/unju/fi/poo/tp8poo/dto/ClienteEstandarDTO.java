@@ -1,12 +1,11 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
+import lombok.*;
 
 import java.io.Serializable;
 
+@ToString
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,11 +15,7 @@ public class ClienteEstandarDTO extends ClienteDTO implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private String email;
-	private String celular;
-	private String foto;
-	
-	private Long cupon;
-	private double porcentajeDescuento;
+
+	private Cupon cupon;
+
 }

@@ -16,6 +16,6 @@ import lombok.Setter;
 @DiscriminatorValue("PREMIUM")
 public class ClientePremium extends Cliente{
 
-	@Column(name="PORCENTAJE_DESCUENTO", nullable = false)
+	@Column
 	private double porcentajeDescuento;
 }

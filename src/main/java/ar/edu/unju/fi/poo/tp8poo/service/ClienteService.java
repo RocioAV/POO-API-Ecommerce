@@ -7,9 +7,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteExistenteException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteInexixtenteExcepcion;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.PorcentajeDescuentoException;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,26 +35,31 @@ public class ClienteService {
      */
 
 	private ClienteEstandarDTO toEstandarDTO(ClienteEstandar clienteEstandar) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
 		ClienteEstandarDTO clienteEstandarDTO = new ClienteEstandarDTO();
 		clienteEstandarDTO.setNombre(clienteEstandar.getNombre());
 		clienteEstandarDTO.setApellido(clienteEstandar.getApellido());
-		clienteEstandarDTO.setCreated(clienteEstandar.getCreated().format(formatter));
+		clienteEstandarDTO.setCreated(clienteEstandar.getCreated());
 		clienteEstandarDTO.setCelular(clienteEstandar.getCelular());
 		clienteEstandarDTO.setFoto(clienteEstandar.getFoto());
 		clienteEstandarDTO.setEmail(clienteEstandar.getEmail());
-		if(clienteEstandar.getCupon().getPorcentajeDescuento()>99 || clienteEstandar.getCupon().getPorcentajeDescuento()<0) {
-			throw new PorcentajeDescuentoException("Porcentaje de descuento invalido");
-		}else {
-			clienteEstandarDTO.setPorcentajeDescuento(clienteEstandar.getCupon().getPorcentajeDescuento());
-		}
+        if (clienteEstandarDTO.getCupon() != null) {
+            if(clienteEstandar.getCupon().getPorcentajeDescuento()>99 || clienteEstandar.getCupon().getPorcentajeDescuento()<0) {
+                throw new PorcentajeDescuentoException("Porcentaje de descuento invalido");
+            }
+            Cupon cupon = new Cupon();
+            cupon.setId(clienteEstandarDTO.getCupon().getId());
+            cupon.setPorcentajeDescuento(clienteEstandarDTO.getCupon().getPorcentajeDescuento());
+            cupon.setFechaExpiracion(clienteEstandarDTO.getCupon().getFechaExpiracion());
+            clienteEstandar.setCupon(cupon);
+        }
 		if(clienteEstandar.getUpdated()==null) {
 			clienteEstandarDTO.setUpdated(null);
 		}else {
-			clienteEstandarDTO.setUpdated(clienteEstandar.getUpdated().format(formatter));
+			clienteEstandarDTO.setUpdated(clienteEstandar.getUpdated());
 		}
 		clienteEstandarDTO.setId(clienteEstandar.getId());
-		clienteEstandarDTO.setCupon(clienteEstandar.getCupon().getId());
+		clienteEstandarDTO.setCupon(clienteEstandar.getCupon());
 		clienteEstandarDTO.setEstado(clienteEstandar.getEstado().name());//Para convertir de un enum a String
 		return clienteEstandarDTO;
 	}
@@ -85,19 +88,12 @@ public class ClienteService {
 	    // Manejar el cupón (evitar NPE)
 	    if (clienteEstandarDTO.getCupon() != null) {
 	        Cupon cupon = new Cupon();
-	        cupon.setId(clienteEstandarDTO.getCupon());
-	        cupon.setPorcentajeDescuento(clienteEstandarDTO.getPorcentajeDescuento());
+	        cupon.setId(clienteEstandarDTO.getCupon().getId());
+	        cupon.setPorcentajeDescuento(clienteEstandarDTO.getCupon().getPorcentajeDescuento());
+            cupon.setFechaExpiracion(clienteEstandarDTO.getCupon().getFechaExpiracion());
 	        clienteEstandar.setCupon(cupon);
 	    }
 
-	    // Convertir String a LocalDateTime usando DateTimeFormatter
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-	    if (clienteEstandarDTO.getCreated() != null) {
-	        clienteEstandar.setCreated(LocalDateTime.parse(clienteEstandarDTO.getCreated(), formatter));
-	    }
-	    if (clienteEstandarDTO.getUpdated() != null) {
-	        clienteEstandar.setUpdated(LocalDateTime.parse(clienteEstandarDTO.getUpdated(), formatter));
-	    }
 
 	    return clienteEstandar;
 	}
@@ -112,7 +108,7 @@ public class ClienteService {
         dtoPremium.setEmail(clientePremium.getEmail());
         dtoPremium.setCelular(clientePremium.getCelular());
         dtoPremium.setPorcentajeDescuento(clientePremium.getPorcentajeDescuento());
-        dtoPremium.setCreated(clientePremium.getCreated().format(formatter));
+        dtoPremium.setCreated(clientePremium.getCreated());
         dtoPremium.setEstado(clientePremium.getEstado().name());
         return dtoPremium;
     }
@@ -122,14 +118,14 @@ public class ClienteService {
     private ClientePremium toPremiumEntityDTO(ClientePremiumDTO dto) {
         ClientePremium clientePremium = new ClientePremium();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        clientePremium.setId(Long.valueOf(dto.getId()));
+        clientePremium.setId(dto.getId());
         clientePremium.setNombre(dto.getNombre());
         clientePremium.setApellido(dto.getApellido());
         clientePremium.setEmail(dto.getEmail());
         clientePremium.setCelular(dto.getCelular());
         clientePremium.setEstado(EstadoCliente.valueOf(dto.getEstado()));
         clientePremium.setPorcentajeDescuento(dto.getPorcentajeDescuento());
-        clientePremium.setCreated(LocalDateTime.parse(dto.getCreated(), formatter));
+        clientePremium.setCreated(dto.getCreated());
         return clientePremium;
     }
     
@@ -140,24 +136,26 @@ public class ClienteService {
     
     /*SECCION DE CLIENTE ESTANDAR*/
 	 // Agregar un nuevo ClienteEstandar
-    public void agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
+    public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
+
+        System.out.println("en el metodfo"+newClienteEstandar.getCupon());
         ClienteEstandar clienteEstandar = toEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
-
         clienteRepository.save(clienteEstandar);
+        return toEstandarDTO(clienteEstandar);
     }
 
     private void validarEmail(String email) {
         if (clienteRepository.findByEmail(email) != null) {
-            throw new ClienteExistenteException("El cliente con dicho correo ya existe");
+            throw new EmailDuplicadoException("El cliente con dicho correo ya existe");
         }
     }
 
     private void validarCelular(String celular) {
         if (clienteRepository.findByCelular(celular) != null) {
-            throw new ClienteExistenteException("El cliente con dicho número de celular ya existe");
+            throw new CelularDuplicadoException("El cliente con dicho número de celular ya existe");
         }
     }
     
@@ -181,13 +179,13 @@ public class ClienteService {
      * @return devuelve el cliente modificado pero con dto
      */
     public ClienteEstandarDTO editarClienteEstandar(Long id, ClienteEstandarDTO dto) {
+
         ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
                 .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
 
         validarEmail(dto.getEmail());
         validarCelular(dto.getCelular());
 
-        // Actualizar los campos
         clienteExistente.setNombre(dto.getNombre());
         clienteExistente.setApellido(dto.getApellido());
         clienteExistente.setEmail(dto.getEmail());
@@ -196,8 +194,9 @@ public class ClienteService {
 
         if (dto.getCupon() != null) {
             Cupon cupon = new Cupon();
-            cupon.setId(dto.getCupon());
-            cupon.setPorcentajeDescuento(dto.getPorcentajeDescuento());
+            cupon.setId(dto.getCupon().getId());
+            cupon.setPorcentajeDescuento(dto.getCupon().getPorcentajeDescuento());
+            cupon.setFechaExpiracion(dto.getCupon().getFechaExpiracion());
             clienteExistente.setCupon(cupon);
         }
 
@@ -218,11 +217,14 @@ public class ClienteService {
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
-    public void agregarClientePremium(ClientePremiumDTO newClientePremium) {
+    public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
         ClientePremium clientePremium = toPremiumEntityDTO(newClientePremium);
-        validarEmail(newClientePremium.getEmail());
-        validarCelular(newClientePremium.getCelular());
+
+        validarEmail(clientePremium.getEmail());
+        validarCelular(clientePremium.getCelular());
+
         clienteRepository.save(clientePremium);
+        return toPremiumDTO(clientePremium);
     }
     
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
@@ -263,7 +265,22 @@ public class ClienteService {
     
     /*FIN DE SECCION PREMIUM*/
 
-    
+    public boolean eliminarLogicamente(Long clienteId) {
+        Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
+        if (clienteOpt.isPresent()) {
+            Cliente cliente = clienteOpt.get();
+            cliente.setEstado(EstadoCliente.INACTIVO);
+            clienteRepository.save(cliente); // Actualiza el estado del cliente
+            return true;
+        }
+        return false; // Retorna false si el cliente no se encuentra
+    }
+
+    public ClienteEstandarDTO buscarPorID(Long id){
+        ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
+                .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+        return toEstandarDTO(clienteEstandar);
+    }
     
     
     // Metodo para obtener todos los clientes y convertirlos a DTOs

@@ -26,19 +26,19 @@ public abstract class Cliente {
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
-	 	@Column(length = 15 , nullable = false)
+	 	@Column(length = 15 )
 	    private String nombre;
 
-	 	@Column(length= 15 ,nullable = false)
+	 	@Column(length= 15 )
 	    private String apellido;
 
-	 	@Column(unique=true,  length= 20,nullable = false)
+	 	@Column(unique=true,  length= 50)
 	    private String email;
 
-	 	@Column(unique=true,  length= 10,nullable = false)
+	 	@Column(unique=true,  length= 15)
 	    private String celular;
 
-	 	@Column(nullable = false)
+	 	@Column
 	    private String foto;
 
 	 	@Column
