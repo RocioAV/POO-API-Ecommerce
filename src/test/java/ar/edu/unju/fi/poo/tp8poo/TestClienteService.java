@@ -2,6 +2,7 @@ package ar.edu.unju.fi.poo.tp8poo;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
+import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
@@ -46,7 +47,7 @@ class TestClienteService {
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new Cupon(4L,LocalDate.of(2024, 12, 2),15));
+        clienteEstandarDTO.setCupon(new CuponDTO(4L,LocalDate.of(2024, 12, 2),15));
         clienteEstandarDTO.setId(4L);
         clienteEstandarDTO.setCreated(LocalDateTime.now());
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
@@ -61,7 +62,7 @@ class TestClienteService {
 
     @Test
     public void testEditarClienteEstandar() {
-        Cupon cupon = new Cupon();
+        CuponDTO cupon = new CuponDTO();
         cupon.setFechaExpiracion(LocalDate.of(2024, 12, 2));
         cupon.setPorcentajeDescuento(15);
         ;  // Asocia el cupon al cliente
@@ -101,7 +102,7 @@ class TestClienteService {
     @Test
     public void testEliminarLogicamenteClienteEstandar() {
         // 1. Crear un cupón para el cliente estándar
-        Cupon cupon = new Cupon();
+        CuponDTO cupon = new CuponDTO();
         cupon.setPorcentajeDescuento(10.0);
         cupon.setFechaExpiracion(LocalDate.now().plusMonths(1));
 

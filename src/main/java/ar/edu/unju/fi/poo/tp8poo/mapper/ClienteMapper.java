@@ -7,12 +7,16 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.PorcentajeDescuentoException;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
 
 @Component
 public class ClienteMapper {
+
+    @Autowired
+    CuponMapper cuponMapper;
 
     /*SECCION DE CONVERSIONES*/
     /**
@@ -47,7 +51,7 @@ public class ClienteMapper {
             clienteEstandarDTO.setUpdated(clienteEstandar.getUpdated());
         }
         clienteEstandarDTO.setId(clienteEstandar.getId());
-        clienteEstandarDTO.setCupon(clienteEstandar.getCupon());
+        clienteEstandarDTO.setCupon(cuponMapper.toCuponDTO(clienteEstandar.getCupon()));
         clienteEstandarDTO.setEstado(clienteEstandar.getEstado().name());//Para convertir de un enum a String
         return clienteEstandarDTO;
     }

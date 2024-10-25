@@ -9,6 +9,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
+import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,14 @@ public class ClienteService {
 
     @Autowired
     ClienteMapper clienteMapper;
+
+    @Autowired
+    CuponMapper cuponMapper;
     
     /*SECCION DE CLIENTE ESTANDAR*/
 	 // Agregar un nuevo ClienteEstandar
     public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
 
-        System.out.println("en el metodfo"+newClienteEstandar.getCupon());
         ClienteEstandar clienteEstandar = clienteMapper.toEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
