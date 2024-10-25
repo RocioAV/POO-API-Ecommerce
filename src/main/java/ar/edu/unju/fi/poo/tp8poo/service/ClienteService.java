@@ -31,8 +31,6 @@ public class ClienteService {
     @Autowired
     ClienteMapper clienteMapper;
 
-    @Autowired
-    CuponMapper cuponMapper;
     
     /*SECCION DE CLIENTE ESTANDAR*/
 	 // Agregar un nuevo ClienteEstandar

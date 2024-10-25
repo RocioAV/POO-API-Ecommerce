@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@Transactional
+
 @SpringBootTest
 class TestClienteService {
 
@@ -51,7 +51,7 @@ class TestClienteService {
         clienteEstandarDTO.setId(4L);
         clienteEstandarDTO.setCreated(LocalDateTime.now());
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
-        clienteEstandarDTO.setFoto("123");
+        clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
@@ -72,7 +72,7 @@ class TestClienteService {
         clienteEstandarDTO.setCelular("123456312");
         clienteEstandarDTO.setCreated(LocalDateTime.now());
         clienteEstandarDTO.setEmail("raul1@hotmail.com");
-        clienteEstandarDTO.setFoto("123");
+        clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
@@ -87,7 +87,7 @@ class TestClienteService {
         clienteEstandarEditado.setCelular("1233123456");
         clienteEstandarEditado.setCreated(clienteEstandarDTO.getCreated());
         clienteEstandarEditado.setEmail("raul@hotmail.com");
-        clienteEstandarEditado.setFoto("123");
+        clienteEstandarEditado.setFoto(clienteEstandarDTO.getFoto());
         clienteEstandarEditado.setUpdated(LocalDateTime.now());
         clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
 
@@ -112,7 +112,7 @@ class TestClienteService {
         clienteEstandar.setApellido("Perez");
         clienteEstandar.setEmail("juan.perez@example.com");
         clienteEstandar.setCelular("1234567890");
-        clienteEstandar.setFoto("foto.jpg");
+        clienteEstandar.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandar.setEstado(EstadoCliente.ACTIVO.name());
         clienteEstandar.setCupon(cupon);
 
@@ -135,7 +135,7 @@ class TestClienteService {
         clientePremiumDTO.setCelular("6542342321");
         clientePremiumDTO.setCreated(LocalDateTime.now());
         clientePremiumDTO.setEmail("maria@hotmail.com");
-        clientePremiumDTO.setFoto("456");
+        clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(20); // Descuento para cliente premium
@@ -155,7 +155,7 @@ class TestClienteService {
         clientePremiumDTO.setCelular("6543324221");
         clientePremiumDTO.setCreated(LocalDateTime.now());
         clientePremiumDTO.setEmail("mariaadwd@hotmail.com");
-        clientePremiumDTO.setFoto("456");
+        clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(20);
@@ -169,7 +169,7 @@ class TestClienteService {
         clientePremiumEditado.setCelular("654321");
         clientePremiumEditado.setCreated(clientePremiumDTO.getCreated());
         clientePremiumEditado.setEmail("mariaawfdf@hotmail.com");
-        clientePremiumEditado.setFoto("456");
+        clientePremiumEditado.setFoto(clientePremiumDTO.getFoto());
         clientePremiumEditado.setUpdated(LocalDateTime.now());
         clientePremiumEditado.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumEditado.setPorcentajeDescuento(20);
@@ -190,7 +190,7 @@ class TestClienteService {
         clienteEstandarDTO1.setCelular("123456");
         clienteEstandarDTO1.setCreated(LocalDateTime.now());
         clienteEstandarDTO1.setEmail("juan123123@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
+        clienteEstandarDTO1.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clienteEstandarDTO1.setUpdated(null);
         clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
 
@@ -204,11 +204,10 @@ class TestClienteService {
         clienteEstandarDTO2.setCelular("987654");
         clienteEstandarDTO2.setCreated(LocalDateTime.now());
         clienteEstandarDTO2.setEmail("juan123123@gmail.com"); // Mismo email que el primer cliente
-        clienteEstandarDTO2.setFoto("foto_pedro.jpg");
+        clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clienteEstandarDTO2.setUpdated(null);
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Verificar que se lance la excepción
         assertThrows(EmailDuplicadoException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
@@ -223,25 +222,22 @@ class TestClienteService {
         clienteEstandarDTO1.setCelular("123456789");
         clienteEstandarDTO1.setCreated(LocalDateTime.now());
         clienteEstandarDTO1.setEmail("juan@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
+        clienteEstandarDTO1.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO1.setUpdated(null);
         clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Agregar el primer cliente
         clienteService.agregarClienteEstandar(clienteEstandarDTO1);
 
-        // Intentar agregar un cliente con el mismo celular
         ClienteEstandarDTO clienteEstandarDTO2 = new ClienteEstandarDTO();
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
         clienteEstandarDTO2.setCelular("123456789"); // Mismo celular que el primer cliente
         clienteEstandarDTO2.setCreated(LocalDateTime.now());
         clienteEstandarDTO2.setEmail("pedro@gmail.com");
-        clienteEstandarDTO2.setFoto("foto_pedro.jpg");
+        clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO2.setUpdated(null);
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Verificar que se lance la excepción
         assertThrows(CelularDuplicadoException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
@@ -254,27 +250,24 @@ class TestClienteService {
         clienteEstandarDTO1.setNombre("Juan");
         clienteEstandarDTO1.setCelular("987654321");
         clienteEstandarDTO1.setCreated(LocalDateTime.now());
-        clienteEstandarDTO1.setEmail("juan@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
+        clienteEstandarDTO1.setEmail("juan2311@gmail.com");
+        clienteEstandarDTO1.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO1.setUpdated(null);
         clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Agregar el primer cliente
         clienteService.agregarClienteEstandar(clienteEstandarDTO1);
 
-        // Intentar agregar un cliente con el mismo celular
         ClientePremiumDTO clientePremiumDTO2 = new ClientePremiumDTO();
         clientePremiumDTO2.setApellido("Garcia");
         clientePremiumDTO2.setNombre("Luis");
         clientePremiumDTO2.setCelular("987654321"); // Mismo celular que el primer cliente
         clientePremiumDTO2.setCreated(LocalDateTime.now());
         clientePremiumDTO2.setEmail("luis@gmail.com");
-        clientePremiumDTO2.setFoto("foto_luis.jpg");
+        clientePremiumDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clientePremiumDTO2.setUpdated(null);
         clientePremiumDTO2.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO2.setPorcentajeDescuento(50.0);
 
-        // Verificar que se lance la excepción
         assertThrows(CelularDuplicadoException.class, () -> {
             clienteService.agregarClientePremium(clientePremiumDTO2);
         });

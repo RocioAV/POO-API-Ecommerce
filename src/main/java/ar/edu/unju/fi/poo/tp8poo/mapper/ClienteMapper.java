@@ -99,6 +99,7 @@ public class ClienteMapper {
         dtoPremium.setApellido(clientePremium.getApellido());
         dtoPremium.setEmail(clientePremium.getEmail());
         dtoPremium.setCelular(clientePremium.getCelular());
+        dtoPremium.setFoto(clientePremium.getFoto());
         dtoPremium.setPorcentajeDescuento(clientePremium.getPorcentajeDescuento());
         dtoPremium.setCreated(clientePremium.getCreated());
         dtoPremium.setEstado(clientePremium.getEstado().name());
@@ -115,6 +116,7 @@ public class ClienteMapper {
         clientePremium.setApellido(dto.getApellido());
         clientePremium.setEmail(dto.getEmail());
         clientePremium.setCelular(dto.getCelular());
+        clientePremium.setFoto(dto.getFoto());
         clientePremium.setEstado(EstadoCliente.valueOf(dto.getEstado()));
         clientePremium.setPorcentajeDescuento(dto.getPorcentajeDescuento());
         clientePremium.setCreated(dto.getCreated());
