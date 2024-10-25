@@ -134,10 +134,8 @@ public class TestProductoService {
 
         productoService.createProducto(productoDTO);
 
-        // Buscar el producto por nombre
         List<ProductoDTO> result = productoService.findByNombre("Producto 6");
 
-        // Verificar resultados
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Producto 6", result.get(0).getNombre());
@@ -145,7 +143,6 @@ public class TestProductoService {
 
     @Test
     public void testFindByDescripcion() {
-        // Crear y guardar un producto
         ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Sprite", "sprite@gmail.com", "87654321",true);
 
         ProductoDTO productoDTO = new ProductoDTO();
