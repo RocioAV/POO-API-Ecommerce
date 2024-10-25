@@ -26,5 +26,4 @@ public class ClienteDTO implements Serializable {
 	    private String estado; // Convertido de Enum a String
 		private LocalDateTime created;
 		private LocalDateTime updated;
-// Fecha en formato String
 }
