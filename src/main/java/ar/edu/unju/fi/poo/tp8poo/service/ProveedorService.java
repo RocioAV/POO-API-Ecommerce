@@ -45,9 +45,7 @@ public class ProveedorService {
         proveedor.setTelefono(proveedorDTO.getTelefono());
 
         Proveedor proveedorActualizado = proveedorRepository.save(proveedor);
-        System.out.println("Proveedor Actualizado"+proveedorActualizado);
         ProveedorDTO proveedorActualizadoDTO=proveedorMapper.toProveedorDTO(proveedorActualizado);
-        System.out.print("Proveedordto actualizado"+proveedorActualizadoDTO);
         return proveedorActualizadoDTO;
     }
 

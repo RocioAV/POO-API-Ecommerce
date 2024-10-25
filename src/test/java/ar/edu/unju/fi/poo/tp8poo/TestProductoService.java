@@ -4,6 +4,7 @@ import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,35 +19,38 @@ public class TestProductoService {
     @Autowired
     ProductoService productoService;
 
+    // Inicializa variables para las pruebas
+    private ProveedorDTO proveedorDTO;
+    private ProductoDTO productoDTO;
+
+    @BeforeEach
+    public void setUp() {
+        proveedorDTO = new ProveedorDTO(null, "Proveedor", "proveedor@gmail.com", "28853324", true);
+
+        productoDTO = new ProductoDTO();
+        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
+        productoDTO.setProveedor(proveedorDTO);
+    }
+    private void setUpProducto(String codigo, String nombre, String descripcion, Double precio, Integer cantidad,String imagen) {
+        productoDTO.setCodigo(codigo);
+        productoDTO.setNombre(nombre);
+        productoDTO.setDescripcion(descripcion);
+        productoDTO.setPrecio(precio);
+        productoDTO.setCantidad(cantidad);
+        productoDTO.setImagen(imagen);
+    }
 
     @Test
     public void testCreateProductoCorrecto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null,"Pepsi","pepsi@gmail.com","28853324",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD001");
-        productoDTO.setNombre("Producto 1");
-        productoDTO.setDescripcion("Descripción del producto 1");
-        productoDTO.setPrecio(100.0);
-        productoDTO.setCantidad(10);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
-
-        ProductoDTO productoCreado=productoService.createProducto(productoDTO);
-        assertEquals("PROD001",productoCreado.getCodigo());
+        setUpProducto("PROD001", "Producto 1", "Descripción del producto 1", 100.0, 10,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
+        ProductoDTO productoCreado = productoService.createProducto(productoDTO);
+        assertEquals("PROD001", productoCreado.getCodigo());
     }
 
     @Test
     public void testCreateProductoSinProveedor() {
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD002");
-        productoDTO.setNombre("Producto 2");
-        productoDTO.setDescripcion("Descripción del producto 2");
-        productoDTO.setPrecio(200.0);
-        productoDTO.setCantidad(5);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(null);  // Proveedor nulo
-
+        setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
+        productoDTO.setProveedor(null);
 
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             productoService.createProducto(productoDTO);
@@ -57,19 +61,9 @@ public class TestProductoService {
 
     @Test
     public void testDeleteLogicoProducto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Coca","coca@gmail.com","28853324",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD003");
-        productoDTO.setNombre("Producto 3");
-        productoDTO.setDescripcion("Descripción del producto 3");
-        productoDTO.setPrecio(150.0);
-        productoDTO.setCantidad(20);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+        setUpProducto("PROD003","Producto 3","Descripción del producto 3",150.0,20,"https://drive.google.com/uc?id=1tde1iwN_TST5XqBz5u4L1IwX8hDvWq5d");
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
-
         productoService.deleteProductoLogico(createdProducto.getId());
 
         ProductoDTO deletedProducto = productoService.findById(createdProducto.getId());
@@ -78,13 +72,7 @@ public class TestProductoService {
 
     @Test
     public void testUpdateProducto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Lays","Lays@gmail.com","28853324",true);
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setNombre("Producto 4");
-        productoDTO.setDescripcion("Descripción del producto 4");
-        productoDTO.setPrecio(180.0);
-        productoDTO.setCantidad(15);
-        productoDTO.setProveedor(proveedorDTO);
+        setUpProducto("PROD003","Producto 4","Descripción del producto 4",180.0,15,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
 
@@ -97,19 +85,9 @@ public class TestProductoService {
         assertEquals("Descripción modificada", updatedProducto.getDescripcion());
     }
 
-
     @Test
     public void testFindByCodigo() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Pepsi", "pepsi@gmail.com", "28853324",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD005");
-        productoDTO.setNombre("Producto 5");
-        productoDTO.setDescripcion("Descripción del producto 5");
-        productoDTO.setPrecio(500.0);
-        productoDTO.setCantidad(50);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+        setUpProducto("PROD005","Producto 5","Descripción del producto 5",500.0,50,"https://drive.google.com/uc?id=15Ygz6H2wh9YZ-rXtpDVBFirUteKMTQzV");
 
         productoService.createProducto(productoDTO);
 
@@ -121,23 +99,9 @@ public class TestProductoService {
 
     @Test
     public void testFindByNombre() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Coca-Cola", "coca@gmail.com", "12345678",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD006");
-        productoDTO.setNombre("Producto 6");
-        productoDTO.setDescripcion("Descripción del producto 6");
-        productoDTO.setPrecio(650.0);
-        productoDTO.setCantidad(65);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
-
+        setUpProducto("PROD006","Producto 6","Descripción del producto 6",650.0,65,"https://drive.google.com/uc?id=1rdFfrURbr-AwXGBuME7i9zYlhanOuImu");
         productoService.createProducto(productoDTO);
-
-        // Buscar el producto por nombre
         List<ProductoDTO> result = productoService.findByNombre("Producto 6");
-
-        // Verificar resultados
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Producto 6", result.get(0).getNombre());
@@ -145,20 +109,9 @@ public class TestProductoService {
 
     @Test
     public void testFindByDescripcion() {
-        // Crear y guardar un producto
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Sprite", "sprite@gmail.com", "87654321",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD007");
-        productoDTO.setNombre("Producto 7");
-        productoDTO.setDescripcion("Descripción del producto 7");
-        productoDTO.setPrecio(700.0);
-        productoDTO.setCantidad(70);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+        setUpProducto("PROD007","Producto 7","Descripción del producto 7",700.0,70,"https://drive.google.com/uc?id=1zlt_-cVGKJE5RFw9q0oIgGlT1yN__2vw");
 
         productoService.createProducto(productoDTO);
-
 
         List<ProductoDTO> result = productoService.findByDescripcion("Descripción del producto 7");
 

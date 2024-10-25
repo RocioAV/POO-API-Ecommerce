@@ -41,5 +41,4 @@ public class Producto {
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
 
-
 }

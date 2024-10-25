@@ -31,13 +31,58 @@ public class ProductoService {
         if (productoDTO.getProveedor() == null) {
             throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
         }
-        System.out.println(productoDTO.getProveedor());
-        System.out.println(productoDTO);
+
         Producto producto = productoMapper.toProducto(productoDTO);
-        System.out.println("Producto mapeado: " + producto);
 
         Producto savedProducto = productoRepository.save(producto);
         return productoMapper.toProductoDTO(savedProducto);
+    }
+    /**
+     * Edita un producto existente.
+     *
+     * @param id          El ID del producto a editar.
+     * @param productoDTO Objeto que contiene los nuevos datos del producto.
+     * @return El producto editado como un objeto DTO.
+     * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
+     */
+    public ProductoDTO editProducto(Long id, ProductoDTO productoDTO) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+
+        producto.setCodigo(productoDTO.getCodigo());
+        producto.setNombre(productoDTO.getNombre());
+        producto.setDescripcion(productoDTO.getDescripcion());
+        producto.setPrecio(productoDTO.getPrecio());
+        producto.setCantidad(productoDTO.getCantidad());
+        producto.setImagen(productoDTO.getImagen());
+        producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
+
+        Producto updatedProducto = productoRepository.save(producto);
+        return productoMapper.toProductoDTO(updatedProducto);
+    }
+
+    /**
+     * Elimina un producto por su ID.
+     *
+     * @param id El ID del producto a eliminar.
+     */
+    public void deleteProducto(Long id) {
+        productoRepository.deleteById(id);
+    }
+
+    /**
+     * Realiza un borrado lógico de un producto, cambiando su estado a false.
+     *
+     * @param id El ID del producto a eliminar lógicamente.
+     * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
+     */
+    public void deleteProductoLogico(Long id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
+
+
+        producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
+        productoRepository.save(producto);
     }
 
     /**
@@ -96,52 +141,6 @@ public class ProductoService {
     }
 
 
-    /**
-     * Edita un producto existente.
-     *
-     * @param id          El ID del producto a editar.
-     * @param productoDTO Objeto que contiene los nuevos datos del producto.
-     * @return El producto editado como un objeto DTO.
-     * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
-     */
-    public ProductoDTO editProducto(Long id, ProductoDTO productoDTO) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
 
-        producto.setCodigo(productoDTO.getCodigo());
-        producto.setNombre(productoDTO.getNombre());
-        producto.setDescripcion(productoDTO.getDescripcion());
-        producto.setPrecio(productoDTO.getPrecio());
-        producto.setCantidad(productoDTO.getCantidad());
-        producto.setImagen(productoDTO.getImagen());
-        producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
-
-        Producto updatedProducto = productoRepository.save(producto);
-        return productoMapper.toProductoDTO(updatedProducto);
-    }
-
-    /**
-     * Elimina un producto por su ID.
-     *
-     * @param id El ID del producto a eliminar.
-     */
-    public void deleteProducto(Long id) {
-        productoRepository.deleteById(id);
-    }
-
-    /**
-     * Realiza un borrado lógico de un producto, cambiando su estado a false.
-     *
-     * @param id El ID del producto a eliminar lógicamente.
-     * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
-     */
-    public void deleteProductoLogico(Long id) {
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Producto no encontrado"));
-
-
-        producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
-        productoRepository.save(producto);
-    }
 
 }
