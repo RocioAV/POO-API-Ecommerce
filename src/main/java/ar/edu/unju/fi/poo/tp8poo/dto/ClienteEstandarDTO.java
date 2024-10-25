@@ -16,6 +16,6 @@ public class ClienteEstandarDTO extends ClienteDTO implements Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private Cupon cupon;
+	private CuponDTO cupon;
 
 }
