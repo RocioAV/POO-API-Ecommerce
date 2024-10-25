@@ -7,12 +7,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class ConversorMoneda {
 	
-	
-	private String consumoAPI() throws IOException {
+	@Autowired
+	private static String consumoAPI() throws IOException {
 			int cp;
 			URL url= new URL("https://dolarapi.com/v1/dolares/oficial");
 			HttpURLConnection connection=(HttpURLConnection) url.openConnection();
@@ -29,7 +30,7 @@ public class ConversorMoneda {
 			return str.toString();
 	}
 	
-	public double convertirPrecio(double precioActual) throws IOException {
+	public static double convertirPrecio(double precioActual) throws IOException {
 		double precioVenta;
 		String api=consumoAPI();
 		JSONObject json= new JSONObject(api);
