@@ -16,14 +16,16 @@ public class Venta {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Integer id;
-    private LocalDateTime fechaYhora;
+
+    @Column
+    private LocalDateTime fechaYHora;
 
     @ManyToOne
-    @JoinColumn(name="cliente_id")
+    @JoinColumn(name="cliente_id", nullable=false)
     private Cliente cliente;
 
     @ManyToOne
-    @JoinColumn(name="producto_id")
+    @JoinColumn(name="producto_id", nullable=false)
     private Producto producto;
 
     private Double precioProducto;
