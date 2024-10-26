@@ -24,5 +24,7 @@ public class PagoDebito extends Pago {
     private Integer mesVencimiento;
     @Column(nullable = false)
     private Integer anioVencimiento;
+    @Column(nullable = false)
+    private Integer codigoSeguridad;
 
 }
