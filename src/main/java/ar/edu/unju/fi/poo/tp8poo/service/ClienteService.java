@@ -12,6 +12,7 @@ import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,8 +21,7 @@ import java.util.Optional;
 
 
 @Service
-
-
+@Component
 public class ClienteService {
 	@Autowired
 	ClienteRepository clienteRepository;
