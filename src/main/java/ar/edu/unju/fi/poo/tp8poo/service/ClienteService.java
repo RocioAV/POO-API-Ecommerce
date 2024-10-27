@@ -9,14 +9,12 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
-import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,12 +34,12 @@ public class ClienteService {
 	 // Agregar un nuevo ClienteEstandar
     public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
 
-        ClienteEstandar clienteEstandar = clienteMapper.toEstandarEntity(newClienteEstandar);
+        ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
         clienteRepository.save(clienteEstandar);
-        return clienteMapper.toEstandarDTO(clienteEstandar);
+        return clienteMapper.toClienteEstandarDTO(clienteEstandar);
     }
 
     private void validarEmail(String email) {
@@ -65,7 +63,7 @@ public class ClienteService {
     public ClienteEstandarDTO getClienteEstandar(Long id){
 		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
-		return clienteMapper.toEstandarDTO(clienteEstandar);
+		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
 	}
     
     //Editar Cliente Estandar
@@ -102,7 +100,7 @@ public class ClienteService {
         // Guardar el cliente actualizado
         clienteRepository.save(clienteExistente);
 
-        return clienteMapper.toEstandarDTO(clienteExistente);
+        return clienteMapper.toClienteEstandarDTO(clienteExistente);
     }
     
     //Eliminar Cliente Estandar
@@ -115,13 +113,13 @@ public class ClienteService {
     
     /*SECCION DE CLIENTE PREMIUM*/
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
-        ClientePremium clientePremium = clienteMapper.toPremiumEntityDTO(newClientePremium);
+        ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
 
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
 
         clienteRepository.save(clientePremium);
-        return clienteMapper.toPremiumDTO(clientePremium);
+        return clienteMapper.toClientePremiunDTO(clientePremium);
     }
     
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
@@ -143,7 +141,7 @@ public class ClienteService {
 
         clienteRepository.save(clienteExistente);
 
-        return clienteMapper.toPremiumDTO(clienteExistente);
+        return clienteMapper.toClientePremiunDTO(clienteExistente);
     }
     
     public void eliminarClientePremium(Long id) {
@@ -155,7 +153,7 @@ public class ClienteService {
     public ClientePremiumDTO getClientePremium(Long id){
 		ClientePremium clientePremium = (ClientePremium) clienteRepository.findById(id)
 	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
-		return clienteMapper.toPremiumDTO(clientePremium);
+		return clienteMapper.toClientePremiunDTO(clientePremium);
 	}
     
     
@@ -175,7 +173,7 @@ public class ClienteService {
     public ClienteEstandarDTO buscarPorID(Long id){
         ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
                 .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
-        return clienteMapper.toEstandarDTO(clienteEstandar);
+        return clienteMapper.toClienteEstandarDTO(clienteEstandar);
     }
     
     
