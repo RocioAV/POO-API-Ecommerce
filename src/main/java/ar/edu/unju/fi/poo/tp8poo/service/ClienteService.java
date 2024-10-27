@@ -12,6 +12,8 @@ import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
 import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,7 @@ import java.util.Optional;
 
 
 @Service
-
-
+@Slf4j
 public class ClienteService {
 	@Autowired
 	ClienteRepository clienteRepository;
@@ -35,23 +36,26 @@ public class ClienteService {
     /*SECCION DE CLIENTE ESTANDAR*/
 	 // Agregar un nuevo ClienteEstandar
     public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
-
+    	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
         ClienteEstandar clienteEstandar = clienteMapper.toEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
         clienteRepository.save(clienteEstandar);
+        log.info("Cliente agregado con exito: {}",newClienteEstandar.getNombre());
         return clienteMapper.toEstandarDTO(clienteEstandar);
     }
 
     private void validarEmail(String email) {
         if (clienteRepository.findByEmail(email) != null) {
+        	log.error("Error al registrar cliente: El correo {} ya está registrado", email);
             throw new EmailDuplicadoException("El cliente con dicho correo ya existe");
         }
     }
 
     private void validarCelular(String celular) {
         if (clienteRepository.findByCelular(celular) != null) {
+        	log.error("Error al registrar cliente: El número {} ya está registrado", celular);
             throw new CelularDuplicadoException("El cliente con dicho número de celular ya existe");
         }
     }
@@ -63,8 +67,13 @@ public class ClienteService {
      * @return se devuelve el cliente Estandar pero convertido a DTO
      */
     public ClienteEstandarDTO getClienteEstandar(Long id){
+    	log.info("Buscando cliente con id: {}", id);
 		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+	            .orElseThrow(() -> {
+	            		log.error("Error al encontrar el cliente: {}", id);
+	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		});
+		log.info("Cliente encontrado con éxito: {}", id);
 		return clienteMapper.toEstandarDTO(clienteEstandar);
 	}
     
@@ -76,19 +85,26 @@ public class ClienteService {
      * @return devuelve el cliente modificado pero con dto
      */
     public ClienteEstandarDTO editarClienteEstandar(Long id, ClienteEstandarDTO dto) {
+    	log.info("Editando los datos del cliente: {}",dto.getNombre());
 
-        ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
-                .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
-
+    	ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
+	            .orElseThrow(() -> {
+	            		log.error("Error al encontrar el cliente: {}", id);
+	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		});
         validarEmail(dto.getEmail());
         validarCelular(dto.getCelular());
 
         clienteExistente.setNombre(dto.getNombre());
+        log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
         clienteExistente.setApellido(dto.getApellido());
+        log.debug("Cambiando a nuevo apellido: {}", dto.getApellido());
         clienteExistente.setEmail(dto.getEmail());
+        log.debug("Cambiando a nuevo email: {}", dto.getEmail());
         clienteExistente.setCelular(dto.getCelular());
+        log.debug("Cambiando a nuevo celular {}", dto.getCelular());
         clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
-
+        log.debug("Cambiando a nuevo email: {}", dto.getEstado());
         if (dto.getCupon() != null) {
             Cupon cupon = new Cupon();
             cupon.setId(dto.getCupon().getId());
@@ -96,53 +112,68 @@ public class ClienteService {
             cupon.setFechaExpiracion(dto.getCupon().getFechaExpiracion());
             clienteExistente.setCupon(cupon);
         }
-
+        
         clienteExistente.setUpdated(LocalDateTime.now());
-
+        log.debug("Fecha de modificacion: {}", clienteExistente.getUpdated());
         // Guardar el cliente actualizado
         clienteRepository.save(clienteExistente);
-
+        log.info("Datos del cliente modificado con éxito");
         return clienteMapper.toEstandarDTO(clienteExistente);
     }
     
     //Eliminar Cliente Estandar
     public void eliminarClienteEstandar(Long id) {
-        ClienteEstandar clienteEstandar=(ClienteEstandar) clienteRepository.findById(id)
-	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+    	
+    	ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
+	            .orElseThrow(() -> {
+	            		log.error("Error al encontrar el cliente: {}", id);
+	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		});
+    	
         clienteRepository.deleteById(clienteEstandar.getId());
     }
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
+    	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
         ClientePremium clientePremium = clienteMapper.toPremiumEntityDTO(newClientePremium);
 
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
-
+        log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         clienteRepository.save(clientePremium);
         return clienteMapper.toPremiumDTO(clientePremium);
     }
     
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
+    	log.info("Iniciando modificacion del cliente: {}", dto.getNombre());
         ClientePremium clienteExistente = (ClientePremium) clienteRepository.findById(id)
-                .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+        		.orElseThrow(() -> {
+            		log.error("Error al encontrar el cliente: {}", id);
+            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+            		});
 
         validarEmail(dto.getEmail());
         validarCelular(dto.getCelular());
 
         clienteExistente.setNombre(dto.getNombre());
+        log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
         clienteExistente.setApellido(dto.getApellido());
+        log.debug("Cambiando a nuevo apellido: {}", dto.getApellido());
         clienteExistente.setEmail(dto.getEmail());
+        log.debug("Cambiando a nuevo email: {}", dto.getEmail());
         clienteExistente.setCelular(dto.getCelular());
+        log.debug("Cambiando a nuevo celular {}", dto.getCelular());
         clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
+        log.debug("Cambiando a nuevo email: {}", dto.getEstado());
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
 
         clienteExistente.setUpdated(LocalDateTime.now());
-
+        log.debug("Fecha de moficacion: {}", clienteExistente.getUpdated());
 
         clienteRepository.save(clienteExistente);
-
+        log.info("Datos del cliente modifado con éxito");
         return clienteMapper.toPremiumDTO(clienteExistente);
     }
     
@@ -153,8 +184,13 @@ public class ClienteService {
     }
     
     public ClientePremiumDTO getClientePremium(Long id){
+    	log.info("Buscando cliente con id: {}", id);
 		ClientePremium clientePremium = (ClientePremium) clienteRepository.findById(id)
-	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+				.orElseThrow(() -> {
+            		log.error("Error al encontrar el cliente: {}", id);
+            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+            		});
+		log.info("Cliente encontrado con éxito: {}", clientePremium.getNombre());
 		return clienteMapper.toPremiumDTO(clientePremium);
 	}
     
@@ -162,19 +198,25 @@ public class ClienteService {
     /*FIN DE SECCION PREMIUM*/
 
     public boolean eliminarLogicamente(Long clienteId) {
+    	log.info("Iniciando eliminacion del cliente con id: {}",clienteId);
         Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
             cliente.setEstado(EstadoCliente.INACTIVO);
             clienteRepository.save(cliente); // Actualiza el estado del cliente
+            log.info("Cliente con id {} eliminado con exito", clienteId);
             return true;
         }
+        log.error("No se encontro cliente con id: {}", clienteId);
         return false; // Retorna false si el cliente no se encuentra
     }
 
-    public ClienteEstandarDTO buscarPorID(Long id){
+    public ClienteEstandarDTO buscarPorID(Long id){	
         ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-                .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+        		.orElseThrow(() -> {
+            		log.error("Error al encontrar el cliente: {}", id);
+            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+            		});
         return clienteMapper.toEstandarDTO(clienteEstandar);
     }
     
