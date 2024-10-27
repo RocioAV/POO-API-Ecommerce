@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class PagoTranferencia extends Pago {
+public class PagoTransferencia extends Pago {
 
     @Column(nullable = false)
     private String cuil;
