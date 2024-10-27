@@ -21,5 +21,5 @@ public class VentaDTO {
 
     private Double precioProducto;
 
-    private Pago formaPago;
+    private PagoDTO formaPago;
 }

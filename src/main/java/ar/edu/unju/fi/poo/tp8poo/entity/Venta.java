@@ -20,17 +20,17 @@ public class Venta {
     @Column
     private LocalDateTime fechaYHora;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="cliente_id", nullable=false)
     private Cliente cliente;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="producto_id", nullable=false)
     private Producto producto;
 
     private Double precioProducto;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="pago_id")
     private Pago formaPago;
 
