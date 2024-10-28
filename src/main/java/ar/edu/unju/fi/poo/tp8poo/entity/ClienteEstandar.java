@@ -9,6 +9,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @DiscriminatorValue("ESTANDAR")
 public class ClienteEstandar extends Cliente {
 

@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ClienteEstandarDTO extends ClienteDTO implements Serializable{
 	/**
 	 * 
