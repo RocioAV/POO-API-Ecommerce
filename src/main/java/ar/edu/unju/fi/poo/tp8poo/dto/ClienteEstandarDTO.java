@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
+
 import lombok.*;
 
 import java.io.Serializable;
@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class ClienteEstandarDTO extends ClienteDTO implements Serializable{
 	/**
 	 * 

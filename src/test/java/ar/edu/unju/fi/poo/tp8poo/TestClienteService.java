@@ -3,35 +3,19 @@ package ar.edu.unju.fi.poo.tp8poo;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
-import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
-import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.CelularDuplicadoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteExistenteException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteInexixtenteExcepcion;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.EmailDuplicadoException;
-import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import jakarta.transaction.Transactional;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @Transactional
 @SpringBootTest
@@ -67,7 +51,7 @@ class TestClienteService {
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumDTO.setPorcentajeDescuento(20); // Descuento para cliente premium
+        clientePremiumDTO.setPorcentajeDescuento(20.0); // Descuento para cliente premium
     }
 
     @Test
@@ -133,7 +117,7 @@ class TestClienteService {
         clientePremiumEditado.setFoto(clientePremiumDTO.getFoto());
         clientePremiumEditado.setUpdated(LocalDateTime.now());
         clientePremiumEditado.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumEditado.setPorcentajeDescuento(20);
+        clientePremiumEditado.setPorcentajeDescuento(20.0);
 
         clienteService.editarClientePremium(clientePremiumDTO.getId(), clientePremiumEditado);
 

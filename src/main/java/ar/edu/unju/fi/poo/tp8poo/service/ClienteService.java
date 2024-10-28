@@ -1,6 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 
+import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
@@ -9,22 +10,22 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
-import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
 
 @Service
 @Slf4j
+@Component
 public class ClienteService {
 	@Autowired
 	ClienteRepository clienteRepository;
@@ -37,13 +38,15 @@ public class ClienteService {
 	 // Agregar un nuevo ClienteEstandar
     public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
     	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
-        ClienteEstandar clienteEstandar = clienteMapper.toEstandarEntity(newClienteEstandar);
+        ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
         clienteRepository.save(clienteEstandar);
         log.info("Cliente agregado con exito: {}",newClienteEstandar.getNombre());
-        return clienteMapper.toEstandarDTO(clienteEstandar);
+        return clienteMapper.toClienteEstandarDTO(clienteEstandar);
+
+
     }
 
     private void validarEmail(String email) {
@@ -74,7 +77,7 @@ public class ClienteService {
 	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
 	            		});
 		log.info("Cliente encontrado con éxito: {}", id);
-		return clienteMapper.toEstandarDTO(clienteEstandar);
+		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
 	}
     
     //Editar Cliente Estandar
@@ -112,38 +115,40 @@ public class ClienteService {
             cupon.setFechaExpiracion(dto.getCupon().getFechaExpiracion());
             clienteExistente.setCupon(cupon);
         }
-        
+
         clienteExistente.setUpdated(LocalDateTime.now());
-        log.debug("Fecha de modificacion: {}", clienteExistente.getUpdated());
+
         // Guardar el cliente actualizado
         clienteRepository.save(clienteExistente);
         log.info("Datos del cliente modificado con éxito");
-        return clienteMapper.toEstandarDTO(clienteExistente);
+        return clienteMapper.toClienteEstandarDTO(clienteExistente);
+
     }
     
     //Eliminar Cliente Estandar
     public void eliminarClienteEstandar(Long id) {
-    	
+
     	ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error("Error al encontrar el cliente: {}", id);
 	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
 	            		});
-    	
+
         clienteRepository.deleteById(clienteEstandar.getId());
     }
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
+
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
-        ClientePremium clientePremium = clienteMapper.toPremiumEntityDTO(newClientePremium);
+        ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
 
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
         log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         clienteRepository.save(clientePremium);
-        return clienteMapper.toPremiumDTO(clientePremium);
+        return clienteMapper.toClientePremiunDTO(clientePremium);
     }
     
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
@@ -170,11 +175,11 @@ public class ClienteService {
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
 
         clienteExistente.setUpdated(LocalDateTime.now());
-        log.debug("Fecha de moficacion: {}", clienteExistente.getUpdated());
+
 
         clienteRepository.save(clienteExistente);
         log.info("Datos del cliente modifado con éxito");
-        return clienteMapper.toPremiumDTO(clienteExistente);
+        return clienteMapper.toClientePremiunDTO(clienteExistente);
     }
     
     public void eliminarClientePremium(Long id) {
@@ -191,7 +196,7 @@ public class ClienteService {
             		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
             		});
 		log.info("Cliente encontrado con éxito: {}", clientePremium.getNombre());
-		return clienteMapper.toPremiumDTO(clientePremium);
+		return clienteMapper.toClientePremiunDTO(clientePremium);
 	}
     
     
@@ -211,13 +216,15 @@ public class ClienteService {
         return false; // Retorna false si el cliente no se encuentra
     }
 
-    public ClienteEstandarDTO buscarPorID(Long id){	
-        ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-        		.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente: {}", id);
-            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
-            		});
-        return clienteMapper.toEstandarDTO(clienteEstandar);
+
+    public ClienteDTO buscarPorID(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Error al encontrar el cliente: {}", id);
+                    return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+                });
+
+        return clienteMapper.toClienteDTO(cliente);
     }
     
     
