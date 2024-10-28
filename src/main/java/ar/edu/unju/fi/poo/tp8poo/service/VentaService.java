@@ -159,10 +159,11 @@ public class VentaService {
     private void descontarStock(ProductoDTO producto){
         log.info("Descontando stock para el producto con ID {}", producto.getId());
         producto.setCantidad(producto.getCantidad()-1);
-        if(producto.getCantidad()==0){
-            producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
-        }
         productoService.editProducto(producto.getId(), producto);
+        if(producto.getCantidad()==0){
+            productoService.deleteProductoLogico(producto.getId());
+        }
+
     }
 
     /**
