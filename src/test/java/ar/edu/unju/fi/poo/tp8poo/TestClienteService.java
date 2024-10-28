@@ -51,7 +51,7 @@ class TestClienteService {
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumDTO.setPorcentajeDescuento(20); // Descuento para cliente premium
+        clientePremiumDTO.setPorcentajeDescuento(20.0); // Descuento para cliente premium
     }
 
     @Test
@@ -117,7 +117,7 @@ class TestClienteService {
         clientePremiumEditado.setFoto(clientePremiumDTO.getFoto());
         clientePremiumEditado.setUpdated(LocalDateTime.now());
         clientePremiumEditado.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumEditado.setPorcentajeDescuento(20);
+        clientePremiumEditado.setPorcentajeDescuento(20.0);
 
         clienteService.editarClientePremium(clientePremiumDTO.getId(), clientePremiumEditado);
 
