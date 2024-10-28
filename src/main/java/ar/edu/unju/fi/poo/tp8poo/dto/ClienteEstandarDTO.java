@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
+
 import lombok.*;
 
 import java.io.Serializable;

@@ -1,13 +1,11 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteNoActivoException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.DebitoVencidaException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.VentaInexistenteException;
-import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
@@ -115,8 +113,7 @@ public class VentaService {
     }
 
     private void validarTarjetaDebito(PagoDTO pagoDTO){
-        if (pagoDTO instanceof PagoDebitoDTO) {
-            PagoDebitoDTO pagoDebito = (PagoDebitoDTO) pagoDTO;
+        if (pagoDTO instanceof PagoDebitoDTO pagoDebito) {
             log.info("Validando fecha de vencimiento para tarjeta de débito: {}/{}", pagoDebito.getMesVencimiento(), pagoDebito.getAnioVencimiento());
             YearMonth fechaActual = YearMonth.now();
             YearMonth fechaVencimiento = YearMonth.of(pagoDebito.getAnioVencimiento(), pagoDebito.getMesVencimiento());

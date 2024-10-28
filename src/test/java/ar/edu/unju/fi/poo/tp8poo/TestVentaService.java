@@ -7,7 +7,6 @@ import ar.edu.unju.fi.poo.tp8poo.exceptions.DebitoVencidaException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
-import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
 import ar.edu.unju.fi.poo.tp8poo.service.VentaService;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
@@ -182,7 +181,7 @@ public class TestVentaService {
     }
 
     @Test
-    public void testCrearVentaTarjetaDebitoVencida() throws IOException {
+    public void testCrearVentaTarjetaDebitoVencida()  {
         clientePremiumDTO=clienteService.agregarClientePremium(clientePremiumDTO);
         productoDTO=productoService.createProducto(productoDTO);
         VentaDTO ventaDTO=new VentaDTO();
