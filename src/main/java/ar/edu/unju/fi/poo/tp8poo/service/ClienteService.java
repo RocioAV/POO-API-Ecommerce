@@ -1,6 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 
+import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
@@ -217,13 +218,15 @@ public class ClienteService {
         return false; // Retorna false si el cliente no se encuentra
     }
 
-    public ClienteEstandarDTO buscarPorID(Long id){
-        ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-        		.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente: {}", id);
-            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
-            		});
-        return clienteMapper.toClienteEstandarDTO(clienteEstandar);
+
+    public ClienteDTO buscarPorID(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Error al encontrar el cliente: {}", id);
+                    return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+                });
+
+        return clienteMapper.toClienteDTO(cliente);
     }
     
     
