@@ -36,6 +36,13 @@ public class VentaService {
     VentaMapper ventaMapper;
 
 
+
+    /**
+     * Valida si el cliente con el ID especificado está activo para realizar compras.
+     *
+     * @param id ID del cliente a validar.
+     * @throws ClienteNoActivoException si el cliente no está activo.
+     */
     private void validarClienteActivo(Long id){
         log.info("Validando si el cliente con ID {} está activo", id);
         ClienteDTO cliente = clienteService.buscarPorID(id);
@@ -45,6 +52,12 @@ public class VentaService {
         }
     }
 
+    /**
+     * Verifica si el producto con el ID especificado tiene stock disponible.
+     *
+     * @param id ID del producto a verificar.
+     * @throws ProductoSinStockException si el producto no tiene stock disponible.
+     */
     private void validarProductoDisponible(Long id){
         log.info("Validando disponibilidad del producto con ID {}", id);
         ProductoDTO producto= productoService.findById(id);
@@ -54,10 +67,25 @@ public class VentaService {
         }
     }
 
+    /**
+     * Calcula el descuento en base a un porcentaje y precio dado.
+     *
+     * @param porcentaje  Porcentaje de descuento.
+     * @param precioProd  Precio original del producto.
+     * @return Monto del descuento aplicado.
+     */
     private Double calcularDescuento(Double porcentaje, Double precioProd){
         log.debug("Calculando descuento del {}% sobre el precio {}", porcentaje,precioProd);
         return porcentaje * precioProd / 100;
     }
+
+    /**
+     * Verifica y aplica el descuento específico para un cliente premium.
+     *
+     * @param clientePremiumDTO Cliente premium a verificar.
+     * @param precioProducto Precio original del producto.
+     * @return Precio final después de aplicar el descuento, si corresponde.
+     */
     private Double verificarDescuentoClientePremiun(ClientePremiumDTO clientePremiumDTO, Double precioProducto){
         log.info("Verificando descuento para cliente premium con ID {}", clientePremiumDTO.getId());
         if(clientePremiumDTO.getPorcentajeDescuento()!=null){
@@ -73,11 +101,24 @@ public class VentaService {
         }
 
     }
+    /**
+     * Verifica si la fecha de un cupón ha expirado.
+     *
+     * @param fechaExpiracion Fecha de expiración del cupón.
+     * @return true si el cupón ha expirado, false en caso contrario.
+     */
     public boolean isExpirado(LocalDate fechaExpiracion) {
         log.debug("Verificando si el cupón ha expirado para la fecha: {}", fechaExpiracion);
         LocalDate ahora = LocalDate.now();
         return fechaExpiracion.isBefore(ahora);
     }
+    /**
+     * Verifica y aplica el descuento específico para un cliente estándar.
+     *
+     * @param clienteEstandarDTO Cliente estándar a verificar.
+     * @param precioProducto Precio original del producto.
+     * @return Precio final después de aplicar el descuento, si corresponde.
+     */
     private Double verificarDescuentoClienteEstandar(ClienteEstandarDTO clienteEstandarDTO, Double precioProducto){
         log.info("Verificando descuento para cliente estándar con ID {}", clienteEstandarDTO.getId());
         if (clienteEstandarDTO.getCupon()!=null){
@@ -93,6 +134,13 @@ public class VentaService {
             return precioProducto;
         }
     }
+    /**
+     * Aplica el descuento adecuado al precio del producto según el tipo de cliente.
+     *
+     * @param precioProducto Precio original del producto.
+     * @param clienteDTO Cliente al que se le aplicará el descuento.
+     * @return Precio final después de aplicar el descuento.
+     */
     private Double aplicarDescuento(Double precioProducto, ClienteDTO clienteDTO){
         log.info("Aplicando descuento para cliente con ID {}", clienteDTO.getId());
         Double precioFinal;
@@ -103,6 +151,11 @@ public class VentaService {
         }
         return precioFinal;
     }
+    /**
+     * Descuenta una unidad del stock del producto. Si el stock llega a cero, actualiza el estado del producto.
+     *
+     * @param producto Producto a descontar del stock.
+     */
     private void descontarStock(ProductoDTO producto){
         log.info("Descontando stock para el producto con ID {}", producto.getId());
         producto.setCantidad(producto.getCantidad()-1);
@@ -112,6 +165,12 @@ public class VentaService {
         productoService.editProducto(producto.getId(), producto);
     }
 
+    /**
+     * Valida la fecha de vencimiento de una tarjeta de débito.
+     *
+     * @param pagoDTO Pago a validar.
+     * @throws DebitoVencidaException si la tarjeta de débito está vencida.
+     */
     private void validarTarjetaDebito(PagoDTO pagoDTO){
         if (pagoDTO instanceof PagoDebitoDTO pagoDebito) {
             log.info("Validando fecha de vencimiento para tarjeta de débito: {}/{}", pagoDebito.getMesVencimiento(), pagoDebito.getAnioVencimiento());
@@ -124,6 +183,16 @@ public class VentaService {
         }
     }
 
+    /**
+     * Crea una nueva venta, realizando todas las validaciones necesarias, aplicando descuentos,
+     * y descontando stock del producto.
+     *
+     * @param idProducto ID del producto a vender.
+     * @param idCliente  ID del cliente que realiza la compra.
+     * @param ventadto   Detalles de la venta a crear.
+     * @return VentaDTO con los detalles de la venta creada.
+     * @throws IOException si ocurre un error en el proceso.
+     */
     public VentaDTO crearVenta(Long idProducto,Long idCliente,VentaDTO ventadto) throws IOException {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
         validarClienteActivo(idCliente);
@@ -155,6 +224,13 @@ public class VentaService {
 
     }
 
+    /**
+     * Busca una venta por su ID.
+     *
+     * @param id ID de la venta a buscar.
+     * @return VentaDTO con los detalles de la venta encontrada.
+     * @throws VentaInexistenteException si no se encuentra una venta con el ID proporcionado.
+     */
     public VentaDTO findById(Long id){
         log.info("Buscando venta con ID {}", id);
         Venta ventaEntity = ventaRepository.findById(id).orElseThrow(() -> {
