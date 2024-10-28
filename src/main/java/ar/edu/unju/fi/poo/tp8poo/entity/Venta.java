@@ -20,11 +20,11 @@ public class Venta {
     @Column
     private LocalDateTime fechaYHora;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="cliente_id", nullable=false)
     private Cliente cliente;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="producto_id", nullable=false)
     private Producto producto;
 
