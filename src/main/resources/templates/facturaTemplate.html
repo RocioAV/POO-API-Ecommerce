@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura de Compra</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            color: #333; 
+            background-color: #f7f7f7; 
+            margin: 0; 
+            padding: 0;
+        }
+        .container { 
+            width: 80%; 
+            margin: auto; 
+            border: 1px solid #ddd; 
+            background-color: #fff; 
+            padding: 20px; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+        }
+        h1 { 
+            text-align: center; 
+            color: rgb(255, 255, 255); 
+            font-size: 24px; 
+        }
+        .details { 
+            margin: 20px 0; 
+        }
+        .details p { 
+            margin: 10px 0; 
+            font-size: 16px; 
+        }
+        .details p strong { 
+            font-weight: bold; 
+        }
+        .footer { 
+            text-align: center; 
+            margin-top: 20px; 
+            font-weight: bold; 
+            font-size: 18px; 
+        }
+        .header, .footer {
+            background-color: #007BFF; 
+            color: white; 
+            padding: 10px 0;
+        }
+        .header img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100px;
+        }
+        .footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg" alt="Logo de la Empresa">
+            <h1>Factura de Compra</h1>
+        </div>
+        <div class="details">
+            <p><strong>Fecha y Hora:</strong> [[${fechaYHora}]]</p>
+            <p><strong>Cliente:</strong> [[${cliente.nombre}]] [[${cliente.apellido}]]</p>
+            <p><strong>Email:</strong> [[${cliente.email}]]</p>
+            <p><strong>Producto:</strong> [[${producto.nombre}]]</p>
+            <p><strong>Descripción:</strong> [[${producto.descripcion}]]</p>
+            <p><strong>Precio en dólares:</strong> $[[${producto.precio}]]</p>
+            <p><strong>Precio final:</strong> $[[${precioProducto}]]</p>
+            <p><strong>Forma de Pago:</strong> [[${formaPago.tipo}]]</p>
+            <p><strong>Importe en Pesos:</strong> $[[${formaPago.importe}]]</p>
+        </div>
+        <div class="footer">
+            <p>Gracias por su compra.</p>
+        </div>
+    </div>
+</body>
+</html>
