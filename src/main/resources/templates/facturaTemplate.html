@@ -50,6 +50,10 @@
             margin: 0 auto;
             max-width: 100px;
         }
+        .footer img {
+            max-width: 150px; /* Ajusta el tamaño deseado */
+            display: block;
+            margin: 10px auto 0;
         .footer p {
             margin: 0;
         }
@@ -58,7 +62,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg" alt="Logo de la Empresa">
+            <img src="[[${cliente.foto}]]" alt="FotoCliente">
             <h1>Factura de Compra</h1>
         </div>
         <div class="details">
@@ -72,8 +76,10 @@
             <p><strong>Forma de Pago:</strong> [[${formaPago.tipo}]]</p>
             <p><strong>Importe en Pesos:</strong> $[[${formaPago.importe}]]</p>
         </div>
+        
         <div class="footer">
             <p>Gracias por su compra.</p>
+            <img src="https://drive.google.com/uc?id=1jY1JGe6klnjhfLFeN--9lcg-Jj31IL59" alt="Logo de la Empresa">
         </div>
     </div>
 </body>
