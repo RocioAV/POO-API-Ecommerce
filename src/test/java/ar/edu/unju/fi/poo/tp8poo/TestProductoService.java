@@ -20,8 +20,8 @@ public class TestProductoService {
     ProductoService productoService;
 
     // Inicializa variables para las pruebas
-    private ProveedorDTO proveedorDTO;
-    private ProductoDTO productoDTO;
+    static ProveedorDTO proveedorDTO;
+    static ProductoDTO productoDTO;
 
     @BeforeEach
     public void setUp() {
@@ -52,9 +52,7 @@ public class TestProductoService {
         setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
         productoDTO.setProveedor(null);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            productoService.createProducto(productoDTO);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> productoService.createProducto(productoDTO));
 
         assertEquals("El producto debe tener un proveedor asignado.", exception.getMessage());
     }
