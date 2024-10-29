@@ -87,7 +87,35 @@
 		    <artifactId>json</artifactId>
 		    <version>20231013</version>
 		</dependency>
+		
+		<!-- Jakarta Mail API -->
+    <dependency>
+        <groupId>com.sun.mail</groupId>
+        <artifactId>jakarta.mail</artifactId>
+        <version>2.0.1</version>
+    </dependency>
+    
+    <!-- Spring Boot Starter Mail -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
+    <!-- Thymeleaf para el template -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>nz.net.ultraq.thymeleaf</groupId>
+        <artifactId>thymeleaf-layout-dialect</artifactId>
+        <version>3.0.0</version>
+    </dependency>
+		
+		
     </dependencies>
+    
 
     <build>
         <plugins>

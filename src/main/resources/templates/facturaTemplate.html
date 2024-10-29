@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura de Compra</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { width: 80%; margin: auto; border: 1px solid #ddd; padding: 10px; }
+        h1 { text-align: center; color: rgb(0, 128, 255); }
+        .details { margin: 20px 0; }
+        .details p { margin: 5px 0; }
+        .footer { text-align: center; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Factura de Compra</h1>
+        <div class="details">
+            <p><strong>Fecha y Hora:</strong> [[${fechaYHora}]]</p>
+            <p><strong>Cliente:</strong> [[${cliente.nombre}]] [[${cliente.apellido}]]</p>
+            <p><strong>Email:</strong> [[${cliente.email}]]</p>
+            <p><strong>Producto:</strong> [[${producto.nombre}]]</p>
+            <p><strong>Descripción:</strong> [[${producto.descripcion}]]</p>
+            <p><strong>Precio en dolares:</strong> $[[${producto.precio}]]</p>
+            <p><strong>Precio final:</strong> $[[${precioProducto}]]</p>
+            <p><strong>Forma de Pago:</strong> [[${formaPago.tipo}]]</p>
+            <p><strong>Importe en Pesos:</strong> $[[${formaPago.importe}]]</p>
+        </div>
+        <div class="footer">
+            <p>Gracias por su compra.</p>
+        </div>
+    </div>
+</body>
+</html>

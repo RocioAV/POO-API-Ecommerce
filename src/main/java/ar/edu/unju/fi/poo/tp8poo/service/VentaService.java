@@ -35,7 +35,8 @@ public class VentaService {
     @Autowired
     VentaMapper ventaMapper;
 
-
+    @Autowired
+    EmailService emailService;
 
     /**
      * Valida si el cliente con el ID especificado está activo para realizar compras.
@@ -221,6 +222,7 @@ public class VentaService {
         log.info("Venta creada y guardada con éxito para el cliente ID {}", idCliente);
         descontarStock(ventadto.getProducto());
 
+        emailService.enviarFacturaPorEmail(ventadto,preciofinal,precioConvertidoAPesos);
         return ventaMapper.toVentaDTO(ventaEntity);
 
     }
