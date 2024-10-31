@@ -2,7 +2,7 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.VentaInexistenteException;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
@@ -110,7 +110,7 @@ public class VentaService {
         log.info("Buscando venta con ID {}", id);
         Venta ventaEntity = ventaRepository.findById(id).orElseThrow(() -> {
             log.error("Venta no encontrada con ID {}", id);
-            return new VentaInexistenteException("Venta no existe");
+            return new NegocioException("Venta no existe");
         });
         return ventaMapper.toVentaDTO(ventaEntity);
     }

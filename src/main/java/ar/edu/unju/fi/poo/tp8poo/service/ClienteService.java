@@ -8,7 +8,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
 import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
@@ -55,14 +55,14 @@ public class ClienteService {
     private void validarEmail(String email) {
         if (clienteRepository.findByEmail(email) != null) {
         	log.error("Error al registrar cliente: El correo {} ya está registrado", email);
-            throw new EmailDuplicadoException("El cliente con dicho correo ya existe");
+            throw new NegocioException("El cliente con dicho correo ya existe");
         }
     }
 
     private void validarCelular(String celular) {
         if (clienteRepository.findByCelular(celular) != null) {
         	log.error("Error al registrar cliente: El número {} ya está registrado", celular);
-            throw new CelularDuplicadoException("El cliente con dicho número de celular ya existe");
+            throw new NegocioException("El cliente con dicho número de celular ya existe");
         }
     }
     
@@ -77,7 +77,7 @@ public class ClienteService {
 		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error("Error al encontrar el cliente: {}", id);
-	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
 		log.info("Cliente encontrado con éxito: {}", id);
 		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
@@ -96,7 +96,7 @@ public class ClienteService {
     	ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error("Error al encontrar el cliente: {}", id);
-	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
         validarEmail(dto.getEmail());
         validarCelular(dto.getCelular());
@@ -131,7 +131,7 @@ public class ClienteService {
     	ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error("Error al encontrar el cliente: {}", id);
-	            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
 
         clienteRepository.deleteById(clienteEstandar.getId());
@@ -156,7 +156,7 @@ public class ClienteService {
         ClientePremium clienteExistente = (ClientePremium) clienteRepository.findById(id)
         		.orElseThrow(() -> {
             		log.error("Error al encontrar el cliente: {}", id);
-            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+            		return new NegocioException("Cliente no encontrado con ID: " + id);
             		});
 
         validarEmail(dto.getEmail());
@@ -184,7 +184,7 @@ public class ClienteService {
     
     public void eliminarClientePremium(Long id) {
         ClientePremium clientePremium=(ClientePremium) clienteRepository.findById(id)
-	            .orElseThrow(() -> new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id));
+	            .orElseThrow(() -> new NegocioException("Cliente no encontrado con ID: " + id));
         clienteRepository.deleteById(clientePremium.getId());
     }
     
@@ -193,7 +193,7 @@ public class ClienteService {
 		ClientePremium clientePremium = (ClientePremium) clienteRepository.findById(id)
 				.orElseThrow(() -> {
             		log.error("Error al encontrar el cliente: {}", id);
-            		return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+            		return new NegocioException("Cliente no encontrado con ID: " + id);
             		});
 		log.info("Cliente encontrado con éxito: {}", clientePremium.getNombre());
 		return clienteMapper.toClientePremiunDTO(clientePremium);
@@ -221,7 +221,7 @@ public class ClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Error al encontrar el cliente: {}", id);
-                    return new ClienteInexixtenteExcepcion("Cliente no encontrado con ID: " + id);
+                    return new NegocioException("Cliente no encontrado con ID: " + id);
                 });
 
         return clienteMapper.toClienteDTO(cliente);
@@ -244,7 +244,7 @@ public class ClienteService {
         ClienteDTO cliente = buscarPorID(id);
         if (!cliente.getEstado().equals(EstadoCliente.ACTIVO.name())) {
             log.warn("El cliente con ID {} no está activo para hacer una compra", id);
-            throw new ClienteNoActivoException("El cliente no esta activo para hacer una compra");
+            throw new NegocioException("El cliente no esta activo para hacer una compra");
         }
     }
 
