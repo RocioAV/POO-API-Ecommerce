@@ -7,7 +7,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring", uses = {ClienteMapper.class, ProductoMapper.class, PagoMapper.class})
+@Mapper(componentModel = "spring", uses = {ClienteMapper.class, ProductoMapper.class})
 public interface VentaMapper {
 
     Venta toVentaEntity(VentaDTO ventaDTO);

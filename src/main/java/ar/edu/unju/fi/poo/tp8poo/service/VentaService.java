@@ -3,14 +3,12 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteNoActivoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.DebitoVencidaException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.VentaInexistenteException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
+
 
 @Slf4j
 @Service
@@ -167,23 +165,7 @@ public class VentaService {
 
     }
 
-    /**
-     * Valida la fecha de vencimiento de una tarjeta de débito.
-     *
-     * @param pagoDTO Pago a validar.
-     * @throws DebitoVencidaException si la tarjeta de débito está vencida.
-     */
-    private void validarTarjetaDebito(PagoDTO pagoDTO){
-        if (pagoDTO instanceof PagoDebitoDTO pagoDebito) {
-            log.info("Validando fecha de vencimiento para tarjeta de débito: {}/{}", pagoDebito.getMesVencimiento(), pagoDebito.getAnioVencimiento());
-            YearMonth fechaActual = YearMonth.now();
-            YearMonth fechaVencimiento = YearMonth.of(pagoDebito.getAnioVencimiento(), pagoDebito.getMesVencimiento());
-            if (fechaVencimiento.isBefore(fechaActual)) {
-                log.error("Tarjeta de débito vencida en {}/{}", pagoDebito.getMesVencimiento(), pagoDebito.getAnioVencimiento());
-                throw new DebitoVencidaException("La tarjeta está vencida");
-            }
-        }
-    }
+
 
     /**
      * Crea una nueva venta, realizando todas las validaciones necesarias, aplicando descuentos,
@@ -212,9 +194,6 @@ public class VentaService {
 
         log.debug("Precio final después del descuento: {}", preciofinal);
         ventadto.setPrecioProducto(precioConvertidoAPesos);
-        ventadto.getFormaPago().setImporte(precioConvertidoAPesos);
-
-        validarTarjetaDebito(ventadto.getFormaPago());
 
         Venta ventaEntity =ventaMapper.toVentaEntity(ventadto);
         ventaRepository.save(ventaEntity);
