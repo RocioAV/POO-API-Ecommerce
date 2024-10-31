@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",uses = {CuponMapper.class})
 public interface ClienteMapper {
     // Métodos para objetos individuales
     ClienteEstandarDTO toClienteEstandarDTO(ClienteEstandar clienteEstandar);

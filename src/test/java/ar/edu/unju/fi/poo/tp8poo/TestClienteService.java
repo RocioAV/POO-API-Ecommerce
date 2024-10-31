@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,11 +32,9 @@ class TestClienteService {
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new CuponDTO(null, LocalDate.of(2024, 12, 2), 15));
-        clienteEstandarDTO.setCreated(LocalDateTime.now());
+        clienteEstandarDTO.setCupon(new CuponDTO(null, "2024-12-02", 10.0));
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
-        clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
         // Inicializar un cliente premium
@@ -46,10 +42,8 @@ class TestClienteService {
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
-        clientePremiumDTO.setCreated(LocalDateTime.now());
         clientePremiumDTO.setEmail("maria@hotmail.com");
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
-        clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(20.0); // Descuento para cliente premium
     }
@@ -70,10 +64,8 @@ class TestClienteService {
         clienteEstandarEditado.setApellido("Lopez");
         clienteEstandarEditado.setNombre("Daniel");
         clienteEstandarEditado.setCelular("1233123456");
-        clienteEstandarEditado.setCreated(clienteEstandarDTO.getCreated());
         clienteEstandarEditado.setEmail("raul@hotmail.com");
         clienteEstandarEditado.setFoto(clienteEstandarDTO.getFoto());
-        clienteEstandarEditado.setUpdated(LocalDateTime.now());
         clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
         clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
 
@@ -112,10 +104,8 @@ class TestClienteService {
         clientePremiumEditado.setApellido("Martinez");
         clientePremiumEditado.setNombre("Ana");
         clientePremiumEditado.setCelular("654321");
-        clientePremiumEditado.setCreated(clientePremiumDTO.getCreated());
         clientePremiumEditado.setEmail("mariaawfdf@hotmail.com");
         clientePremiumEditado.setFoto(clientePremiumDTO.getFoto());
-        clientePremiumEditado.setUpdated(LocalDateTime.now());
         clientePremiumEditado.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumEditado.setPorcentajeDescuento(20.0);
 
@@ -135,10 +125,8 @@ class TestClienteService {
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
         clienteEstandarDTO2.setCelular("987654");
-        clienteEstandarDTO2.setCreated(LocalDateTime.now());
         clienteEstandarDTO2.setEmail("raul5@hotmail.com"); // Mismo email que el primer cliente
         clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
-        clienteEstandarDTO2.setUpdated(null);
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
         assertThrows(EmailDuplicadoException.class, () -> {
@@ -154,10 +142,8 @@ class TestClienteService {
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
         clienteEstandarDTO2.setCelular("1234561341"); // Mismo celular que el primer cliente
-        clienteEstandarDTO2.setCreated(LocalDateTime.now());
         clienteEstandarDTO2.setEmail("pedro@gmail.com");
         clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
-        clienteEstandarDTO2.setUpdated(null);
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
         assertThrows(CelularDuplicadoException.class, () -> {
@@ -173,10 +159,8 @@ class TestClienteService {
         clientePremiumDTO2.setApellido("Garcia");
         clientePremiumDTO2.setNombre("Luis");
         clientePremiumDTO2.setCelular("1234561341"); // Mismo celular que el primer cliente
-        clientePremiumDTO2.setCreated(LocalDateTime.now());
         clientePremiumDTO2.setEmail("luis@gmail.com");
         clientePremiumDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
-        clientePremiumDTO2.setUpdated(null);
         clientePremiumDTO2.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO2.setPorcentajeDescuento(50.0);
 

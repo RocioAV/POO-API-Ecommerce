@@ -11,7 +11,6 @@ import org.thymeleaf.TemplateEngine;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Servicio para enviar facturas por email.
@@ -44,18 +43,10 @@ public class EmailService {
             String htmlTemplate = new String(Files.readAllBytes(Paths.get("src/main/resources/templates/facturaTemplate.html")));
 
             /**
-             * Formateador para la fecha
-             */
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-            String fechaYHora = venta.getFechaYHora().format(formatter);
-
-
-
-            /**
              * Generar el contenido HTML usando los datos de la venta
              */
             String htmlContent = htmlTemplate
-                    .replace("[[${fechaYHora}]]", fechaYHora)
+                    .replace("[[${fechaYHora}]]", venta.getFechaYHora())
                     .replace("[[${cliente.foto}]]", venta.getCliente().getFoto())
                     .replace("[[${cliente.nombre}]]", venta.getCliente().getNombre())
                     .replace("[[${cliente.apellido}]]", venta.getCliente().getApellido())

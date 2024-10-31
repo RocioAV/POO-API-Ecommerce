@@ -10,6 +10,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.*;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
+import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ public class ClienteService {
 
     @Autowired
     ClienteMapper clienteMapper;
+    @Autowired
+    CuponMapper cuponMapper;
 
     
     /*SECCION DE CLIENTE ESTANDAR*/
@@ -109,10 +112,7 @@ public class ClienteService {
         clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
         log.debug("Cambiando a nuevo email: {}", dto.getEstado());
         if (dto.getCupon() != null) {
-            Cupon cupon = new Cupon();
-            cupon.setId(dto.getCupon().getId());
-            cupon.setPorcentajeDescuento(dto.getCupon().getPorcentajeDescuento());
-            cupon.setFechaExpiracion(dto.getCupon().getFechaExpiracion());
+            Cupon cupon = cuponMapper.toCuponEntity(dto.getCupon());
             clienteExistente.setCupon(cupon);
         }
 

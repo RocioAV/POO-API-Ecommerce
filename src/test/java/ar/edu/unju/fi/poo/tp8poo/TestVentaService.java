@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,21 +46,17 @@ public class TestVentaService {
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new CuponDTO(null, LocalDate.of(2024, 12, 2), 10));
-        clienteEstandarDTO.setCreated(LocalDateTime.now());
-        clienteEstandarDTO.setEmail("chiiohca@gmail.com");
+        clienteEstandarDTO.setCupon(new CuponDTO(null,"2024-12-02", 10));
+        clienteEstandarDTO.setEmail("44351449@fi.unju.edu.ar");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
-        clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
         clientePremiumDTO= new ClientePremiumDTO();
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
-        clientePremiumDTO.setCreated(LocalDateTime.now());
         clientePremiumDTO.setEmail("maria@hotmail.com");
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
-        clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(10.0);
 
@@ -112,7 +106,7 @@ public class TestVentaService {
 
     @Test
     public void testCrearVentaCuponExpiradoClienteEstandar() throws IOException {
-        clienteEstandarDTO.getCupon().setFechaExpiracion(LocalDate.of(2024,9,10));
+        clienteEstandarDTO.getCupon().setFechaExpiracion("2024-09-10");
         clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
         productoDTO=productoService.createProducto(productoDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),FormaPago.CREDITO.name());
