@@ -232,4 +232,20 @@ public class ClienteService {
     public List<Cliente> mostrarClientes(){
     	return clienteRepository.findAll();
     }
+
+    /**
+     * Valida si el cliente con el ID especificado está activo para realizar compras.
+     *
+     * @param id ID del cliente a validar.
+     * @throws ClienteNoActivoException si el cliente no está activo.
+     */
+    public void validarClienteActivo(Long id){
+        log.info("Validando si el cliente con ID {} está activo", id);
+        ClienteDTO cliente = buscarPorID(id);
+        if (!cliente.getEstado().equals(EstadoCliente.ACTIVO.name())) {
+            log.warn("El cliente con ID {} no está activo para hacer una compra", id);
+            throw new ClienteNoActivoException("El cliente no esta activo para hacer una compra");
+        }
+    }
+
 }

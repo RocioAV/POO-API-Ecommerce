@@ -1,6 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProductoMapper;
 import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
@@ -175,6 +176,46 @@ public class ProductoService {
         }
         log.info("Productos encontrados: {}", productos.size());
         return productoMapper.toProductoDTOList(productos);
+    }
+
+    /**
+     * Verifica si el producto con el ID especificado tiene stock disponible.
+     *
+     * @param id ID del producto a verificar.
+     * @throws ProductoSinStockException si el producto no tiene stock disponible.
+     */
+    public void validarProductoSinStock(Long id){
+        log.info("Validando stock del producto con ID {}", id);
+        ProductoDTO producto= findById(id);
+        if (producto.getCantidad()<=0){
+            log.warn("El producto con ID {} no tiene stock", id);
+            throw new ProductoSinStockException("El producto NO tiene stock");
+        }
+    }
+
+    public void validarProductoDisponible(Long id){
+        log.info("Validando stock del producto con ID {}", id);
+        ProductoDTO producto= findById(id);
+        if (producto.getEstado().equals(EstadoProducto.NO_DISPONIBLE.getEstado())){
+            log.warn("El producto con ID {} no esta disponible", id);
+            throw new ProductoSinStockException("El producto NO se encuentra disponible");
+        }
+    }
+
+    /**
+     * Descuenta una unidad del stock del producto. Si el stock llega a cero, actualiza el estado del producto.
+     *
+     * @param id  ID del producto a descontar del stock.
+     */
+    public void descontarStock(Long id){
+        log.info("Descontando stock para el producto con ID {}", id);
+        ProductoDTO producto= findById(id);
+        producto.setCantidad(producto.getCantidad()-1);
+        editProducto(producto.getId(), producto);
+        if(producto.getCantidad()==0){
+            deleteProductoLogico(producto.getId());
+        }
+
     }
 
 }
