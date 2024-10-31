@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Service
@@ -48,6 +49,11 @@ public class VentaService {
         productoService.validarProductoSinStock(idProducto);
         log.info("Validaciones de cliente y producto completadas para Cliente ID: {} y Producto ID: {}", idCliente, idProducto);
     }
+    private String parsearFechaHoy(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String fechaYHoraFormateada = LocalDateTime.now().format(formatter);
+        return fechaYHoraFormateada;
+    }
     /**
      * Prepara el objeto VentaDTO con los datos necesarios para registrar una venta.
      *
@@ -60,7 +66,7 @@ public class VentaService {
     private VentaDTO prepararVentaDTO(ClienteDTO clienteDTO, ProductoDTO productoDTO, String formaDePago) throws IOException {
         VentaDTO ventaDTO = new VentaDTO();
         log.debug("Preparando venta para cliente con ID {}", clienteDTO.getId());
-        ventaDTO.setFechaYHora(LocalDateTime.now());
+        ventaDTO.setFechaYHora(parsearFechaHoy());
         ventaDTO.setProducto(productoDTO);
         ventaDTO.setCliente(clienteDTO);
         ventaDTO.setFormaPago(formaDePago);

@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Transactional
+//@Transactional
 @SpringBootTest
 public class TestVentaService {
 
@@ -49,7 +49,7 @@ public class TestVentaService {
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
         clienteEstandarDTO.setCupon(new CuponDTO(null,"2024-12-02", 10));
-        clienteEstandarDTO.setEmail("chiiohca@gmail.com");
+        clienteEstandarDTO.setEmail("44351449@fi.unju.edu.ar");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
