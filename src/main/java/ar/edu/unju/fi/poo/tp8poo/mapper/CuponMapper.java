@@ -1,9 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.mapper;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
-import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
-import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

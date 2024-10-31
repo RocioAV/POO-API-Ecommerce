@@ -51,8 +51,7 @@ public class VentaService {
     }
     private String parsearFechaHoy(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String fechaYHoraFormateada = LocalDateTime.now().format(formatter);
-        return fechaYHoraFormateada;
+        return LocalDateTime.now().format(formatter);
     }
     /**
      * Prepara el objeto VentaDTO con los datos necesarios para registrar una venta.
