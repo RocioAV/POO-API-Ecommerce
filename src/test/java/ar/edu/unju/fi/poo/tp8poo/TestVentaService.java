@@ -48,7 +48,7 @@ public class TestVentaService {
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new CuponDTO(null, LocalDate.of(2024, 12, 2), 10));
+        clienteEstandarDTO.setCupon(new CuponDTO(null,"2024-12-02", 10));
         clienteEstandarDTO.setEmail("chiiohca@gmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
@@ -108,7 +108,7 @@ public class TestVentaService {
 
     @Test
     public void testCrearVentaCuponExpiradoClienteEstandar() throws IOException {
-        clienteEstandarDTO.getCupon().setFechaExpiracion(LocalDate.of(2024,9,10));
+        clienteEstandarDTO.getCupon().setFechaExpiracion("2024-09-10");
         clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
         productoDTO=productoService.createProducto(productoDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),FormaPago.CREDITO.name());

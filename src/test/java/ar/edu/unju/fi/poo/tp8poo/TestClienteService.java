@@ -34,7 +34,7 @@ class TestClienteService {
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new CuponDTO(null, LocalDate.of(2024, 12, 2), 15));
+        clienteEstandarDTO.setCupon(new CuponDTO(null, "2024-12-02", 10.0));
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());

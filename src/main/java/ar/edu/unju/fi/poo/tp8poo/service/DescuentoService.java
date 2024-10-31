@@ -67,7 +67,7 @@ public class DescuentoService {
     private Double verificarDescuentoClienteEstandar(ClienteEstandarDTO clienteEstandarDTO, Double precioProducto){
         log.info("Verificando descuento para cliente estándar con ID {}", clienteEstandarDTO.getId());
         if (clienteEstandarDTO.getCupon()!=null){
-            if(!isExpirado(clienteEstandarDTO.getCupon().getFechaExpiracion())){
+            if(!isExpirado(LocalDate.parse(clienteEstandarDTO.getCupon().getFechaExpiracion()))){
                 Double descuento= calcularDescuento(clienteEstandarDTO.getCupon().getPorcentajeDescuento(),precioProducto);
                 log.debug("Descuento aplicado: {}, Precio final: {}", descuento, precioProducto - descuento);
                 return precioProducto-descuento;
