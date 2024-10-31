@@ -18,13 +18,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class ProveedorServiceTest {
+ class ProveedorServiceTest {
 
     @Autowired
     private ProveedorRepository proveedorRepository;
-
-    @Autowired
-    private ProveedorMapper proveedorMapper;
 
     @Autowired
     private ProveedorService proveedorService;

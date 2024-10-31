@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
-public class TestProductoService {
+ class TestProductoService {
     @Autowired
     ProductoService productoService;
 
@@ -41,14 +41,14 @@ public class TestProductoService {
     }
 
     @Test
-    public void testCreateProductoCorrecto() {
+     void testCreateProductoCorrecto() {
         setUpProducto("PROD001", "Producto 1", "Descripción del producto 1", 100.0, 10,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
         ProductoDTO productoCreado = productoService.createProducto(productoDTO);
         assertEquals("PROD001", productoCreado.getCodigo());
     }
 
     @Test
-    public void testCreateProductoSinProveedor() {
+     void testCreateProductoSinProveedor() {
         setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
         productoDTO.setProveedor(null);
 
@@ -58,8 +58,8 @@ public class TestProductoService {
     }
 
     @Test
-    public void testDeleteLogicoProducto() {
-        setUpProducto("PROD003","Producto 3","Descripción del producto 3",150.0,20,"https://drive.google.com/uc?id=1tde1iwN_TST5XqBz5u4L1IwX8hDvWq5d");
+     void testDeleteLogicoProducto() {
+        setUpProducto("PROD008","Producto 3","Descripción del producto 3",150.0,20,"https://drive.google.com/uc?id=1tde1iwN_TST5XqBz5u4L1IwX8hDvWq5d");
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
         productoService.deleteProductoLogico(createdProducto.getId());
@@ -69,7 +69,7 @@ public class TestProductoService {
     }
 
     @Test
-    public void testUpdateProducto() {
+     void testUpdateProducto() {
         setUpProducto("PROD003","Producto 4","Descripción del producto 4",180.0,15,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
@@ -84,7 +84,7 @@ public class TestProductoService {
     }
 
     @Test
-    public void testFindByCodigo() {
+     void testFindByCodigo() {
         setUpProducto("PROD005","Producto 5","Descripción del producto 5",500.0,50,"https://drive.google.com/uc?id=15Ygz6H2wh9YZ-rXtpDVBFirUteKMTQzV");
 
         productoService.createProducto(productoDTO);
@@ -96,7 +96,7 @@ public class TestProductoService {
     }
 
     @Test
-    public void testFindByNombre() {
+     void testFindByNombre() {
         setUpProducto("PROD006","Producto 6","Descripción del producto 6",650.0,65,"https://drive.google.com/uc?id=1rdFfrURbr-AwXGBuME7i9zYlhanOuImu");
         productoService.createProducto(productoDTO);
         List<ProductoDTO> result = productoService.findByNombre("Producto 6");
@@ -106,7 +106,7 @@ public class TestProductoService {
     }
 
     @Test
-    public void testFindByDescripcion() {
+     void testFindByDescripcion() {
         setUpProducto("PROD007","Producto 7","Descripción del producto 7",700.0,70,"https://drive.google.com/uc?id=1zlt_-cVGKJE5RFw9q0oIgGlT1yN__2vw");
 
         productoService.createProducto(productoDTO);
