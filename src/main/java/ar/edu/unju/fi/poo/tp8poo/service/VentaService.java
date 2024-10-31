@@ -104,7 +104,7 @@ public class VentaService {
      *
      * @param id ID de la venta a buscar.
      * @return VentaDTO con los detalles de la venta encontrada.
-     * @throws VentaInexistenteException si no se encuentra una venta con el ID proporcionado.
+     * @throws NegocioException si no se encuentra una venta con el ID proporcionado.
      */
     public VentaDTO findById(Long id){
         log.info("Buscando venta con ID {}", id);
