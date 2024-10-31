@@ -9,7 +9,9 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {ClienteMapper.class, ProductoMapper.class})
 public interface VentaMapper {
-
+    @Mappings({
+            @Mapping(source = "fechaYHora", target = "fechaYHora", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    })
     Venta toVentaEntity(VentaDTO ventaDTO);
 
     VentaDTO toVentaDTO(Venta venta);

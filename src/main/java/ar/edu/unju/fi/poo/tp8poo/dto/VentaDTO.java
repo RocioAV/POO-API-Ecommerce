@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class VentaDTO {
     private Long id;
 
-    private LocalDateTime fechaYHora;
+    private String fechaYHora;
 
     private ClienteDTO cliente;
 
