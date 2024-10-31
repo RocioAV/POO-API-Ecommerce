@@ -1,5 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.entity;
 
+import ar.edu.unju.fi.poo.tp8poo.util.FormaPago;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,11 +29,12 @@ public class Venta {
     @JoinColumn(name="producto_id", nullable=false)
     private Producto producto;
 
+    @Column
     private Double precioProducto;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="pago_id")
-    private Pago formaPago;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private FormaPago formaPago;
 
 
 }

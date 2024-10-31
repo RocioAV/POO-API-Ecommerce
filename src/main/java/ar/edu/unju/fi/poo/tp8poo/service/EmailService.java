@@ -1,7 +1,5 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
-import ar.edu.unju.fi.poo.tp8poo.dto.PagoDebitoDTO;
-import ar.edu.unju.fi.poo.tp8poo.dto.PagoTransferenciaDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.VentaDTO;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +8,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
 
 /**
  * Servicio para enviar facturas por email.
@@ -35,7 +31,7 @@ public class EmailService {
      *
      * @param venta VentaDTO que contiene los detalles de la venta.
      */
-    public void enviarFacturaPorEmail(VentaDTO venta, Double preciofinal, Double precioConvertidoAPesos) {
+    public void enviarFacturaPorEmail(VentaDTO venta) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -53,17 +49,7 @@ public class EmailService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
             String fechaYHora = venta.getFechaYHora().format(formatter);
 
-            /**
-             * Verificar el tipo de forma de pago
-             */
-            String tipoFormaPago;
-            if (venta.getFormaPago() instanceof PagoDebitoDTO) {
-                tipoFormaPago = "Tarjeta de Débito";
-            } else if (venta.getFormaPago() instanceof PagoTransferenciaDTO) {
-                tipoFormaPago = "Transferencia Bancaria";
-            } else {
-                tipoFormaPago = "Otro";
-            }
+
 
             /**
              * Generar el contenido HTML usando los datos de la venta
@@ -77,9 +63,8 @@ public class EmailService {
                     .replace("[[${producto.nombre}]]", venta.getProducto().getNombre())
                     .replace("[[${producto.descripcion}]]", venta.getProducto().getDescripcion())
                     .replace("[[${producto.precio}]]", String.format("%.2f", venta.getProducto().getPrecio()))
-                    .replace("[[${precioProducto}]]", String.format("%.2f", preciofinal))
-                    .replace("[[${formaPago.tipo}]]", tipoFormaPago)
-                    .replace("[[${formaPago.importe}]]", String.format("%.2f", precioConvertidoAPesos));
+                    .replace("[[${formaPago.tipo}]]", venta.getFormaPago())
+                    .replace("[[${formaPago.importe}]]", String.format("%.2f", venta.getPrecioProducto()));
 
             helper.setText(htmlContent, true);
 

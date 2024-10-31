@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import ar.edu.unju.fi.poo.tp8poo.entity.Pago;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,5 +21,5 @@ public class VentaDTO {
 
     private Double precioProducto;
 
-    private PagoDTO formaPago;
+    private String formaPago;
 }
