@@ -18,7 +18,7 @@ public class CuponDTO {
 
     private Long id;
 
-    private LocalDate fechaExpiracion;
+    private String fechaExpiracion;
 
     private double porcentajeDescuento;
 }

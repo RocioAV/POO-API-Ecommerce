@@ -5,12 +5,17 @@ import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CuponMapper {
-    Cupon toCupon(CuponDTO cuponDTO);
+    @Mappings({
+            @Mapping(source = "fechaExpiracion", target = "fechaExpiracion", dateFormat = "yyyy-MM-dd")
+    })
+    Cupon toCuponEntity(CuponDTO cuponDTO);
 
 
     CuponDTO toCuponDTO(Cupon cupon);
