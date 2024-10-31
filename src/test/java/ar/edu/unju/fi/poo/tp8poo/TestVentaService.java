@@ -49,20 +49,16 @@ public class TestVentaService {
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
         clienteEstandarDTO.setCupon(new CuponDTO(null, LocalDate.of(2024, 12, 2), 10));
-        clienteEstandarDTO.setCreated(LocalDateTime.now());
         clienteEstandarDTO.setEmail("chiiohca@gmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
-        clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
         clientePremiumDTO= new ClientePremiumDTO();
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
-        clientePremiumDTO.setCreated(LocalDateTime.now());
         clientePremiumDTO.setEmail("maria@hotmail.com");
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
-        clientePremiumDTO.setUpdated(null);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(10.0);
 
