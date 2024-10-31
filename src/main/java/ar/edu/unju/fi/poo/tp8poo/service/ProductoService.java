@@ -1,7 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProductoMapper;
 import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
@@ -182,14 +182,14 @@ public class ProductoService {
      * Verifica si el producto con el ID especificado tiene stock disponible.
      *
      * @param id ID del producto a verificar.
-     * @throws ProductoSinStockException si el producto no tiene stock disponible.
+     * @throws NegocioException si el producto no tiene stock disponible.
      */
     public void validarProductoSinStock(Long id){
         log.info("Validando stock del producto con ID {}", id);
         ProductoDTO producto= findById(id);
         if (producto.getCantidad()<=0){
             log.warn("El producto con ID {} no tiene stock", id);
-            throw new ProductoSinStockException("El producto NO tiene stock");
+            throw new NegocioException("El producto NO tiene stock");
         }
     }
 
@@ -198,7 +198,7 @@ public class ProductoService {
         ProductoDTO producto= findById(id);
         if (producto.getEstado().equals(EstadoProducto.NO_DISPONIBLE.getEstado())){
             log.warn("El producto con ID {} no esta disponible", id);
-            throw new ProductoSinStockException("El producto NO se encuentra disponible");
+            throw new NegocioException("El producto NO se encuentra disponible");
         }
     }
 

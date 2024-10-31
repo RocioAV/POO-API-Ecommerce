@@ -36,10 +36,64 @@ public class ClienteService {
     @Autowired
     CuponMapper cuponMapper;
 
+
+
+    /**
+     * Valida si el nuevo clienteEditadoDTO cambio de email para volver a validarlo
+     * @param cliente
+     * @param clienteEditadoDTO
+     */
+    private void validarEmailParaEdicion(Cliente cliente, ClienteDTO clienteEditadoDTO){
+        if (!cliente.getEmail().equals(clienteEditadoDTO.getEmail())) {
+            validarEmail(clienteEditadoDTO.getEmail());
+        }
+    }
+
+    /**
+     * Valida si el nuevo clienteEditadoDTO cambio de celular para volver a validarlo
+     * @param cliente
+     * @param clienteEditadoDTO
+     */
+    private void validarCelularParaEdicion(Cliente cliente, ClienteDTO clienteEditadoDTO){
+        if (!cliente.getCelular().equals(clienteEditadoDTO.getCelular())) {
+            validarCelular(clienteEditadoDTO.getCelular());
+        }
+    }
+    /**
+     * Valida que el email no esté registrado en el sistema.
+     *
+     * @param email Email a validar.
+     * @throws NegocioException si el email ya está registrado.
+     */
+    private void validarEmail(String email) {
+        if (clienteRepository.findByEmail(email) != null) {
+            log.error("Error al registrar cliente: El correo {} ya está registrado", email);
+            throw new NegocioException("El cliente con dicho correo ya existe");
+        }
+    }
+
+    /**
+     * Valida que el número de celular no esté registrado en el sistema.
+     *
+     * @param celular Número de celular a validar.
+     * @throws NegocioException si el celular ya está registrado.
+     */
+    private void validarCelular(String celular) {
+        if (clienteRepository.findByCelular(celular) != null) {
+            log.error("Error al registrar cliente: El número {} ya está registrado", celular);
+            throw new NegocioException("El cliente con dicho número de celular ya existe");
+        }
+    }
     
     /*SECCION DE CLIENTE ESTANDAR*/
-	 // Agregar un nuevo ClienteEstandar
-    public ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
+    /**
+     * Agrega un nuevo cliente de tipo estándar al sistema.
+     * Valida la unicidad del email y celular antes de la creación.
+     *
+     * @param newClienteEstandar Datos del cliente estándar a agregar.
+     * @return ClienteEstandarDTO con los datos del cliente registrado.
+     */
+    public  ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
     	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
         ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
@@ -52,25 +106,14 @@ public class ClienteService {
 
     }
 
-    private void validarEmail(String email) {
-        if (clienteRepository.findByEmail(email) != null) {
-        	log.error("Error al registrar cliente: El correo {} ya está registrado", email);
-            throw new NegocioException("El cliente con dicho correo ya existe");
-        }
-    }
 
-    private void validarCelular(String celular) {
-        if (clienteRepository.findByCelular(celular) != null) {
-        	log.error("Error al registrar cliente: El número {} ya está registrado", celular);
-            throw new NegocioException("El cliente con dicho número de celular ya existe");
-        }
-    }
-    
-    // Obtener Cliente Estandar por id
+
     /**
-     * 
-     * @param id recibe como parametro el id del Cliente tipo Estandar
-     * @return se devuelve el cliente Estandar pero convertido a DTO
+     * Obtiene un cliente estándar por su ID.
+     *
+     * @param id ID del cliente estándar.
+     * @return ClienteEstandarDTO con los datos del cliente.
+     * @throws NegocioException si no se encuentra el cliente.
      */
     public ClienteEstandarDTO getClienteEstandar(Long id){
     	log.info("Buscando cliente con id: {}", id);
@@ -82,13 +125,14 @@ public class ClienteService {
 		log.info("Cliente encontrado con éxito: {}", id);
 		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
 	}
-    
-    //Editar Cliente Estandar
+
     /**
-     * 
-     * @param id recibe como parametro el id del Cliente tipo Estandar
-     * @param dto recibe como parametro el cliente Estandar DTO
-     * @return devuelve el cliente modificado pero con dto
+     * Edita los datos de un cliente estándar existente.
+     *
+     * @param id  ID del cliente a editar.
+     * @param dto Datos actualizados del cliente estándar.
+     * @return ClienteEstandarDTO con los datos actualizados.
+     * @throws NegocioException si no se encuentra el cliente o hay conflicto con el email/celular.
      */
     public ClienteEstandarDTO editarClienteEstandar(Long id, ClienteEstandarDTO dto) {
     	log.info("Editando los datos del cliente: {}",dto.getNombre());
@@ -98,8 +142,8 @@ public class ClienteService {
 	            		log.error("Error al encontrar el cliente: {}", id);
 	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
-        validarEmail(dto.getEmail());
-        validarCelular(dto.getCelular());
+        validarEmailParaEdicion(clienteExistente,dto);
+        validarCelularParaEdicion(clienteExistente,dto);
 
         clienteExistente.setNombre(dto.getNombre());
         log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
@@ -114,18 +158,24 @@ public class ClienteService {
         if (dto.getCupon() != null) {
             Cupon cupon = cuponMapper.toCuponEntity(dto.getCupon());
             clienteExistente.setCupon(cupon);
+        }else{
+            clienteExistente.setCupon(null);
         }
 
         clienteExistente.setUpdated(LocalDateTime.now());
 
-        // Guardar el cliente actualizado
         clienteRepository.save(clienteExistente);
         log.info("Datos del cliente modificado con éxito");
         return clienteMapper.toClienteEstandarDTO(clienteExistente);
 
     }
-    
-    //Eliminar Cliente Estandar
+
+    /**
+     * Elimina un cliente estándar por su ID.
+     *
+     * @param id ID del cliente a eliminar.
+     * @throws NegocioException si no se encuentra el cliente.
+     */
     public void eliminarClienteEstandar(Long id) {
 
     	ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
@@ -139,6 +189,13 @@ public class ClienteService {
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
+    /**
+     * Agrega un nuevo cliente de tipo premium al sistema.
+     * Valida la unicidad del email y celular antes de la creación.
+     *
+     * @param newClientePremium Datos del cliente premium a agregar.
+     * @return ClientePremiumDTO con los datos del cliente registrado.
+     */
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
 
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
@@ -150,7 +207,15 @@ public class ClienteService {
         clienteRepository.save(clientePremium);
         return clienteMapper.toClientePremiunDTO(clientePremium);
     }
-    
+
+
+    /**
+     * Edita los datos de un cliente premium existente.
+     *
+     * @param id  ID del cliente a editar.
+     * @param dto Datos actualizados del cliente premium.
+     * @return ClientePremiumDTO con los datos actualizados.
+     */
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
     	log.info("Iniciando modificacion del cliente: {}", dto.getNombre());
         ClientePremium clienteExistente = (ClientePremium) clienteRepository.findById(id)
@@ -159,8 +224,8 @@ public class ClienteService {
             		return new NegocioException("Cliente no encontrado con ID: " + id);
             		});
 
-        validarEmail(dto.getEmail());
-        validarCelular(dto.getCelular());
+        validarEmailParaEdicion(clienteExistente, dto);
+        validarCelularParaEdicion(clienteExistente, dto);
 
         clienteExistente.setNombre(dto.getNombre());
         log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
@@ -237,7 +302,7 @@ public class ClienteService {
      * Valida si el cliente con el ID especificado está activo para realizar compras.
      *
      * @param id ID del cliente a validar.
-     * @throws ClienteNoActivoException si el cliente no está activo.
+     * @throws NegocioException si el cliente no está activo.
      */
     public void validarClienteActivo(Long id){
         log.info("Validando si el cliente con ID {} está activo", id);

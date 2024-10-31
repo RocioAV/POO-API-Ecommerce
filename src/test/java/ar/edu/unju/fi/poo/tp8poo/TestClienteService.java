@@ -3,8 +3,7 @@ package ar.edu.unju.fi.poo.tp8poo;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.CelularDuplicadoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.EmailDuplicadoException;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import jakarta.transaction.Transactional;
@@ -20,14 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestClienteService {
 
     @Autowired
-    private ClienteService clienteService; // Clase bajo prueba
+    ClienteService clienteService;
 
-    private ClienteEstandarDTO clienteEstandarDTO;
-    private ClientePremiumDTO clientePremiumDTO;
+    static ClienteEstandarDTO clienteEstandarDTO;
+    static ClientePremiumDTO clientePremiumDTO;
 
     @BeforeEach
     public void setUp() {
-        // Inicializar un cliente estándar
         clienteEstandarDTO = new ClienteEstandarDTO();
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
@@ -37,7 +35,6 @@ class TestClienteService {
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Inicializar un cliente premium
         clientePremiumDTO = new ClientePremiumDTO();
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
@@ -49,17 +46,16 @@ class TestClienteService {
     }
 
     @Test
-    public void testAgregarClienteEstandar() {
+     void testAgregarClienteEstandar() {
         ClienteEstandarDTO nuevoCliente = clienteService.agregarClienteEstandar(clienteEstandarDTO);
         assertNotNull(nuevoCliente);
         assertEquals("Raul", nuevoCliente.getNombre());
     }
 
     @Test
-    public void testEditarClienteEstandar() {
+     void testEditarClienteEstandar() {
         ClienteEstandarDTO nuevoCliente =  clienteService.agregarClienteEstandar(clienteEstandarDTO); // Guardar el cliente inicial
 
-        // Editar cliente
         ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
         clienteEstandarEditado.setApellido("Lopez");
         clienteEstandarEditado.setNombre("Daniel");
@@ -76,7 +72,7 @@ class TestClienteService {
     }
 
     @Test
-    public void testEliminarLogicamenteClienteEstandar() {
+     void testEliminarLogicamenteClienteEstandar() {
         ClienteEstandarDTO nuevoCliente =  clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
         clienteService.eliminarLogicamente(nuevoCliente.getId());
@@ -87,7 +83,7 @@ class TestClienteService {
     }
 
     @Test
-    public void testAgregarClientePremium() {
+     void testAgregarClientePremium() {
         clientePremiumDTO = clienteService.agregarClientePremium(clientePremiumDTO);
 
         ClientePremiumDTO nuevoClientePremium = clienteService.getClientePremium(clientePremiumDTO.getId());
@@ -96,10 +92,9 @@ class TestClienteService {
     }
 
     @Test
-    public void testEditarClientePremium() {
+    void testEditarClientePremium() {
         clientePremiumDTO = clienteService.agregarClientePremium(clientePremiumDTO);
 
-        // Editar cliente premium
         ClientePremiumDTO clientePremiumEditado = new ClientePremiumDTO();
         clientePremiumEditado.setApellido("Martinez");
         clientePremiumEditado.setNombre("Ana");
@@ -117,10 +112,9 @@ class TestClienteService {
 
 
     @Test
-    public void testAgregarClienteEstandar_EmailDuplicado() {
-        ClienteEstandarDTO nuevoClienteEstandar =  clienteService.agregarClienteEstandar(clienteEstandarDTO);
+     void testAgregarClienteEstandar_EmailDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
-        // Intentar agregar un cliente con el mismo email
         ClienteEstandarDTO clienteEstandarDTO2 = new ClienteEstandarDTO();
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
@@ -128,15 +122,16 @@ class TestClienteService {
         clienteEstandarDTO2.setEmail("raul5@hotmail.com"); // Mismo email que el primer cliente
         clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
-
-        assertThrows(EmailDuplicadoException.class, () -> {
+        NegocioException exception = assertThrows(NegocioException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
+
+        assertEquals("El cliente con dicho correo ya existe", exception.getMessage());
     }
 
     @Test
-    public void testAgregarClienteEstandar_CelularDuplicado() {
-        ClienteEstandarDTO nuevoClienteEstandar =  clienteService.agregarClienteEstandar(clienteEstandarDTO);
+     void testAgregarClienteEstandar_CelularDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
         ClienteEstandarDTO clienteEstandarDTO2 = new ClienteEstandarDTO();
         clienteEstandarDTO2.setApellido("Gonzalez");
@@ -146,14 +141,15 @@ class TestClienteService {
         clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
-        assertThrows(CelularDuplicadoException.class, () -> {
+        NegocioException exception= assertThrows(NegocioException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
+        assertEquals("El cliente con dicho número de celular ya existe", exception.getMessage());
     }
 
     @Test
-    public void testAgregarClientePremium_CelularDuplicado() {
-        ClienteEstandarDTO nuevoClienteEstandar =  clienteService.agregarClienteEstandar(clienteEstandarDTO);
+     void testAgregarClientePremium_CelularDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
         ClientePremiumDTO clientePremiumDTO2 = new ClientePremiumDTO();
         clientePremiumDTO2.setApellido("Garcia");
@@ -164,9 +160,11 @@ class TestClienteService {
         clientePremiumDTO2.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO2.setPorcentajeDescuento(50.0);
 
-        assertThrows(CelularDuplicadoException.class, () -> {
+        NegocioException exception = assertThrows(NegocioException.class, () -> {
             clienteService.agregarClientePremium(clientePremiumDTO2);
         });
+
+        assertEquals("El cliente con dicho número de celular ya existe", exception.getMessage());
     }
 
 

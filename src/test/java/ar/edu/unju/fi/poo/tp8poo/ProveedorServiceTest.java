@@ -2,13 +2,11 @@ package ar.edu.unju.fi.poo.tp8poo;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
-import ar.edu.unju.fi.poo.tp8poo.mapper.ProveedorMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProveedorRepository;
 import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class ProveedorServiceTest {
+ class ProveedorServiceTest {
 
     @Autowired
     private ProveedorRepository proveedorRepository;
-
-    @Autowired
-    private ProveedorMapper proveedorMapper;
 
     @Autowired
     private ProveedorService proveedorService;

@@ -1,6 +1,5 @@
 package ar.edu.unju.fi.poo.tp8poo.entity;
 
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,7 +36,7 @@ public class Producto {
     @Column
     private String estado;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "proveedor_id")
     private Proveedor proveedor;
 

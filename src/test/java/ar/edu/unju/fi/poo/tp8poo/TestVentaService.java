@@ -2,8 +2,7 @@ package ar.edu.unju.fi.poo.tp8poo;
 
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteNoActivoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
 import ar.edu.unju.fi.poo.tp8poo.service.VentaService;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
-public class TestVentaService {
+ class TestVentaService {
 
     @Autowired
     VentaService ventaService;
@@ -37,31 +36,34 @@ public class TestVentaService {
     static ClientePremiumDTO clientePremiumDTO;
     static  ProveedorDTO proveedorDTO;
     static ProductoDTO productoDTO;
+    static CuponDTO cuponDTO;
 
 
     @BeforeEach
     void setUp() {
-
-        clienteEstandarDTO= new ClienteEstandarDTO();
+        cuponDTO=new CuponDTO(null,"2024-12-02", 10);
+        clienteEstandarDTO= new ClienteEstandarDTO(cuponDTO);
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new CuponDTO(null,"2024-12-02", 10));
-        clienteEstandarDTO.setEmail("44351449@fi.unju.edu.ar");
+        clienteEstandarDTO.setEmail("lorena@gmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
-        clientePremiumDTO= new ClientePremiumDTO();
+        clientePremiumDTO= new ClientePremiumDTO(10.0);
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
         clientePremiumDTO.setEmail("maria@hotmail.com");
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumDTO.setPorcentajeDescuento(10.0);
 
         proveedorDTO= new ProveedorDTO(null,"proveedor1","proveedor@gmail.com","388453213",true);
         productoDTO = new ProductoDTO(null,"PROD01","producto 1","descripcion prod1", 100.0,5,"url", EstadoProducto.DISPONIBLE.getEstado(), proveedorDTO);
+
+        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
+        productoDTO=productoService.createProducto(productoDTO);
+        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
     }
 
     @AfterEach
@@ -70,73 +72,72 @@ public class TestVentaService {
         clientePremiumDTO = null;
         proveedorDTO = null;
         productoDTO = null;
+        cuponDTO=null;
     }
 
     @Test
-    public void testCrearVentaClienteEstandarCorrectamenteConDescuento() throws IOException {
-        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+     void testCrearVentaClienteEstandarCorrectamenteConDescuento() throws IOException {
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),FormaPago.CREDITO.name());
         assertNotNull(ventaDTO);
         assertEquals(clienteEstandarDTO.getId(),ventaDTO.getCliente().getId());
     }
     @Test
-    public void testCrearVentaClientePremiumCorrectamenteConDescuento() throws IOException {
-        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+     void testCrearVentaClientePremiumCorrectamenteConDescuento() throws IOException {
         VentaDTO ventaDTO=ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name());
         assertNotNull(ventaDTO);
         assertEquals(clientePremiumDTO.getId(),ventaDTO.getCliente().getId());
     }
     @Test
-    public void testCrearVentaClienteInvalido(){
+     void testCrearVentaClienteInvalido(){
         clienteEstandarDTO.setEstado(EstadoCliente.INACTIVO.name());
-        clienteEstandarDTO=clienteService.agregarClienteEstandar(clienteEstandarDTO);
-        productoDTO=productoService.createProducto(productoDTO);
-        assertThrows(ClienteNoActivoException.class,()-> ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.DEBITO.name()));
+        clienteEstandarDTO=clienteService.editarClienteEstandar(clienteEstandarDTO.getId(),clienteEstandarDTO);
+        NegocioException exception = assertThrows(NegocioException.class,()->{
+            ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.DEBITO.name());
+        });
+        assertEquals("El cliente no esta activo para hacer una compra", exception.getMessage());
     }
 
     @Test
-    public void testCrearVentaProductoSinStock() {
-        clientePremiumDTO = clienteService.agregarClientePremium(clientePremiumDTO);
+     void testCrearVentaProductoSinStock() {
         productoDTO.setCantidad(0);
-        productoDTO=productoService.createProducto(productoDTO);
-        assertThrows(ProductoSinStockException.class,()-> ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name()));
+        productoDTO=productoService.editProducto(productoDTO.getId(),productoDTO);
+        NegocioException exception=assertThrows(NegocioException.class,()-> {
+            ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name());
+        });
+        assertEquals("El producto NO tiene stock",exception.getMessage());
     }
 
     @Test
-    public void testCrearVentaCuponExpiradoClienteEstandar() throws IOException {
+     void testCrearVentaCuponExpiradoClienteEstandar() throws IOException {
         clienteEstandarDTO.getCupon().setFechaExpiracion("2024-09-10");
-        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+        clienteEstandarDTO= clienteService.editarClienteEstandar(clienteEstandarDTO.getId(),clienteEstandarDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),FormaPago.CREDITO.name());
         Double preciofinalSinDescuento= ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
         assertEquals(preciofinalSinDescuento,ventaDTO.getPrecioProducto());
     }
     @Test
-    public void testCrearVentaCuponNullClienteEstandar() throws IOException {
+     void testCrearVentaCuponNullClienteEstandar() throws IOException {
         clienteEstandarDTO.setCupon(null);
-        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+        System.out.println(clienteEstandarDTO.getCupon());
+        clienteEstandarDTO= clienteService.editarClienteEstandar(clienteEstandarDTO.getId(),clienteEstandarDTO);
+        System.out.println(clienteEstandarDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),FormaPago.CREDITO.name());
         Double preciofinalSinDescuento= ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
         assertEquals(preciofinalSinDescuento,ventaDTO.getPrecioProducto());
     }
 
     @Test
-    public void testCrearVentaPorcentajeDescuentoInvalidoClientePremium() throws IOException {
+     void testCrearVentaPorcentajeDescuentoInvalidoClientePremium() throws IOException {
         clientePremiumDTO.setPorcentajeDescuento(150.0);
-        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+        clientePremiumDTO= clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clientePremiumDTO.getId(),FormaPago.CREDITO.name());
         Double preciofinalSinDescuento= ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
         assertEquals(preciofinalSinDescuento,ventaDTO.getPrecioProducto());
     }
     @Test
-    public void testCrearVentaPorcentajeDescuentoNullClientePremium() throws IOException {
+     void testCrearVentaPorcentajeDescuentoNullClientePremium() throws IOException {
         clientePremiumDTO.setPorcentajeDescuento(null);
-        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
-        productoDTO=productoService.createProducto(productoDTO);
+        clientePremiumDTO= clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO);
         VentaDTO ventaDTO= ventaService.crearVenta(productoDTO.getId(),clientePremiumDTO.getId(),FormaPago.CREDITO.name());
         Double preciofinalSinDescuento= ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
         assertEquals(preciofinalSinDescuento,ventaDTO.getPrecioProducto());

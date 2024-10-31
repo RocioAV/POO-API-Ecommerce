@@ -1,5 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
@@ -74,12 +75,12 @@ public class ProveedorService {
      * @param id el ID del proveedor a actualizar
      * @param proveedorDTO el objeto DTO con los nuevos datos del proveedor
      * @return el proveedor actualizado como un objeto ProveedorDTO
-     * @throws RuntimeException si no se encuentra el proveedor con el ID especificado
+     * @throws NegocioException si no se encuentra el proveedor con el ID especificado
      */
     public ProveedorDTO actualizarProveedor(Long id, ProveedorDTO proveedorDTO) {
         log.debug("Actualizando proveedor con ID: {}", id);
         Proveedor proveedor = proveedorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Proveedor no encontrado con ID: " + id));
+                .orElseThrow(() -> new NegocioException("Proveedor no encontrado con ID: " + id));
         proveedor.setNombre(proveedorDTO.getNombre());
         proveedor.setEmail(proveedorDTO.getEmail());
         proveedor.setTelefono(proveedorDTO.getTelefono());
@@ -92,12 +93,12 @@ public class ProveedorService {
      * Marca un proveedor como inactivo (estado false) sin eliminarlo de la base de datos.
      *
      * @param id el ID del proveedor a marcar como inactivo
-     * @throws RuntimeException si no se encuentra el proveedor con el ID especificado
+     * @throws NegocioException si no se encuentra el proveedor con el ID especificado
      */
     public void eliminarProveedor(Long id) {
         log.debug("Iniciando la eliminación del proveedor con ID: {}", id);
         Proveedor proveedor = proveedorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Proveedor no encontrado con ID: " + id));
+                .orElseThrow(() -> new NegocioException("Proveedor no encontrado con ID: " + id));
         proveedor.setEstado(false);  
         proveedorRepository.save(proveedor);
         log.info("Proveedor con ID: {} marcado como inactivo", id);
