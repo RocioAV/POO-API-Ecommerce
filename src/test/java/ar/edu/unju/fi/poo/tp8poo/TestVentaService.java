@@ -2,7 +2,6 @@ package ar.edu.unju.fi.poo.tp8poo;
 
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
