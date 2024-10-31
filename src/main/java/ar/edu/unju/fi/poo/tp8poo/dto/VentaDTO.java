@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import ar.edu.unju.fi.poo.tp8poo.util.FormaPago;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

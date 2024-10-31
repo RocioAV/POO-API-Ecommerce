@@ -6,7 +6,5 @@ import lombok.Getter;
 public enum FormaPago {
     DEBITO,
     TRANSFERENCIA,
-    CREDITO;
-//    private final String formaPago;
-//    FormaPago(String formaPago) {this.formaPago = formaPago;}
+    CREDITO
 }

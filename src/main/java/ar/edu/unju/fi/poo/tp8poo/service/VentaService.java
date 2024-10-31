@@ -2,21 +2,16 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteNoActivoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ProductoSinStockException;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.VentaInexistenteException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 
 @Slf4j
 @Service
