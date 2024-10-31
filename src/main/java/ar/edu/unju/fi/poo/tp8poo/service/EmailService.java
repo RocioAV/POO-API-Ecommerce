@@ -31,7 +31,7 @@ public class EmailService {
      *
      * @param venta VentaDTO que contiene los detalles de la venta.
      */
-    public void enviarFacturaPorEmail(VentaDTO venta, Double preciofinal, Double precioConvertidoAPesos) {
+    public void enviarFacturaPorEmail(VentaDTO venta) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -63,9 +63,8 @@ public class EmailService {
                     .replace("[[${producto.nombre}]]", venta.getProducto().getNombre())
                     .replace("[[${producto.descripcion}]]", venta.getProducto().getDescripcion())
                     .replace("[[${producto.precio}]]", String.format("%.2f", venta.getProducto().getPrecio()))
-                    .replace("[[${precioProducto}]]", String.format("%.2f", preciofinal))
                     .replace("[[${formaPago.tipo}]]", venta.getFormaPago())
-                    .replace("[[${formaPago.importe}]]", String.format("%.2f", precioConvertidoAPesos));
+                    .replace("[[${formaPago.importe}]]", String.format("%.2f", venta.getPrecioProducto()));
 
             helper.setText(htmlContent, true);
 
