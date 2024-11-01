@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+
+import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,5 +23,6 @@ public class ClienteDTO implements Serializable {
 	    private String celular;
 	    private String email;
 	    private String foto;
+	    private MultipartFile imagen;
 	    private String estado; // Convertido de Enum a String
 }
