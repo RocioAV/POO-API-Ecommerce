@@ -10,7 +10,6 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Servicio para gestionar las operaciones CRUD de los proveedores.
@@ -59,14 +58,13 @@ public class ProveedorService {
      */
     public ProveedorDTO obtenerProveedorPorId(Long id) {
         log.debug("Buscando proveedor con ID: {}", id);
-        Optional<Proveedor> proveedor = proveedorRepository.findById(id);
-        if (proveedor.isPresent()) {
-            log.info("Proveedor encontrado: {}", proveedor.get());
-            return proveedorMapper.toProveedorDTO(proveedor.get());
-        } else {
-            log.warn("Proveedor con ID: {} no encontrado", id);
-            return null;
-        }
+        Proveedor proveedor = proveedorRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Proveedor con ID: {} no encontrado", id);
+                    return new NegocioException("Proveedor no encontrado"); // Cambiado para retornar la excepción
+                });
+        log.info("Proveedor encontrado ID: {}", proveedor.getId());
+        return proveedorMapper.toProveedorDTO(proveedor);
     }
 
     /**

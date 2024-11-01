@@ -1,7 +1,9 @@
 package ar.edu.unju.fi.poo.tp8poo;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
+import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
  class TestProductoService {
     @Autowired
     ProductoService productoService;
+    @Autowired
+    ProveedorService proveedorService;
 
     // Inicializa variables para las pruebas
     static ProveedorDTO proveedorDTO;
@@ -29,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
         productoDTO = new ProductoDTO();
         productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+       proveedorDTO= proveedorService.crearProveedor(proveedorDTO);
     }
     private void setUpProducto(String codigo, String nombre, String descripcion, Double precio, Integer cantidad,String imagen) {
         productoDTO.setCodigo(codigo);
@@ -38,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
         productoDTO.setPrecio(precio);
         productoDTO.setCantidad(cantidad);
         productoDTO.setImagen(imagen);
+        productoDTO.setIdProveedor(proveedorDTO.getId());
     }
 
     @Test
@@ -48,13 +53,13 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
-     void testCreateProductoSinProveedor() {
+     void testCreateProductoConProveedorInexistente() {
         setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5,"https://drive.google.com/uc?id=1BFiAyGd6NKHNgU83uu2sGJHM2sT-o5vJ");
-        productoDTO.setProveedor(null);
+        productoDTO.setIdProveedor(8L);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> productoService.createProducto(productoDTO));
+        Exception exception = assertThrows(NegocioException.class, () -> productoService.createProducto(productoDTO));
 
-        assertEquals("El producto debe tener un proveedor asignado.", exception.getMessage());
+        assertEquals("Proveedor no encontrado", exception.getMessage());
     }
 
     @Test
