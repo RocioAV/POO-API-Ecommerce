@@ -59,14 +59,13 @@ public class ProveedorService {
      */
     public ProveedorDTO obtenerProveedorPorId(Long id) {
         log.debug("Buscando proveedor con ID: {}", id);
-        Optional<Proveedor> proveedor = proveedorRepository.findById(id);
-        if (proveedor.isPresent()) {
-            log.info("Proveedor encontrado: {}", proveedor.get());
-            return proveedorMapper.toProveedorDTO(proveedor.get());
-        } else {
-            log.warn("Proveedor con ID: {} no encontrado", id);
-            return null;
-        }
+        Proveedor proveedor = proveedorRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Proveedor con ID: {} no encontrado", id);
+                    return new NegocioException("Proveedor no encontrado"); // Cambiado para retornar la excepción
+                });
+        log.info("Proveedor encontrado ID: {}", proveedor.getId());
+        return proveedorMapper.toProveedorDTO(proveedor);
     }
 
     /**

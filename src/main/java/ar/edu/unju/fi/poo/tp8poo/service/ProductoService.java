@@ -1,9 +1,12 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
+import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
+import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProductoMapper;
 import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
+import ar.edu.unju.fi.poo.tp8poo.mapper.ProveedorMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,6 +25,24 @@ public class ProductoService {
     @Autowired
     ProductoMapper productoMapper;
 
+    @Autowired
+    ProveedorService proveedorService;
+    @Autowired
+    ProveedorMapper proveedorMapper;
+
+
+    /**
+     * Verifica que el producto tenga un proveedor asignado.
+     *
+     * @param productoDTO El objeto {@link ProductoDTO} a validar.
+     * @throws IllegalArgumentException si el proveedor no está asignado.
+     */
+    private void validarProveedor(ProductoDTO productoDTO) {
+        if (productoDTO.getIdProveedor() == null) {
+            log.error("El producto debe tener un proveedor.");
+            throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
+        }
+    }
 
     /**
      * Crea un producto.
@@ -32,12 +53,10 @@ public class ProductoService {
      */
     public ProductoDTO createProducto(ProductoDTO productoDTO) {
         log.info("Creando producto: Nombre={}", productoDTO.getNombre());
-        if (productoDTO.getProveedor() == null) {
-            log.error("El producto debe tener un Proveedor");
-            throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
-        }
-
+        validarProveedor(productoDTO);
+        Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
+        producto.setProveedor(proveedor);
         Producto savedProducto = productoRepository.save(producto);
         log.info("Producto creado con éxito: ID={}, Nombre={}", savedProducto.getId(), savedProducto.getNombre());
         return productoMapper.toProductoDTO(savedProducto);
