@@ -7,13 +7,22 @@ import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+@Slf4j
 @Transactional
 @SpringBootTest
 class TestClienteService {
@@ -23,16 +32,23 @@ class TestClienteService {
 
     static ClienteEstandarDTO clienteEstandarDTO;
     static ClientePremiumDTO clientePremiumDTO;
+    File file;
+	FileInputStream inputStream;
+	MultipartFile multipartFile;
+    String workspacePath = System.getProperty("user.dir");
+    String rutaArchivo1 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test01.jpeg";
+    String rutaArchivo2 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test02.png";
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         clienteEstandarDTO = new ClienteEstandarDTO();
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
         clienteEstandarDTO.setCupon(new CuponDTO(null, "2024-12-02", 10.0));
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
-        clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
+        multipartFile = generarMultipartFile(rutaArchivo1);
+		clienteEstandarDTO.setImagen(multipartFile);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
         clientePremiumDTO = new ClientePremiumDTO();
@@ -40,7 +56,8 @@ class TestClienteService {
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
         clientePremiumDTO.setEmail("maria@hotmail.com");
-        clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
+        multipartFile = generarMultipartFile(rutaArchivo2);
+		clientePremiumDTO.setImagen(multipartFile);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO.setPorcentajeDescuento(20.0); // Descuento para cliente premium
     }
@@ -166,7 +183,24 @@ class TestClienteService {
 
         assertEquals("El cliente con dicho número de celular ya existe", exception.getMessage());
     }
+    
+    private MultipartFile generarMultipartFile(String rutaArchivo) throws IOException {
+    	String nombreArchivo = rutaArchivo.substring(rutaArchivo.lastIndexOf("/") + 1);
+    	String tipoContenido = "image/" + rutaArchivo.substring(rutaArchivo.lastIndexOf(".") + 1);
+    	log.debug("generando MultipartFilenombre del archivo: {}", nombreArchivo);
 
+    	// Lee una imagen real del sistema de archivos
+    	inputStream = new FileInputStream(rutaArchivo);
+    	
+    	// Crear un MockMultipartFile con una imagen real
+        MultipartFile multipartFile = new MockMultipartFile(
+                "file", // Nombre del parámetro
+                nombreArchivo, // Nombre del archivo
+                tipoContenido, // Tipo de contenido (MIME)
+                inputStream); // Contenido del archivo
+        
+        return multipartFile;
+    }
 
 
 }
