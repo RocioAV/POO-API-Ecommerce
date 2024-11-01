@@ -19,5 +19,6 @@ public class ProductoDTO {
     private Integer cantidad;
     private String imagen;
     private String estado;
-    private ProveedorDTO proveedor;
+    private Long idProveedor;
+
 }
