@@ -1,7 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
-import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProductoMapper;

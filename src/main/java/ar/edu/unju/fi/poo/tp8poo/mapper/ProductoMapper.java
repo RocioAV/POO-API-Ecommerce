@@ -5,7 +5,6 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
 import java.util.List;
 

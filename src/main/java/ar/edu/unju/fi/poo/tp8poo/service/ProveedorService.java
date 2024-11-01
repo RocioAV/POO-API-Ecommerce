@@ -10,7 +10,6 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Servicio para gestionar las operaciones CRUD de los proveedores.
