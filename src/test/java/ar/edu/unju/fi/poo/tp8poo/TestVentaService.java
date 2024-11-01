@@ -5,6 +5,7 @@ import ar.edu.unju.fi.poo.tp8poo.dto.*;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
+import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
 import ar.edu.unju.fi.poo.tp8poo.service.VentaService;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
     ClienteService clienteService;
     @Autowired
     ProductoService productoService;
+    @Autowired
+    ProveedorService proveedorService;
 
     static ClienteEstandarDTO clienteEstandarDTO;
     static ClientePremiumDTO clientePremiumDTO;
@@ -49,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
         clienteEstandarDTO.setEmail("lorena@gmail.com");
         clienteEstandarDTO.setFoto("https://drive.google.com/uc?id=1SYGQFHAOJmU60I2V-zCsefMtam0tkTjg");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
+        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
         clientePremiumDTO= new ClientePremiumDTO(10.0);
         clientePremiumDTO.setApellido("Martinez");
@@ -57,13 +61,15 @@ import static org.junit.jupiter.api.Assertions.*;
         clientePremiumDTO.setEmail("maria@hotmail.com");
         clientePremiumDTO.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
+        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
 
         proveedorDTO= new ProveedorDTO(null,"proveedor1","proveedor@gmail.com","388453213",true);
-        productoDTO = new ProductoDTO(null,"PROD01","producto 1","descripcion prod1", 100.0,5,"url", EstadoProducto.DISPONIBLE.getEstado(), proveedorDTO);
+        proveedorDTO=proveedorService.crearProveedor(proveedorDTO);
 
-        clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
+        productoDTO = new ProductoDTO(null,"PROD01","producto 1","descripcion prod1", 100.0,5,"url", EstadoProducto.DISPONIBLE.getEstado(),proveedorDTO.getId());
+
         productoDTO=productoService.createProducto(productoDTO);
-        clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
+
     }
 
     @AfterEach
