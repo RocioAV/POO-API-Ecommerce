@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -308,8 +309,26 @@ public class ClienteService {
     
     
     // Metodo para obtener todos los clientes y convertirlos a DTOs
-    public List<Cliente> mostrarClientes(){
-    	return clienteRepository.findAll();
+    public List<ClienteDTO> obtenerClientes() {
+        log.info("Obteniendo clientes");
+        List<Cliente> clientes = clienteRepository.findAll();
+        List<ClienteDTO> clientesDTO = new ArrayList<>();
+
+        if(!clientes.isEmpty()){
+            for (Cliente cliente : clientes) {
+                log.debug("Listando clientes");
+                if (cliente instanceof ClienteEstandar) {
+                    clientesDTO.add(clienteMapper.toClienteEstandarDTO((ClienteEstandar) cliente));
+                } else if (cliente instanceof ClientePremium) {
+                    clientesDTO.add(clienteMapper.toClientePremiunDTO((ClientePremium) cliente));
+                }
+                log.info("Proceso completado con exito");
+            }
+        }else{
+            log.error("Proceso interrumpido");
+            throw new NegocioException("No hay ningún cliente registrado");
+        }
+        return clientesDTO;
     }
 
     /**
