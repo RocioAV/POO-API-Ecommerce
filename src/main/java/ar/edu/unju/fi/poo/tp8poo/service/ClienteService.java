@@ -296,18 +296,22 @@ public class ClienteService {
     
     // Metodo para obtener todos los clientes y convertirlos a DTOs
     public List<ClienteDTO> obtenerClientes() {
-        List<Cliente> clientes = clienteRepository.findAll(); // Obtiene todos los clientes del repositorio
+        log.info("Obteniendo clientes");
+        List<Cliente> clientes = clienteRepository.findAll();
         List<ClienteDTO> clientesDTO = new ArrayList<>();
 
         if(!clientes.isEmpty()){
             for (Cliente cliente : clientes) {
+                log.debug("Listando clientes");
                 if (cliente instanceof ClienteEstandar) {
                     clientesDTO.add(clienteMapper.toClienteEstandarDTO((ClienteEstandar) cliente));
                 } else if (cliente instanceof ClientePremium) {
                     clientesDTO.add(clienteMapper.toClientePremiunDTO((ClientePremium) cliente));
                 }
+                log.info("Proceso completado con exito");
             }
         }else{
+            log.error("Proceso interrumpido");
             throw new NegocioException("No hay ningún cliente registrado");
         }
         return clientesDTO;
