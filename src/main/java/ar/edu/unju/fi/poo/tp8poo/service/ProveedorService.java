@@ -32,6 +32,7 @@ public class ProveedorService {
      */
     public ProveedorDTO crearProveedor(ProveedorDTO proveedorDTO) {
         log.debug("Creando un nuevo proveedor: {}", proveedorDTO);
+        proveedorDTO.setEstado(true);
         Proveedor proveedor = proveedorMapper.toProveedor(proveedorDTO);
         Proveedor proveedorGuardado = proveedorRepository.save(proveedor);
         log.info("Proveedor creado exitosamente con ID: {}", proveedorGuardado.getId());
