@@ -46,4 +46,8 @@ public interface ClienteMapper {
         return null;
     }
 
+    List<ClienteDTO> toClienteDtoList(List<Cliente> clienteList);
+
+    List<Cliente> toClienteEntityList(List<ClienteDTO> clienteDTOList);
+
 }
