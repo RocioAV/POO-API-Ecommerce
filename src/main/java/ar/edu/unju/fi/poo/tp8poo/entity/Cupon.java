@@ -20,7 +20,7 @@ public class Cupon {
 		@Column(name="FECHA_EXPIRACION")
 		private LocalDate fechaExpiracion;
 
-		@Column(name="POERCENTAJE_DESCUENTO")
+		@Column(name="PORCENTAJE_DESCUENTO")
 		private double porcentajeDescuento;
 
 
