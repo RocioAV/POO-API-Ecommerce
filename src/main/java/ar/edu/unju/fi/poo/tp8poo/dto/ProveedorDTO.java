@@ -20,6 +20,6 @@ public class ProveedorDTO {
 
     private String telefono;
 
-    private boolean estado = true;
+    private boolean estado;
 
 }
