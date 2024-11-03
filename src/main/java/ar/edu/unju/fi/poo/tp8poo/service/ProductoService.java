@@ -33,7 +33,7 @@ public class ProductoService {
     /**
      * Verifica que el producto tenga un proveedor asignado.
      *
-     * @param productoDTO El objeto {@link ProductoDTO} a validar.
+     * @param productoDTO El objeto  ProductoDTO a validar.
      * @throws IllegalArgumentException si el proveedor no está asignado.
      */
     private void validarProveedor(ProductoDTO productoDTO) {
@@ -89,22 +89,12 @@ public class ProductoService {
         return productoMapper.toProductoDTO(updatedProducto);
     }
 
-    /**
-     * Elimina un producto por su ID.
-     *
-     * @param id El ID del producto a eliminar.
-     */
-    public void deleteProducto(Long id) {
-        log.info("Eliminando producto con ID: {}", id);
-        productoRepository.deleteById(id);
-        log.info("Producto eliminado con éxito");
-    }
 
     /**
      * Realiza un borrado lógico de un producto, cambiando su estado a false.
      *
      * @param id El ID del producto a eliminar lógicamente.
-     * @return
+     * @return ProductoDTO devuelve el producto eliminado (logicamente)
      * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
      */
     public ProductoDTO deleteProductoLogico(Long id) {
