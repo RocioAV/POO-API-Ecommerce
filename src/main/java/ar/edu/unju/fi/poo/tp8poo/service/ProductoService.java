@@ -33,7 +33,7 @@ public class ProductoService {
     /**
      * Verifica que el producto tenga un proveedor asignado.
      *
-     * @param productoDTO El objeto {@link ProductoDTO} a validar.
+     * @param productoDTO El objeto  ProductoDTO a validar.
      * @throws IllegalArgumentException si el proveedor no está asignado.
      */
     private void validarProveedor(ProductoDTO productoDTO) {
@@ -56,6 +56,7 @@ public class ProductoService {
         Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
+        producto.setEstado(EstadoProducto.DISPONIBLE.getEstado());
         Producto savedProducto = productoRepository.save(producto);
         log.info("Producto creado con éxito: ID={}, Nombre={}", savedProducto.getId(), savedProducto.getNombre());
         return productoMapper.toProductoDTO(savedProducto);
@@ -88,24 +89,15 @@ public class ProductoService {
         return productoMapper.toProductoDTO(updatedProducto);
     }
 
-    /**
-     * Elimina un producto por su ID.
-     *
-     * @param id El ID del producto a eliminar.
-     */
-    public void deleteProducto(Long id) {
-        log.info("Eliminando producto con ID: {}", id);
-        productoRepository.deleteById(id);
-        log.info("Producto eliminado con éxito");
-    }
 
     /**
      * Realiza un borrado lógico de un producto, cambiando su estado a false.
      *
      * @param id El ID del producto a eliminar lógicamente.
+     * @return ProductoDTO devuelve el producto eliminado (logicamente)
      * @throws EntityNotFoundException Si no se encuentra un producto con el ID proporcionado.
      */
-    public void deleteProductoLogico(Long id) {
+    public ProductoDTO deleteProductoLogico(Long id) {
         log.info("Realizando borrado lógico de producto con ID: {}", id);
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
@@ -113,8 +105,10 @@ public class ProductoService {
                     return new EntityNotFoundException("Producto no encontrado");
                 });
         producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
-        productoRepository.save(producto);
         log.info("Borrado lógico realizado con éxito para el producto con ID: {}", id);
+        return productoMapper.toProductoDTO(productoRepository.save(producto));
+
+
     }
 
     /**
@@ -143,7 +137,7 @@ public class ProductoService {
     public List<ProductoDTO> findAll() {
         log.info("Obteniendo todos los productos disponibles");
 
-        List<ProductoDTO> productosDTO = productoMapper.toProductoDTOList(productoRepository.findByEstado(EstadoProducto.DISPONIBLE.getEstado()));
+        List<ProductoDTO> productosDTO = productoMapper.toProductoDTOList(productoRepository.findAll());
         log.info("Productos encontrados: {}", productosDTO.size());
         return productosDTO;
 
