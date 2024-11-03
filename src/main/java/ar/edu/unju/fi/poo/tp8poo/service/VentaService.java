@@ -11,30 +11,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
 public class VentaService {
-    @Autowired
-    ClienteService clienteService;
+    private final ClienteService clienteService;
+    private final ProductoService productoService;
+    private final VentaRepository ventaRepository;
+    private final VentaMapper ventaMapper;
+    private final EmailService emailService;
+    private final DescuentoService descuentoService;
 
-    @Autowired
-    ProductoService productoService;
-
-    @Autowired
-    VentaRepository ventaRepository;
-
-    @Autowired
-    VentaMapper ventaMapper;
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    DescuentoService descuentoService;
-
+    public VentaService(ClienteService clienteService,
+                        ProductoService productoService,
+                        VentaRepository ventaRepository,
+                        VentaMapper ventaMapper,
+                        EmailService emailService,
+                        DescuentoService descuentoService) {
+        this.clienteService = clienteService;
+        this.productoService = productoService;
+        this.ventaRepository = ventaRepository;
+        this.ventaMapper = ventaMapper;
+        this.emailService = emailService;
+        this.descuentoService = descuentoService;
+    }
 
 
     /**
@@ -115,6 +121,47 @@ public class VentaService {
         return ventaMapper.toVentaDTO(ventaEntity);
     }
 
+    public List<VentaDTO> findAll(){
+        return ventaMapper.toVentaDTOList(ventaRepository.findAll());
+    }
 
+    public List<VentaDTO> filtrarVentas(FiltroVentaDTO filtro) {
+        List<Venta> ventas = new ArrayList<>();
+        validarNoNulo(filtro);
+        validarFechas(filtro.getFechaDesde(), filtro.getFechaHasta());
+        if (filtro.getNombreCliente() != null) {
+            ventas.addAll(ventaRepository.findByClienteNombreContaining(filtro.getNombreCliente()));
+        }
+        if (filtro.getIdCliente() != null) {
+            ventas.addAll(ventaRepository.findByClienteId(filtro.getIdCliente()));
+        }
+        if (filtro.getFechaDesde() != null && filtro.getFechaHasta() != null) {
+            LocalDateTime fechaInicio = LocalDate.parse(filtro.getFechaDesde()).atStartOfDay();
+            LocalDateTime fechaFin = LocalDate.parse(filtro.getFechaHasta()).atTime(23, 59, 59);
+            ventas.addAll(ventaRepository.findByFechaYHoraBetween(fechaInicio, fechaFin));
+        }
+
+        return ventaMapper.toVentaDTOList(ventas);
+    }
+    private void validarFechas(String fechaDesde, String fechaHasta) throws NegocioException {
+        if (fechaDesde == null || fechaHasta == null) {
+            throw new NegocioException("Ambas fechas deben estar presentes para realizar el filtro.");
+        }
+        try {
+            LocalDate fechaInicio = LocalDate.parse(fechaDesde);
+            LocalDate fechaFin = LocalDate.parse(fechaHasta);
+            if (fechaInicio.isAfter(fechaFin)) {
+                throw new NegocioException("La fecha de inicio no puede ser posterior a la fecha de fin.");
+            }
+        } catch (DateTimeParseException e) {
+            throw new NegocioException("Formato de fecha inválido. Debe ser YYYY-MM-DD.");
+        }
+    }
+
+    private void validarNoNulo(FiltroVentaDTO filtro){
+        if (filtro.getNombreCliente() == null && filtro.getFechaDesde() == null && filtro.getFechaHasta() == null && filtro.getIdCliente()==null) {
+            throw new NegocioException("Todos los filtros no deben ser nulos");
+        }
+    }
 
 }
