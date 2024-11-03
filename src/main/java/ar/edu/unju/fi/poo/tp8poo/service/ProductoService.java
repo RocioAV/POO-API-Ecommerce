@@ -56,6 +56,7 @@ public class ProductoService {
         Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
+        producto.setEstado(EstadoProducto.DISPONIBLE.getEstado());
         Producto savedProducto = productoRepository.save(producto);
         log.info("Producto creado con éxito: ID={}, Nombre={}", savedProducto.getId(), savedProducto.getNombre());
         return productoMapper.toProductoDTO(savedProducto);
