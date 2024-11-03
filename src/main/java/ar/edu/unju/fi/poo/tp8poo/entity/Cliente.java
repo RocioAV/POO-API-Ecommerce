@@ -26,10 +26,10 @@ public abstract class Cliente {
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
-	 	@Column(length = 10 )
+	 	@Column(length = 25)
 	    private String nombre;
 
-	 	@Column(length= 10 )
+	 	@Column(length= 25)
 	    private String apellido;
 
 	 	@Column(unique=true,  length= 50)
