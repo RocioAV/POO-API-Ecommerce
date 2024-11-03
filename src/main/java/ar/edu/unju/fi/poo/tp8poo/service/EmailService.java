@@ -47,7 +47,7 @@ public class EmailService {
              */
             String htmlContent = htmlTemplate
                     .replace("[[${fechaYHora}]]", venta.getFechaYHora())
-                    .replace("[[${cliente.foto}]]", venta.getCliente().getFoto())
+//                    .replace("[[${cliente.foto}]]", venta.getCliente().getFoto())
                     .replace("[[${cliente.nombre}]]", venta.getCliente().getNombre())
                     .replace("[[${cliente.apellido}]]", venta.getCliente().getApellido())
                     .replace("[[${cliente.email}]]", venta.getCliente().getEmail())
