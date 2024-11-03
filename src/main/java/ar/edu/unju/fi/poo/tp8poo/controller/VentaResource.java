@@ -50,12 +50,18 @@ public class VentaResource {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> agregarVenta(@RequestBody VentaDTO ventaDTO) {
+    public ResponseEntity<?> agregarVenta(@RequestParam Long idProducto,
+                                          @RequestParam Long idCliente,
+                                          @RequestParam String formaPago) {
         log.info("/api/v1/venta/create");
         Map<String, Object> response = new HashMap<>();
+        if (idProducto == null || idCliente == null || formaPago == null) {
+            log.error("Faltan parámetros obligatorios");
+            response.put("mensaje", "Todos los parámetros son obligatorios y no pueden ser nulos.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         try{
-            VentaDTO venta= ventaService.crearVenta(ventaDTO.getProducto().getId(),ventaDTO.getCliente().getId(),ventaDTO.getFormaPago());
-            response.put("venta", venta);
+            response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago));
             response.put("mensaje", "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }catch (NegocioException e) {
@@ -77,7 +83,7 @@ public class VentaResource {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<?> filtrarVentas(@RequestBody FiltroVentaDTO filtroDTO){
+    public ResponseEntity<?> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
         log.info("/api/v1/venta/filter");
         Map<String, Object> response = new HashMap<>();
         try{
