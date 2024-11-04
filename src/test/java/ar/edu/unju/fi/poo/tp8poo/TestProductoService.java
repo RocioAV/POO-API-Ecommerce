@@ -41,27 +41,27 @@ import static org.junit.jupiter.api.Assertions.*;
         productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
        proveedorDTO= proveedorService.crearProveedor(proveedorDTO);
     }
-    private void setUpProducto(String codigo, String nombre, String descripcion, Double precio, Integer cantidad,MultipartFile multipartFile) {
+    private void setUpProducto(String codigo, String nombre, String descripcion, Double precio, Integer cantidad) {
         productoDTO.setCodigo(codigo);
         productoDTO.setNombre(nombre);
         productoDTO.setDescripcion(descripcion);
         productoDTO.setPrecio(precio);
         productoDTO.setCantidad(cantidad);
-        productoDTO.setFile(multipartFile);
         productoDTO.setIdProveedor(proveedorDTO.getId());
     }
 
     @Test
      void testCreateProductoCorrectoConImagem() throws IOException {
         multipartFile= TestUtils.generarMultipartFile(rutaArchivo1);
-        setUpProducto("PROD001", "Producto 1", "Descripción del producto 1", 100.0, 10,multipartFile);
+        setUpProducto("PROD001", "Producto 1", "Descripción del producto 1", 100.0, 10);
         ProductoDTO productoCreado = productoService.createProducto(productoDTO);
+        productoService.subirImagenProducto(productoCreado.getId(),multipartFile);
         assertEquals("PROD001", productoCreado.getCodigo());
     }
 
     @Test
      void testCreateProductoConProveedorInexistente() {
-        setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5,null);
+        setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5);
         productoDTO.setIdProveedor(8L);
 
         Exception exception = assertThrows(NegocioException.class, () -> productoService.createProducto(productoDTO));
@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
      void testDeleteLogicoProducto() {
-        setUpProducto("PROD008","Producto 3","Descripción del producto 3",150.0,20,null);
+        setUpProducto("PROD008","Producto 3","Descripción del producto 3",150.0,20);
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
         productoService.deleteProductoLogico(createdProducto.getId());
@@ -83,10 +83,9 @@ import static org.junit.jupiter.api.Assertions.*;
     @Test
      void testUpdateProducto() throws IOException {
         multipartFile= TestUtils.generarMultipartFile(rutaArchivo1);
-        setUpProducto("PROD003","Producto 4","Descripción del producto 4",180.0,15,multipartFile);
-
+        setUpProducto("PROD003","Producto 4","Descripción del producto 4",180.0,15);
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
-
+        productoService.subirImagenProducto(createdProducto.getId(),multipartFile);
         createdProducto.setNombre("Producto Modificado");
         createdProducto.setDescripcion("Descripción modificada");
 
@@ -98,7 +97,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
      void testFindByCodigo() {
-        setUpProducto("PROD005","Producto 5","Descripción del producto 5",500.0,50,null);
+        setUpProducto("PROD005","Producto 5","Descripción del producto 5",500.0,50);
 
         productoService.createProducto(productoDTO);
 
@@ -110,7 +109,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
      void testFindByNombre() {
-        setUpProducto("PROD006","Producto 6","Descripción del producto 6",650.0,65,null);
+        setUpProducto("PROD006","Producto 6","Descripción del producto 6",650.0,65);
         productoService.createProducto(productoDTO);
         List<ProductoDTO> result = productoService.findByNombre("Producto 6");
         assertNotNull(result);
@@ -120,7 +119,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
      void testFindByDescripcion() {
-        setUpProducto("PROD007","Producto 7","Descripción del producto 7",700.0,70,null);
+        setUpProducto("PROD007","Producto 7","Descripción del producto 7",700.0,70);
 
         productoService.createProducto(productoDTO);
 

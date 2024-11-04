@@ -19,13 +19,24 @@ public class FirebaseConfig {
 			+ "/src/main/resources/tp8poo2024-firebase-adminsdk-2htn6-5dae6d3691.json";
 
 	@Bean
-	FirebaseApp firebaseApp() throws IOException {
-		FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);
+	FirebaseApp firebaseApp()  {
+		try {
+			if (FirebaseApp.getApps().isEmpty()) {
+				FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);
 
-		@SuppressWarnings("deprecation")
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(BUCKET_NAME).build();
+				@SuppressWarnings("deprecation")
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(BUCKET_NAME).build();
 
-		return FirebaseApp.initializeApp(options);
+				return FirebaseApp.initializeApp(options);
+			}
+			else {
+				return FirebaseApp.getInstance();
+			}
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Fallo con la inicializacion de Firebase");
+		}
 	}
+
 }

@@ -3,12 +3,16 @@ package ar.edu.unju.fi.poo.tp8poo.controller;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +24,9 @@ import java.util.Map;
 public class ProductoResource {
     private final ProductoService productoService;
 
-    public ProductoResource(ProductoService productoService) {this.productoService = productoService;}
+
+    public ProductoResource(ProductoService productoService) {this.productoService = productoService;
+    }
 
     @GetMapping("/list")
     public ResponseEntity<?> getAllProductos() {
@@ -70,13 +76,16 @@ public class ProductoResource {
 
     }
 
+
     @PostMapping("/create")
-    public ResponseEntity<?> createProducto(@RequestBody ProductoDTO productoDTO) {
+    @Operation(summary = "Crea un producto", description = "Crea un producto nuevo con datos y un archivo opcional")
+    public ResponseEntity<?> createProducto(
+            @Parameter(description = "Producto DTO", required = true)
+            @RequestBody ProductoDTO productoDTO) {
         log.info("/api/v1/producto/create");
         Map<String, Object> response = new HashMap<>();
         try{
-            ProductoDTO createdProducto = productoService.createProducto(productoDTO);
-            response.put("producto", createdProducto);
+            response.put("producto", productoService.createProducto(productoDTO));
             response.put("mensaje", "Producto creado con éxito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NegocioException e) {
@@ -142,6 +151,25 @@ public class ProductoResource {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 
+    }
+
+    @PostMapping(value= "/upload/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadFotoProducto (@PathVariable Long id, @RequestParam("file") final MultipartFile file) {
+        log.info("/api/v1/producto/upload/{id}/file", id);
+        Map<String, Object> response = new HashMap<>();
+        try{
+            response.put("producto",productoService.subirImagenProducto(id,file));
+            response.put("mensaje", "Imagen actualizada con exito:");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (EntityNotFoundException e){
+            log.error("No se encontro el producto con ID [{}] para eliminar", id);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }catch (Exception e){
+            log.error("Error interno en el servidor");
+            response.put("mensaje", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 

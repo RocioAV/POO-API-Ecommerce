@@ -12,6 +12,7 @@ import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -62,12 +63,7 @@ public class ProductoService {
     public ProductoDTO createProducto(ProductoDTO productoDTO) {
         log.info("Creando producto: Nombre={}", productoDTO.getNombre());
         validarProveedor(productoDTO);
-        if(productoDTO.getFile()==null){
-            productoDTO.setImagen(DEFAULT_IMAGE_URL);
-        }else{
-            String url= gestorDeImagenesUtil.subirImagen(productoDTO.getFile(), FOLDER_NAME);
-            productoDTO.setImagen(url);
-        }
+        productoDTO.setImagen(DEFAULT_IMAGE_URL);
         Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
@@ -89,7 +85,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto no encontrado con ID: {}", id);
-                    return new EntityNotFoundException("Producto no encontrado");
+                    return new EntityNotFoundException("Producto  no encontrado");
                 });
         producto.setCodigo(productoDTO.getCodigo());
         producto.setNombre(productoDTO.getNombre());
@@ -97,6 +93,9 @@ public class ProductoService {
         producto.setPrecio(productoDTO.getPrecio());
         producto.setCantidad(productoDTO.getCantidad());
         producto.setEstado(productoDTO.getEstado());
+        if(productoDTO.getImagen()!=null){
+            producto.setImagen(productoDTO.getImagen());
+        }
         producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
 
         Producto updatedProducto = productoRepository.save(producto);
@@ -242,6 +241,15 @@ public class ProductoService {
         if(producto.getCantidad()==0){
             deleteProductoLogico(producto.getId());
         }
+
+    }
+
+    public ProductoDTO subirImagenProducto(Long id, MultipartFile file){
+        log.info("Subiendo imagen de producto");
+            ProductoDTO producto= findById(id);
+            String url= gestorDeImagenesUtil.subirImagen(file,FOLDER_NAME);
+            producto.setImagen(url);
+            return editProducto(producto.getId(), producto);
 
     }
 
