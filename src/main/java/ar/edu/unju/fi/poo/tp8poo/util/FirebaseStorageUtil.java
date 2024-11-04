@@ -57,7 +57,7 @@ public class FirebaseStorageUtil {
     /**
      * Borrar una imagen de la nube
      * 
-     * @param URL de la imagen que se va a borrar
+     * @param url de la imagen que se va a borrar
      * @param folder nombre de la carpeta donde esta la imagen
      */
     public void eliminarArchivo(String url, String folder) {
@@ -74,7 +74,7 @@ public class FirebaseStorageUtil {
     /**
      * Obtiene el nombre del archivo de una url
      * 
-     * @param url
+     * @param url del archivo para obtener el nombre de firebase
      * @return nombre del archivo
      */
     private String obtenerNombreArchivoDesdeURL(String url) {
