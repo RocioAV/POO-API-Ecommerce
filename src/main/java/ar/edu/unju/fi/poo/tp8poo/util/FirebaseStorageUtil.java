@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class FirebaseStorageUtil {
 
-	private String BUCKET_NAME = "tp8poo2024.firebasestorage.app";
+	private static final String BUCKET_NAME = "tp8poo2024.firebasestorage.app";
 
     private final Storage storage;
 
@@ -43,8 +43,9 @@ public class FirebaseStorageUtil {
 	                .build();
 	        
 	        storage.create(blobInfo, file.getInputStream());
-	        
-	        String downloadURL = String.format("https://storage.googleapis.com/%s/%s", BUCKET_NAME, fileName);;
+
+            String downloadURL = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+                    BUCKET_NAME, fileName.replace("/", "%2F"));
 	        log.info("SUBIDA de archivo {} con URL: {}", fileName, downloadURL);
 	        return downloadURL;
         } catch (IOException e) {
@@ -56,11 +57,11 @@ public class FirebaseStorageUtil {
     /**
      * Borrar una imagen de la nube
      * 
-     * @param URL de la imagen que se va a borrar
+     * @param url de la imagen que se va a borrar
      * @param folder nombre de la carpeta donde esta la imagen
      */
-    public void eliminarArchivo(String URL, String folder) {
-        String fileName = folder + "/" + obtenerNombreArchivoDesdeURL(URL);
+    public void eliminarArchivo(String url, String folder) {
+        String fileName = folder + "/" + obtenerNombreArchivoDesdeURL(url);
         BlobId blobId = BlobId.of(BUCKET_NAME, fileName);
         boolean deleted = storage.delete(blobId);
         if (deleted) {
@@ -73,7 +74,7 @@ public class FirebaseStorageUtil {
     /**
      * Obtiene el nombre del archivo de una url
      * 
-     * @param url
+     * @param url del archivo para obtener el nombre de firebase
      * @return nombre del archivo
      */
     private String obtenerNombreArchivoDesdeURL(String url) {

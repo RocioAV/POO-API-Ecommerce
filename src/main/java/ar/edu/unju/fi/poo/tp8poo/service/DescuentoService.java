@@ -38,7 +38,7 @@ public class DescuentoService {
                 return precioProducto;
             }else{
                 Double descuento=calcularDescuento(clientePremiumDTO.getPorcentajeDescuento(),precioProducto);
-                log.debug("Descuento aplicado: {}, Precio final: {}", descuento, precioProducto - descuento);
+                log.debug("Descuento  aplicado: {}, Precio final: {}", descuento, precioProducto - descuento);
                 return precioProducto-descuento;
             }
         }else{

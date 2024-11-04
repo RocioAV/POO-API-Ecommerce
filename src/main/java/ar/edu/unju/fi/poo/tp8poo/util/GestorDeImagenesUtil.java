@@ -1,6 +1,5 @@
 package ar.edu.unju.fi.poo.tp8poo.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,9 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class GestorDeImagenesUtil {
 
-	@Autowired
-	private FirebaseStorageUtil firebaseStorageUtil;
-	
+	private final FirebaseStorageUtil firebaseStorageUtil;
+
+	public GestorDeImagenesUtil(FirebaseStorageUtil firebaseStorageUtil) {
+		this.firebaseStorageUtil = firebaseStorageUtil;
+	}
+
 	/**
 	 * Subir imagen y obtener su URL.
 	 * 
@@ -36,30 +38,31 @@ public class GestorDeImagenesUtil {
 	 * se desea borrar la imagen actual o mantener la misma
 	 * 
 	 * @param imagen a subir
-	 * @param URLAnterior URL de la anterior imagen
+	 * @param urlAnterior URL de la anterior imagen
 	 * @param folderName carpeta donde se guardara
 	 * @param eliminarFoto que indica la eliminacion de la foto o no
 	 * @return URL de la imagen subida o de la anterior
 	 * @throws RuntimeException si hay fallo con la subida o de imagen
 	 */
-	public String actualizarImagen(MultipartFile imagen, String URLAnterior, String folderName, 
+	public String actualizarImagen(MultipartFile imagen, String urlAnterior, String folderName,
 			boolean eliminarFoto) {
-		String URL = null;
+		String url = null;
 		if (imagen != null && !imagen.isEmpty()) {
-			// se ha subido una nueva imagen
-			URL = this.subirImagen(imagen, folderName);
-			if (URLAnterior != null) {
-				firebaseStorageUtil.eliminarArchivo(URLAnterior, folderName);
+			url = this.subirImagen(imagen, folderName);
+			if (urlAnterior != null) {
+				firebaseStorageUtil.eliminarArchivo(urlAnterior, folderName);
 			}
 		} else {
 			// no se ha subido una imagen (posible eliminación o no se ha cambiado la imagen)
 			if (eliminarFoto) {
-				firebaseStorageUtil.eliminarArchivo(URLAnterior, folderName);
+				firebaseStorageUtil.eliminarArchivo(urlAnterior, folderName);
 			} else {
-				URL = URLAnterior;
+				url = urlAnterior;
 			}
 		}
-		return URL;
+		return url;
 	}
+
+
 
 }

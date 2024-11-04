@@ -1,7 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProveedorMapper;
@@ -18,11 +17,14 @@ import java.util.List;
 @Service
 public class ProveedorService {
 
-    @Autowired
-    private ProveedorRepository proveedorRepository;
+    private final ProveedorRepository proveedorRepository;
+    private final ProveedorMapper proveedorMapper;
 
-    @Autowired
-    private ProveedorMapper proveedorMapper;
+    public ProveedorService(ProveedorRepository proveedorRepository,
+                            ProveedorMapper proveedorMapper) {
+        this.proveedorRepository = proveedorRepository;
+        this.proveedorMapper = proveedorMapper;
+    }
 
     /**
      * Crea un nuevo proveedor a partir de un objeto ProveedorDTO.

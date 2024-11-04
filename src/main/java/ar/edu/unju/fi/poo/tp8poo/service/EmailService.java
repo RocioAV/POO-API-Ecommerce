@@ -19,12 +19,15 @@ import java.nio.file.Paths;
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+    private final TemplateEngine  templateEngine;
 
     @Autowired
-    private TemplateEngine templateEngine;
-
+    public EmailService(JavaMailSender mailSender,
+                        TemplateEngine  templateEngine) {
+        this.mailSender = mailSender;
+        this.templateEngine = templateEngine;
+    }
     /**
      * Envía la factura por email al cliente.
      *
@@ -47,7 +50,7 @@ public class EmailService {
              */
             String htmlContent = htmlTemplate
                     .replace("[[${fechaYHora}]]", venta.getFechaYHora())
-//                    .replace("[[${cliente.foto}]]", venta.getCliente().getFoto())
+                    .replace("[[${cliente.foto}]]", venta.getCliente().getFoto())
                     .replace("[[${cliente.nombre}]]", venta.getCliente().getNombre())
                     .replace("[[${cliente.apellido}]]", venta.getCliente().getApellido())
                     .replace("[[${cliente.email}]]", venta.getCliente().getEmail())
