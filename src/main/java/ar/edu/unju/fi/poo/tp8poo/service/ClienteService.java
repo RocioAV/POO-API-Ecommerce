@@ -16,13 +16,10 @@ import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,24 +28,29 @@ import java.util.Optional;
 @Slf4j
 @Component
 public class ClienteService {
-	@Autowired
-	ClienteRepository clienteRepository;
-
-    @Autowired
-    ClienteMapper clienteMapper;
-    @Autowired
-    CuponMapper cuponMapper;
-    @Autowired
-   	private GestorDeImagenesUtil gestorDeImagenesUtil;
+    private final ClienteRepository clienteRepository;
+    private final ClienteMapper clienteMapper;
+    private final CuponMapper cuponMapper;
+    private final GestorDeImagenesUtil gestorDeImagenesUtil;
+    public ClienteService(ClienteRepository clienteRepository,
+                          ClienteMapper clienteMapper,
+                          CuponMapper cuponMapper,
+                          GestorDeImagenesUtil gestorDeImagenesUtil) {
+        this.clienteRepository = clienteRepository;
+        this.clienteMapper = clienteMapper;
+        this.cuponMapper = cuponMapper;
+        this.gestorDeImagenesUtil = gestorDeImagenesUtil;
+    }
    	
-   	private final String FOLDER_NAME = "avatars";
+   	private static final String FOLDER_NAME = "avatars";
+    private static final String DEFAULT_IMAGE_URL = "https://firebasestorage.googleapis.com/v0/b/tp8poo2024.firebasestorage.app/o/avatars%2Fdefault.webp?alt=media&token=8a77e93a-cea1-4a1a-bfb0-36c0e8bc433d";
 
 
 
     /**
      * Valida si el nuevo clienteEditadoDTO cambio de email para volver a validarlo
-     * @param cliente
-     * @param clienteEditadoDTO
+     * @param cliente cliente de la base de datos
+     * @param clienteEditadoDTO cliente editado que llega del body
      */
     private void validarEmailParaEdicion(Cliente cliente, ClienteDTO clienteEditadoDTO){
         if (!cliente.getEmail().equals(clienteEditadoDTO.getEmail())) {
@@ -58,8 +60,8 @@ public class ClienteService {
 
     /**
      * Valida si el nuevo clienteEditadoDTO cambio de celular para volver a validarlo
-     * @param cliente
-     * @param clienteEditadoDTO
+     * @param cliente cliente de la base de datos
+     * @param clienteEditadoDTO cliente que llega del body con cambios
      */
     private void validarCelularParaEdicion(Cliente cliente, ClienteDTO clienteEditadoDTO){
         if (!cliente.getCelular().equals(clienteEditadoDTO.getCelular())) {
@@ -102,9 +104,13 @@ public class ClienteService {
      */
     public  ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
     	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
-    	
-    	String URL = this.subirImagen(newClienteEstandar.getImagen());		
-		newClienteEstandar.setFoto(URL);
+
+        if(newClienteEstandar.getImagen()==null || !(newClienteEstandar.getImagen().isEmpty())){
+            newClienteEstandar.setFoto(DEFAULT_IMAGE_URL);
+        }else{
+            String url = gestorDeImagenesUtil.subirImagen(newClienteEstandar.getImagen(),FOLDER_NAME);
+            newClienteEstandar.setFoto(url);
+        }
     	
         ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
@@ -131,10 +137,10 @@ public class ClienteService {
     	log.info("Buscando cliente con id: {}", id);
 		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
-	            		log.error("Error al encontrar el cliente: {}", id);
+	            		log.error("ERROR al encontrar el cliente: {}", id);
 	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
-		log.info("Cliente encontrado con éxito: {}", id);
+		log.info(" Cliente encontrado con éxito: {}", id);
 		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
 	}
 
@@ -150,7 +156,7 @@ public class ClienteService {
     	log.info("Editando los datos del cliente: {}",dto.getNombre());
     	ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
-	            		log.error("Error al encontrar el cliente: {}", id);
+	            		log.error(" Error al encontrar el cliente: {}", id);
 	            		return new NegocioException("Cliente no encontrado con ID: " + id);
 	            		});
         validarEmailParaEdicion(clienteExistente,dto);
@@ -165,7 +171,7 @@ public class ClienteService {
         clienteExistente.setCelular(dto.getCelular());
         log.debug("Cambiando a nuevo celular {}", dto.getCelular());
         clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
-        log.debug("Cambiando a nuevo email: {}", dto.getEstado());
+        log.debug("Cambiando a nuevo estado: {}", dto.getEstado());
         if (dto.getCupon() != null) {
             Cupon cupon = cuponMapper.toCuponEntity(dto.getCupon());
             clienteExistente.setCupon(cupon);
@@ -181,22 +187,7 @@ public class ClienteService {
 
     }
 
-    /**
-     * Elimina un cliente estándar por su ID.
-     *
-     * @param id ID del cliente a eliminar.
-     * @throws NegocioException si no se encuentra el cliente.
-     */
-    public void eliminarClienteEstandar(Long id) {
 
-    	ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-	            .orElseThrow(() -> {
-	            		log.error("Error al encontrar el cliente: {}", id);
-	            		return new NegocioException("Cliente no encontrado con ID: " + id);
-	            		});
-
-        clienteRepository.deleteById(clienteEstandar.getId());
-    }
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
@@ -210,9 +201,12 @@ public class ClienteService {
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
 
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
-    	
-    	String URL = this.subirImagen(newClientePremium.getImagen());		
-		newClientePremium.setFoto(URL);
+        if(newClientePremium.getImagen()==null){
+            newClientePremium.setFoto(DEFAULT_IMAGE_URL);
+        }else{
+            String url = gestorDeImagenesUtil.subirImagen(newClientePremium.getImagen(),FOLDER_NAME);
+            newClientePremium.setFoto(url);
+        }
 		
         ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
 
@@ -261,12 +255,7 @@ public class ClienteService {
         log.info("Datos del cliente modifado con éxito");
         return clienteMapper.toClientePremiunDTO(clienteExistente);
     }
-    
-    public void eliminarClientePremium(Long id) {
-        ClientePremium clientePremium=(ClientePremium) clienteRepository.findById(id)
-	            .orElseThrow(() -> new NegocioException("Cliente no encontrado con ID: " + id));
-        clienteRepository.deleteById(clientePremium.getId());
-    }
+
     
     public ClientePremiumDTO getClientePremium(Long id){
     	log.info("Buscando cliente con id: {}", id);
@@ -314,8 +303,7 @@ public class ClienteService {
         List<Cliente> clientes = clienteRepository.findAll();
 
         if(!clientes.isEmpty()){
-            List<ClienteDTO> clientesDTO = clienteMapper.toClienteDtoList(clientes);
-            return clientesDTO;
+            return clienteMapper.toClienteDtoList(clientes);
         }else{
             log.error("Proceso interrumpido");
             throw new NegocioException("No hay ningún cliente registrado");
@@ -337,12 +325,6 @@ public class ClienteService {
         }
     }
     
-    private String subirImagen(MultipartFile imagen) {
-		String URL = null;
-		if (imagen != null && !imagen.isEmpty()) {
-			URL = gestorDeImagenesUtil.subirImagen(imagen, FOLDER_NAME);
-		}
-		return URL;
-	}
+
 
 }
