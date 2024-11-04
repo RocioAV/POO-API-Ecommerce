@@ -5,6 +5,9 @@ import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/producto")
 @Slf4j
+@Tag(name = "Gestion de Producto", description = "Operaciones CRUD entre otras relacionadas a Producto")
 public class ProductoResource {
     private final ProductoService productoService;
 
@@ -29,6 +33,15 @@ public class ProductoResource {
     }
 
     @GetMapping("/list")
+    @Operation(
+            summary = "Obtener todos los productos",
+            description = "Devuelve una lista de todos los productos",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Productos obtenidos con éxito"),
+                    @ApiResponse(responseCode = "204", description = "No hay productos disponibles"),
+                    @ApiResponse(responseCode = "500", description = "Error de base de datos al obtener el producto")
+            }
+    )
     public ResponseEntity<?> getAllProductos() {
         log.info("/api/v1/producto/list");
         Map<String, Object> response = new HashMap<>();
@@ -50,7 +63,18 @@ public class ProductoResource {
 
     }
 
+
     @GetMapping("/get/{id}")
+    @Operation(
+            summary = "Obtener producto por ID",
+            description = "Devuelve un producto específico por su ID",
+            parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Producto obtenido con éxito"),
+                    @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Error de base de datos al obtener el producto")
+            }
+    )
     public ResponseEntity<?> getProductoById(@PathVariable Long id) {
         log.info("/api/v1/producto/get/{id}", id);
         Map<String, Object> response = new HashMap<>();
@@ -77,8 +101,17 @@ public class ProductoResource {
     }
 
 
+
     @PostMapping("/create")
-    @Operation(summary = "Crea un producto", description = "Crea un producto nuevo con datos y un archivo opcional")
+    @Operation(
+            summary = "Crea un producto",
+            description = "Crea un producto nuevo con datos proporcionados en el body",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Producto creado con éxito"),
+                    @ApiResponse(responseCode = "400", description = "Error en los datos enviados para crear el producto"),
+                    @ApiResponse(responseCode = "500", description = "Error de base de datos al crear el producto")
+            }
+    )
     public ResponseEntity<?> createProducto(
             @Parameter(description = "Producto DTO", required = true)
             @RequestBody ProductoDTO productoDTO) {
@@ -101,7 +134,19 @@ public class ProductoResource {
 
     }
 
+
+
     @PutMapping("/update/{id}")
+    @Operation(
+            summary = "Actualizar un producto",
+            description = "Actualiza un producto existente con el ID y datos proporcionados",
+            parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Producto actualizado con éxito"),
+                    @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Error de base de datos al actualizar el producto")
+            }
+    )
     public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody ProductoDTO productoDTO) {
         log.info("/api/v1/producto/update/{id}", id);
         Map<String, Object> response = new HashMap<>();
@@ -127,7 +172,18 @@ public class ProductoResource {
 
     }
 
+
     @DeleteMapping("/delete/{id}")
+    @Operation(
+            summary = "Eliminar un producto",
+            description = "Realiza una eliminación lógica del producto especificado por ID",
+            parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Producto eliminado con éxito"),
+                    @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Error de base de datos al eliminar el producto", content = @Content)
+            }
+    )
     public ResponseEntity<?> deleteProducto(@PathVariable Long id) {
         log.info("/api/v1/producto/delete/{id}", id);
         Map<String, Object> response = new HashMap<>();
@@ -154,6 +210,16 @@ public class ProductoResource {
     }
 
     @PostMapping(value= "/upload/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Subir imagen de un producto",
+            description = "Carga una imagen para un producto específico por ID",
+            parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Imagen actualizada con éxito"),
+                    @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor al actualizar la imagen")
+            }
+    )
     public ResponseEntity<?> uploadFotoProducto (@PathVariable Long id, @RequestParam("file") final MultipartFile file) {
         log.info("/api/v1/producto/upload/{id}/file", id);
         Map<String, Object> response = new HashMap<>();
