@@ -81,7 +81,7 @@ import static org.junit.jupiter.api.Assertions.*;
         proveedorDTO= new ProveedorDTO(null,"proveedor1","proveedor@gmail.com","388453213",true);
         proveedorDTO=proveedorService.crearProveedor(proveedorDTO);
 
-        productoDTO = new ProductoDTO(null,"PROD01","producto 1","descripcion prod1", 100.0,5,"url", EstadoProducto.DISPONIBLE.getEstado(),proveedorDTO.getId());
+        productoDTO = new ProductoDTO(null,"PROD01","producto 1","descripcion prod1", 100.0,5,"url",null, EstadoProducto.DISPONIBLE.getEstado(),proveedorDTO.getId());
 
         productoDTO=productoService.createProducto(productoDTO);
 
