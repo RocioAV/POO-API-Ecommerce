@@ -12,6 +12,7 @@ import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -97,6 +98,9 @@ public class ProductoService {
         producto.setPrecio(productoDTO.getPrecio());
         producto.setCantidad(productoDTO.getCantidad());
         producto.setEstado(productoDTO.getEstado());
+        if(productoDTO.getImagen()!=null){
+            producto.setImagen(productoDTO.getImagen());
+        }
         producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
 
         Producto updatedProducto = productoRepository.save(producto);
@@ -242,6 +246,15 @@ public class ProductoService {
         if(producto.getCantidad()==0){
             deleteProductoLogico(producto.getId());
         }
+
+    }
+
+    public ProductoDTO subirImagenProducto(Long id, MultipartFile file){
+        log.info("Subiendo imagen de producto");
+            ProductoDTO producto= findById(id);
+            String url= gestorDeImagenesUtil.subirImagen(file,FOLDER_NAME);
+            producto.setImagen(url);
+            return editProducto(producto.getId(), producto);
 
     }
 
