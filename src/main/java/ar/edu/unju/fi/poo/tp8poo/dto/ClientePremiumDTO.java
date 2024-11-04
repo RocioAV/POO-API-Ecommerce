@@ -1,5 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.io.Serializable;
@@ -10,10 +11,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class ClientePremiumDTO extends ClienteDTO implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
+	@Schema(description = "Porcentaje de descuento del cliente premium", example = "15.5")
 	private Double porcentajeDescuento;
 }
