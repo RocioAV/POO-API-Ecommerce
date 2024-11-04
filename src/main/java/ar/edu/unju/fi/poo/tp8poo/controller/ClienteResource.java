@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+
 
 @SpringBootApplication
 @RestController
@@ -49,11 +49,6 @@ public class ClienteResource {
     @Operation(
             summary = "Crear cliente estándar",
             description = "Registra un nuevo cliente estándar en el sistema",
-            requestBody = @RequestBody(
-                    description = "Detalles del cliente estándar",
-                    required = true,
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClienteEstandarDTO.class))
-            ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cliente estándar creado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos")
@@ -80,11 +75,6 @@ public class ClienteResource {
     @Operation(
             summary = "Crear cliente premium",
             description = "Registra un nuevo cliente premium en el sistema",
-            requestBody = @RequestBody(
-                    description = "Detalles del cliente premium",
-                    required = true,
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClientePremiumDTO.class))
-            ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cliente premium creado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos")
@@ -137,11 +127,6 @@ public class ClienteResource {
             summary = "Actualizar cliente estándar",
             description = "Modifica los datos de un cliente estándar existente",
             parameters = @Parameter(name = "id", description = "ID del cliente estándar a actualizar", required = true),
-            requestBody = @RequestBody(
-                    description = "Datos actualizados del cliente estándar",
-                    required = true,
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClienteEstandarDTO.class))
-            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente estándar actualizado con éxito"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
@@ -175,11 +160,6 @@ public class ClienteResource {
             summary = "Actualizar cliente premium",
             description = "Modifica los datos de un cliente premium existente",
             parameters = @Parameter(name = "id", description = "ID del cliente premium a actualizar", required = true),
-            requestBody = @RequestBody(
-                    description = "Datos actualizados del cliente premium",
-                    required = true,
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ClientePremiumDTO.class))
-            ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente premium actualizado con éxito"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
