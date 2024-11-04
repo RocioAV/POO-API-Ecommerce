@@ -96,7 +96,6 @@ public class ProductoService {
         producto.setDescripcion(productoDTO.getDescripcion());
         producto.setPrecio(productoDTO.getPrecio());
         producto.setCantidad(productoDTO.getCantidad());
-        producto.setImagen(productoDTO.getImagen());
         producto.setEstado(productoDTO.getEstado());
         producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
 
