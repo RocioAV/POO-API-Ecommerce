@@ -3,6 +3,7 @@ package ar.edu.unju.fi.poo.tp8poo.dto;
 
 import lombok.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @Data
@@ -18,6 +19,7 @@ public class ProductoDTO {
     private Double precio;
     private Integer cantidad;
     private String imagen;
+    private MultipartFile file;
     private String estado;
     private Long idProveedor;
 
