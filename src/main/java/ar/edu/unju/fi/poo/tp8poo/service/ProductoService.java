@@ -63,12 +63,7 @@ public class ProductoService {
     public ProductoDTO createProducto(ProductoDTO productoDTO) {
         log.info("Creando producto: Nombre={}", productoDTO.getNombre());
         validarProveedor(productoDTO);
-        if(productoDTO.getFile()==null){
-            productoDTO.setImagen(DEFAULT_IMAGE_URL);
-        }else{
-            String url= gestorDeImagenesUtil.subirImagen(productoDTO.getFile(), FOLDER_NAME);
-            productoDTO.setImagen(url);
-        }
+        productoDTO.setImagen(DEFAULT_IMAGE_URL);
         Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
@@ -90,7 +85,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto no encontrado con ID: {}", id);
-                    return new EntityNotFoundException("Producto no encontrado");
+                    return new EntityNotFoundException("Producto  no encontrado");
                 });
         producto.setCodigo(productoDTO.getCodigo());
         producto.setNombre(productoDTO.getNombre());
