@@ -19,7 +19,7 @@ public class FirebaseConfig {
 			+ "/src/main/resources/tp8poo2024-firebase-adminsdk-2htn6-5dae6d3691.json";
 
 	@Bean
-	FirebaseApp firebaseApp() throws IOException {
+	FirebaseApp firebaseApp()  {
 		try {
 			if (FirebaseApp.getApps().isEmpty()) {
 				FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);

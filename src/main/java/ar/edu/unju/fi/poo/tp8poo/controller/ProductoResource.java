@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.attribute.standard.Media;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class ProductoResource {
     private final ProductoService productoService;
 
 
-    public ProductoResource(ProductoService productoService, ProductoDTO productoDTO) {this.productoService = productoService;
+    public ProductoResource(ProductoService productoService) {this.productoService = productoService;
     }
 
     @GetMapping("/list")
