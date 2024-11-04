@@ -20,12 +20,23 @@ public class FirebaseConfig {
 
 	@Bean
 	FirebaseApp firebaseApp() throws IOException {
-		FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);
+		try {
+			if (FirebaseApp.getApps().isEmpty()) {
+				FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);
 
-		@SuppressWarnings("deprecation")
-		FirebaseOptions options = new FirebaseOptions.Builder()
-				.setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(BUCKET_NAME).build();
+				@SuppressWarnings("deprecation")
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(BUCKET_NAME).build();
 
-		return FirebaseApp.initializeApp(options);
+				return FirebaseApp.initializeApp(options);
+			}
+			else {
+				return FirebaseApp.getInstance();
+			}
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Fallo con la inicializacion de Firebase");
+		}
 	}
+
 }
