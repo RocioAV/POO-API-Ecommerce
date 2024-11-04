@@ -18,11 +18,14 @@ import java.util.List;
 @Service
 public class ProveedorService {
 
-    @Autowired
-    private ProveedorRepository proveedorRepository;
+    private final ProveedorRepository proveedorRepository;
+    private final ProveedorMapper proveedorMapper;
 
-    @Autowired
-    private ProveedorMapper proveedorMapper;
+    public ProveedorService(ProveedorRepository proveedorRepository,
+                            ProveedorMapper proveedorMapper) {
+        this.proveedorRepository = proveedorRepository;
+        this.proveedorMapper = proveedorMapper;
+    }
 
     /**
      * Crea un nuevo proveedor a partir de un objeto ProveedorDTO.
