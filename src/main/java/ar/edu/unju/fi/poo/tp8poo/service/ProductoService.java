@@ -8,9 +8,9 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProveedorMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
+import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,17 +18,25 @@ import java.util.List;
 @Slf4j
 @Service
 public class ProductoService {
-    @Autowired
-    ProductoRepository productoRepository;
+    private final ProductoRepository productoRepository;
+    private final ProductoMapper productoMapper;
+    private final ProveedorService proveedorService;
+    private final ProveedorMapper proveedorMapper;
+    private final GestorDeImagenesUtil gestorDeImagenesUtil;
+    public ProductoService(ProductoRepository productoRepository,
+                           ProductoMapper productoMapper,
+                           ProveedorService proveedorService,
+                           ProveedorMapper proveedorMapper,
+                           GestorDeImagenesUtil gestorDeImagenesUtil) {
+        this.productoRepository = productoRepository;
+        this.productoMapper = productoMapper;
+        this.proveedorService = proveedorService;
+        this.proveedorMapper = proveedorMapper;
+        this.gestorDeImagenesUtil = gestorDeImagenesUtil;
+    }
 
-    @Autowired
-    ProductoMapper productoMapper;
-
-    @Autowired
-    ProveedorService proveedorService;
-    @Autowired
-    ProveedorMapper proveedorMapper;
-
+    private static final String FOLDER_NAME = "imagesProducto";
+    private static final String DEFAULT_IMAGE_URL = "https://firebasestorage.googleapis.com/v0/b/tp8poo2024.firebasestorage.app/o/imagesProducto%2Fproducto.webp?alt=media&token=df9db268-695f-4a94-a455-06426e67ff52";
 
     /**
      * Verifica que el producto tenga un proveedor asignado.
@@ -37,6 +45,7 @@ public class ProductoService {
      * @throws IllegalArgumentException si el proveedor no está asignado.
      */
     private void validarProveedor(ProductoDTO productoDTO) {
+
         if (productoDTO.getIdProveedor() == null) {
             log.error("El producto debe tener un proveedor.");
             throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
@@ -53,6 +62,12 @@ public class ProductoService {
     public ProductoDTO createProducto(ProductoDTO productoDTO) {
         log.info("Creando producto: Nombre={}", productoDTO.getNombre());
         validarProveedor(productoDTO);
+        if(productoDTO.getFile()==null){
+            productoDTO.setImagen(DEFAULT_IMAGE_URL);
+        }else{
+            String url= gestorDeImagenesUtil.subirImagen(productoDTO.getFile(), FOLDER_NAME);
+            productoDTO.setImagen(url);
+        }
         Proveedor proveedor= proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor()));
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
@@ -82,6 +97,7 @@ public class ProductoService {
         producto.setPrecio(productoDTO.getPrecio());
         producto.setCantidad(productoDTO.getCantidad());
         producto.setImagen(productoDTO.getImagen());
+        producto.setEstado(productoDTO.getEstado());
         producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
 
         Producto updatedProducto = productoRepository.save(producto);
@@ -101,7 +117,7 @@ public class ProductoService {
         log.info("Realizando borrado lógico de producto con ID: {}", id);
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Producto no encontrado con ID: {}", id);
+                    log.error("Producto NO  encontrado con ID: {}", id);
                     return new EntityNotFoundException("Producto no encontrado");
                 });
         producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
@@ -122,7 +138,7 @@ public class ProductoService {
         log.info("Buscando producto con ID: {}", id);
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Producto no encontrado con ID: {}", id);
+                    log.error("Producto NO encontrado con ID: {}", id);
                     return new EntityNotFoundException("Producto no encontrado");
                 });
         log.info("Producto encontrado: ID={}, Nombre={}", producto.getId(), producto.getNombre());
@@ -153,7 +169,7 @@ public class ProductoService {
         log.info("Buscando producto por código: {}", codigo);
         Producto producto = productoRepository.findByCodigoContainingIgnoreCase(codigo);
         if (producto == null) {
-            log.error("Producto no encontrado");
+            log.error("Producto NO encontrado");
             throw new EntityNotFoundException("Producto no encontrado");
         }
         log.info("Producto encontrado: ID={}, Nombre={}, Codigo={}", producto.getId(), producto.getNombre(), producto.getCodigo());
@@ -169,7 +185,7 @@ public class ProductoService {
     public List<ProductoDTO> findByNombre(String nombre) {
         log.info("Buscando productos por nombre: {}", nombre);
         List<Producto> productos = productoRepository.findByNombreContainingIgnoreCase(nombre);
-        log.info("Productos encontrados: {}", productos.size());
+        log.info("Productos encontrados : {}", productos.size());
         return productoMapper.toProductoDTOList(productos);
     }
 
@@ -186,7 +202,7 @@ public class ProductoService {
             log.error("Producto no encontrado");
             throw new EntityNotFoundException("Producto no encontrado");
         }
-        log.info("Productos encontrados: {}", productos.size());
+        log.info("Productos  encontrados: {}", productos.size());
         return productoMapper.toProductoDTOList(productos);
     }
 
@@ -206,7 +222,7 @@ public class ProductoService {
     }
 
     public void validarProductoDisponible(Long id){
-        log.info("Validando stock del producto con ID {}", id);
+        log.info("Validando disponibilidad del producto con ID {}", id);
         ProductoDTO producto= findById(id);
         if (producto.getEstado().equals(EstadoProducto.NO_DISPONIBLE.getEstado())){
             log.warn("El producto con ID {} no esta disponible", id);
