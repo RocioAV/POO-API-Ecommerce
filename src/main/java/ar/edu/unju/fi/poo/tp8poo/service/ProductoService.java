@@ -98,7 +98,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto no encontrado con ID: {}", id);
-                    return new EntityNotFoundException("Producto  no encontrado");
+                    return new NegocioException("Producto  no encontrado");
                 });
         actualizarProductoDesdeDTO(producto,productoDTO);
         Producto updatedProducto = productoRepository.save(producto);
@@ -119,7 +119,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto NO  encontrado con ID: {}", id);
-                    return new EntityNotFoundException("Producto no encontrado");
+                    return new NegocioException("Producto no encontrado");
                 });
         producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
         log.info("Borrado lógico realizado con éxito para el producto con ID: {}", id);
@@ -140,7 +140,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto NO encontrado con ID: {}", id);
-                    return new EntityNotFoundException("Producto no encontrado");
+                    return new NegocioException("Producto no encontrado");
                 });
         log.info("Producto encontrado: ID={}, Nombre={}", producto.getId(), producto.getNombre());
         return productoMapper.toProductoDTO(producto);
@@ -168,10 +168,10 @@ public class ProductoService {
      */
     public ProductoDTO findByCodigo(String codigo) {
         log.info("Buscando producto por código: {}", codigo);
-        Producto producto = productoRepository.findByCodigoContainingIgnoreCase(codigo);
+        Producto producto = productoRepository.findByCodigo(codigo);
         if (producto == null) {
             log.error("Producto NO encontrado");
-            throw new EntityNotFoundException("Producto no encontrado");
+            throw new NegocioException("Producto no encontrado");
         }
         log.info("Producto encontrado: ID={}, Nombre={}, Codigo={}", producto.getId(), producto.getNombre(), producto.getCodigo());
         return productoMapper.toProductoDTO(producto);
@@ -201,7 +201,7 @@ public class ProductoService {
         List<Producto> productos = productoRepository.findByDescripcionContainingIgnoreCase(descripcion);
         if (productos.isEmpty()) {
             log.error("Producto no encontrado");
-            throw new EntityNotFoundException("Producto no encontrado");
+            throw new NegocioException("Producto no encontrado");
         }
         log.info("Productos  encontrados: {}", productos.size());
         return productoMapper.toProductoDTOList(productos);
