@@ -13,11 +13,12 @@ public class VentaDTO {
 
     private String fechaYHora;
 
+    private Double precioProducto;
+
+    private String formaPago;
+
     private ClienteDTO cliente;
 
     private ProductoDTO producto;
 
-    private Double precioProducto;
-
-    private String formaPago;
 }
