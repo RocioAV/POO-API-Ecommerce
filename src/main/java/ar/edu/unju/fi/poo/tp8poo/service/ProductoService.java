@@ -49,7 +49,7 @@ public class ProductoService {
 
         if (productoDTO.getIdProveedor() == null) {
             log.error("El producto debe tener un proveedor.");
-            throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
+            throw new NegocioException("El producto debe tener un proveedor asignado.");
         }
     }
     private void actualizarProductoDesdeDTO(Producto producto, ProductoDTO productoDTO) {

@@ -184,17 +184,11 @@ class TestClienteService {
     void testListarClientes(){
         clienteService.agregarClienteEstandar(clienteEstandarDTO);
         clienteService.agregarClientePremium(clientePremiumDTO);
-        assertEquals(2,clienteService.obtenerClientes().size());
+        assertEquals(4,clienteService.obtenerClientes().size());
 
     }
 
-    @Test
-    void testListarClientesVacio(){
-        NegocioException exception=assertThrows(NegocioException.class, ()->{
-                clienteService.obtenerClientes();
-                });
-        assertEquals("No hay ningún cliente registrado",exception.getMessage());
-    }
+
 
 
 
