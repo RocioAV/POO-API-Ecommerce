@@ -15,12 +15,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 description="Nuestra aplicacion provee gestion del negocio, ya sea de cliente, producto, proveedor y sus ventas",
                 version = "1.0.0",
                 contact = @Contact(
-<<<<<<< src/main/java/ar/edu/unju/fi/poo/tp8poo/config/SwaggerConfig.java
                         name = "Velazques, Rocio Alejandra.     " +
                                 "Valle, Alejandro Leonel.     " +
                                 "Bazan, Fabricio Agustín",
-=======
->>>>>>> src/main/java/ar/edu/unju/fi/poo/tp8poo/config/SwaggerConfig.java
                         email = "44351449@fi.unju.edu.ar, alejandrovalle1904@gmail.com, 41300614@fi.unju.edu.ar"
                 ),
                 license = @License(
