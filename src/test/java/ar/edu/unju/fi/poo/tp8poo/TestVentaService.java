@@ -59,9 +59,9 @@ import static org.junit.jupiter.api.Assertions.*;
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setEmail("leoalevalle2014@gmail.com");
+        clienteEstandarDTO.setEmail("41300614@fi.unju.edu.ar");
         multipartFile = TestUtils.generarMultipartFile(rutaArchivo1);
-		clienteEstandarDTO.setImagen(multipartFile);
+        clienteEstandarDTO.setFoto(rutaArchivo1);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
         clienteEstandarDTO= clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
@@ -69,9 +69,9 @@ import static org.junit.jupiter.api.Assertions.*;
         clientePremiumDTO.setApellido("Martinez");
         clientePremiumDTO.setNombre("Maria");
         clientePremiumDTO.setCelular("6542342321");
-        clientePremiumDTO.setEmail("maria@hotmail.com");
+        clientePremiumDTO.setEmail("fabri98201098@gmail.com");
         multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
-		clientePremiumDTO.setImagen(multipartFile);
+        clientePremiumDTO.setFoto(rutaArchivo2);
         clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO= clienteService.agregarClientePremium(clientePremiumDTO);
 
