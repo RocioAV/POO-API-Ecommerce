@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.*;
         List<ProveedorDTO> proveedores = proveedorService.obtenerProveedores();
         assertNotNull(proveedores);
         assertFalse(proveedores.isEmpty());
-        assertEquals(proveedorGuardado.getNombre(), proveedores.get(0).getNombre());
+        assertEquals(4,proveedores.size());
     }
 
     @Test

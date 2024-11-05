@@ -61,8 +61,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
      void testCreateProductoConProveedorInexistente() {
-        setUpProducto("PROD002", "Producto 2", "Descripción del producto 2", 200.0, 5);
-        productoDTO.setIdProveedor(8L);
+        setUpProducto("PROD005", "Producto 2", "Descripción del producto 2", 200.0, 5);
+        productoDTO.setIdProveedor(88L);
 
         Exception exception = assertThrows(NegocioException.class, () -> productoService.createProducto(productoDTO));
 
@@ -83,7 +83,7 @@ import static org.junit.jupiter.api.Assertions.*;
     @Test
      void testUpdateProducto() throws IOException {
         multipartFile= TestUtils.generarMultipartFile(rutaArchivo1);
-        setUpProducto("PROD003","Producto 4","Descripción del producto 4",180.0,15);
+        setUpProducto("PROD006","Producto 4","Descripción del producto 4",180.0,15);
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
         productoService.subirImagenProducto(createdProducto.getId(),multipartFile);
         createdProducto.setNombre("Producto Modificado");
