@@ -105,7 +105,10 @@ public class ProductoResource {
     @PostMapping("/create")
     @Operation(
             summary = "Crea un producto",
-            description = "Crea un producto nuevo con datos proporcionados en el body",
+            description =""" 
+                    Crea un producto nuevo con datos proporcionados en el body,
+                    -ELIMINAR ATRIBUTO ID
+                """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Producto creado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Error en los datos enviados para crear el producto"),
@@ -139,7 +142,10 @@ public class ProductoResource {
     @PutMapping("/update/{id}")
     @Operation(
             summary = "Actualizar un producto",
-            description = "Actualiza un producto existente con el ID y datos proporcionados",
+            description = """ 
+                    Actualiza un producto existente con el ID y datos proporcionados,
+                    -ELIMINAR ATRIBUTO ID
+                """,
             parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Producto actualizado con éxito"),

@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 description="Nuestra aplicacion provee gestion del negocio, ya sea de cliente, producto, proveedor y sus ventas",
                 version = "1.0.0",
                 contact = @Contact(
-                        name = "Velazques, Rocio. Valle, Alejandro. Bazan, Fabricio",
+                        name = "Velazquez, Rocio Alejandra - Valle, Alejandro Leonel - Bazan, Fabricio Agustin",
                         email = "44351449@fi.unju.edu.ar, alejandrovalle1904@gmail.com, 41300614@fi.unju.edu.ar"
                 ),
                 license = @License(
