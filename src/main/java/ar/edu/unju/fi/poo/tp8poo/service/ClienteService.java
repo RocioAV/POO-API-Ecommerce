@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -104,19 +105,12 @@ public class ClienteService {
      */
     public  ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
     	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
-
-        if(newClienteEstandar.getImagen()==null || !(newClienteEstandar.getImagen().isEmpty())){
-            newClienteEstandar.setFoto(DEFAULT_IMAGE_URL);
-        }else{
-            String url = gestorDeImagenesUtil.subirImagen(newClienteEstandar.getImagen(),FOLDER_NAME);
-            newClienteEstandar.setFoto(url);
-        }
-    	
+        newClienteEstandar.setFoto(DEFAULT_IMAGE_URL);
         ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
-
+        clienteEstandar.setId(null);
 		clienteRepository.save(clienteEstandar);
         log.info("Cliente agregado con exito: {}",newClienteEstandar.getNombre());
         return clienteMapper.toClienteEstandarDTO(clienteEstandar);
@@ -179,6 +173,9 @@ public class ClienteService {
             clienteExistente.setCupon(null);
         }
 
+        if(dto.getFoto()!=null || dto.getFoto().equals("string")){
+            clienteExistente.setFoto(dto.getFoto());
+        }
         clienteExistente.setUpdated(LocalDateTime.now());
 
         clienteRepository.save(clienteExistente);
@@ -201,17 +198,12 @@ public class ClienteService {
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
 
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
-        if(newClientePremium.getImagen()==null){
-            newClientePremium.setFoto(DEFAULT_IMAGE_URL);
-        }else{
-            String url = gestorDeImagenesUtil.subirImagen(newClientePremium.getImagen(),FOLDER_NAME);
-            newClientePremium.setFoto(url);
-        }
-		
+		newClientePremium.setFoto(DEFAULT_IMAGE_URL);
         ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
 
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
+        clientePremium.setId(null);
         log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         clienteRepository.save(clientePremium);
         return clienteMapper.toClientePremiunDTO(clientePremium);
@@ -247,7 +239,9 @@ public class ClienteService {
         clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
         log.debug("Cambiando a nuevo email: {}", dto.getEstado());
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
-
+        if(dto.getFoto()!=null || !dto.getFoto().equals("string")){
+            clienteExistente.setFoto(dto.getFoto());
+        }
         clienteExistente.setUpdated(LocalDateTime.now());
 
 
@@ -324,7 +318,19 @@ public class ClienteService {
             throw new NegocioException("El cliente no esta activo para hacer una compra");
         }
     }
-    
 
 
+    public ClienteEstandarDTO subirImagenClienteEstandar(Long clienteId, MultipartFile imagen)  {
+        ClienteEstandarDTO clienteEstandar=getClienteEstandar(clienteId);
+        String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
+        clienteEstandar.setFoto(url);
+        return editarClienteEstandar(clienteEstandar.getId(),clienteEstandar);
+    }
+
+    public ClientePremiumDTO subirImagenClientePremium(Long clienteId, MultipartFile imagen)  {
+        ClientePremiumDTO clientePremium=getClientePremium(clienteId);
+        String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
+        clientePremium.setFoto(url);
+        return editarClientePremium(clientePremium.getId(),clientePremium);
+    }
 }
