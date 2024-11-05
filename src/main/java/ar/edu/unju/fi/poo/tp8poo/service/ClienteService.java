@@ -105,7 +105,7 @@ public class ClienteService {
      */
     public  ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
     	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
-
+        newClienteEstandar.setFoto(DEFAULT_IMAGE_URL);
         ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
 
         validarEmail(clienteEstandar.getEmail());
@@ -198,7 +198,7 @@ public class ClienteService {
     public ClientePremiumDTO agregarClientePremium(ClientePremiumDTO newClientePremium) {
 
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
-		
+		newClientePremium.setFoto(DEFAULT_IMAGE_URL);
         ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
 
         validarEmail(clientePremium.getEmail());
