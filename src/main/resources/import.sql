@@ -1,0 +1,3 @@
+INSERT INTO proveedor (proveedor_id, nombre, email, telefono, estado) VALUES (1, 'Proveedor A', 'proveedorA@ejemplo.com', '+5491112345678', true);
+INSERT INTO proveedor (proveedor_id, nombre, email, telefono, estado) VALUES (2, 'Proveedor B', 'proveedorB@ejemplo.com', '+5491112345679', true);
+INSERT INTO proveedor (proveedor_id, nombre, email, telefono, estado) VALUES (3, 'Proveedor C', 'proveedorC@ejemplo.com', '+5491112345680', true);
