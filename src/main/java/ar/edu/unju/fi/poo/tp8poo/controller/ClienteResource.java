@@ -7,13 +7,11 @@ import java.util.Map;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
-import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
@@ -245,6 +243,45 @@ public class ClienteResource {
             response.put("mensaje", "Error al obtener clientes");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @PostMapping(value = "/upload/estandar/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadFotoEstandar(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
+        log.info("Subida de imagen");
+        Map<String, Object> response = new HashMap<>();
+        try {
+            response.put("estandar",clienteService.subirImagenClienteEstandar(id,file));
+            response.put("mensaje","Imagen actualizado del cliente");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (EntityNotFoundException e) {
+            log.error("No se encontró el cliente");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }catch (Exception e){
+            log.error("Error interno en el servidor");
+            response.put("mensaje", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
+    @PostMapping(value = "/upload/premium/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadFotoPremium(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
+        log.info("Subida de imagen");
+        Map<String, Object> response = new HashMap<>();
+        try {
+            response.put("estandar",clienteService.subirImagenClientePremium(id,file));
+            response.put("mensaje","Imagen actualizado del cliente");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (EntityNotFoundException e) {
+            log.error("No se encontró el cliente");
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }catch (Exception e){
+            log.error("Error interno en el servidor");
+            response.put("mensaje", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
