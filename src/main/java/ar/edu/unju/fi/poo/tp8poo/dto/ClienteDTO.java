@@ -35,8 +35,6 @@ public class ClienteDTO implements Serializable {
 	@Schema(description = "Foto del cliente en formato base64")
 	private String foto;
 
-	@Schema(description = "Imagen del cliente como archivo")
-	private MultipartFile imagen;
 
 	@Schema(description = "Estado del cliente", example = "ACTIVO")
 	private String estado="ACTIVO";
