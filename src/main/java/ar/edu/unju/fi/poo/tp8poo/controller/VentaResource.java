@@ -39,7 +39,7 @@ public class VentaResource {
             summary = "Obtiene todas las ventas",
             description = "Devuelve una lista de todas las ventas registradas en el sistema.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas obtenidas exitosamente", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "200", description = "Ventas obtenidas exitosamente", content = @Content),
                     @ApiResponse(responseCode = "404", description = "No se encontraron ventas", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Error en el servidor al acceder a la base de datos", content = @Content)
             }
@@ -68,7 +68,7 @@ public class VentaResource {
                     @Parameter(name = "formaPago",description = "Forma de  (CREDITO,DEBITO,TRANSFERENCIA)", required = true, example = "DEBITO")
             },
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Venta creada con éxito", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "201", description = "Venta creada con éxito", content = @Content),
                     @ApiResponse(responseCode = "400", description = "Error en los datos proporcionados", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
             }
@@ -110,7 +110,7 @@ public class VentaResource {
                     - Solo ID (Long)
                     """,
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content),
                     @ApiResponse(responseCode = "204", description = "No se encontraron ventas que coincidan con el filtro", content = @Content),
                     @ApiResponse(responseCode = "400", description = "Error en los criterios de filtro", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
@@ -142,7 +142,7 @@ public class VentaResource {
             description = "Devuelve los detalles de una venta específica a partir de su ID.",
             parameters = @Parameter(name = "id",description = "ID de venta (Long)", required = true, example = "1"),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content(mediaType = "application/json")),
+                    @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content),
                     @ApiResponse(responseCode = "404", description = "Venta no encontrada", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
             }
