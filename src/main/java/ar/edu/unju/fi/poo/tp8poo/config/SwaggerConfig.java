@@ -11,11 +11,13 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
         info = @Info(
-                title = "API NEGOCIO",
+                title = "API NEGOCIO - GRUPO 2",
                 description="Nuestra aplicacion provee gestion del negocio, ya sea de cliente, producto, proveedor y sus ventas",
                 version = "1.0.0",
                 contact = @Contact(
-                        name = "Velazques, Rocio. Valle, Alejandro. Bazan, Fabricio",
+                        name = "Velazques, Rocio Alejandra.     " +
+                                "Valle, Alejandro Leonel.     " +
+                                "Bazan, Fabricio Agustín",
                         email = "44351449@fi.unju.edu.ar, alejandrovalle1904@gmail.com, 41300614@fi.unju.edu.ar"
                 ),
                 license = @License(
