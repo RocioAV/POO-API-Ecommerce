@@ -31,7 +31,8 @@ public class VentaResource {
     public VentaResource(VentaService ventaService) {
         this.ventaService = ventaService;
     }
-
+    private static final String MENSAJE="mensaje";
+    private static final String ERROR="error";
 
     @GetMapping("/list")
     @Operation(
@@ -46,22 +47,15 @@ public class VentaResource {
     public ResponseEntity<?> getAllVentas(){
         log.info("/api/v1/venta/list");
         Map<String, Object> response = new HashMap<>();
-        try {
-            List<VentaDTO> ventas = ventaService.findAll();
-            if (ventas.isEmpty()) {
-                log.info("No se encontraron ventas");
-                response.put("message", "No se encontraron ventas");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            response.put("ventas", ventas);
-            response.put("mensaje", "Ventas obtenidas con éxito");
-            return ResponseEntity.ok(response);
-        }catch (DataAccessException e) {
-            log.error("Error de acceso a la base de datos al obtener el producto por ID", e);
-            response.put("mensaje", "Error de base de datos al obtener el producto");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        List<VentaDTO> ventas = ventaService.findAll();
+        if (ventas.isEmpty()) {
+            log.info("No se encontraron ventas");
+            response.put("message", "No se encontraron ventas");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+        response.put("ventas", ventas);
+        response.put(MENSAJE, "Ventas obtenidas con éxito");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/create")
@@ -69,8 +63,8 @@ public class VentaResource {
             summary = "Crea una venta",
             description = "Crea una nueva venta registrando el producto y cliente asociados, así como la forma de pago.",
             parameters = {
-                    @Parameter(name = "idProducto",description = "ID del producto", required = true, example = "1"),
-                    @Parameter(name = "idCliente",description = "ID del cliente", required = true, example = "1"),
+                    @Parameter(name = "idProducto",description = "ID del producto (Long)", required = true, example = "1"),
+                    @Parameter(name = "idCliente",description = "ID del cliente (Long)", required = true, example = "1"),
                     @Parameter(name = "formaPago",description = "Forma de  (CREDITO,DEBITO,TRANSFERENCIA)", required = true, example = "DEBITO")
             },
             responses = {
@@ -86,23 +80,13 @@ public class VentaResource {
         Map<String, Object> response = new HashMap<>();
         try{
             response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago));
-            response.put("mensaje", "Venta creada con exito");
+            response.put(MENSAJE, "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }catch (NegocioException e) {
+        }catch (NegocioException | IOException e) {
             log.error("Problemas al registrar la venta");
-            response.put("mensaje", "Error al crear la venta");
-            response.put("error", e.getMessage());
+            response.put(MENSAJE, "Error al crear la venta");
+            response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        } catch (IOException e) {
-            log.error("Problemas al registrar la venta");
-            response.put("mensaje", "Error al convertir moneda");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        } catch (Exception e) {
-            log.error("Proceso de creacion interrumpido");
-            response.put("mensaje", "Error interno del servidor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -121,9 +105,9 @@ public class VentaResource {
                     Combinaciones posibles:
                     - Nombre y rango de fechas
                     - ID y rango de fechas
-                    - Solo rango de fechas
-                    - Solo nombre
-                    - Solo ID
+                    - Solo rango de fechas (String)
+                    - Solo nombre (String)
+                    - Solo ID (Long)
                     """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content(mediaType = "application/json")),
@@ -142,17 +126,13 @@ public class VentaResource {
                 return ResponseEntity.noContent().build();
             }
             response.put("ventas", ventasFiltradas);
-            response.put("mensaje","Ventas de acuerdo al filtro obtenidas con exito ");
+            response.put(MENSAJE,"Ventas de acuerdo al filtro obtenidas con exito ");
             return ResponseEntity.ok(response);
 
         }catch (NegocioException e) {
-            response.put("mensaje", "Error al aplicar filtros");
-            response.put("error", e.getMessage());
+            response.put(MENSAJE, "Error al aplicar filtros");
+            response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        } catch (Exception e) {
-            response.put("mensaje", "Error al consultar el hsitoria de ventas");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -160,7 +140,7 @@ public class VentaResource {
     @Operation(
             summary = "Obtiene una venta por ID",
             description = "Devuelve los detalles de una venta específica a partir de su ID.",
-            parameters = @Parameter(name = "id",description = "ID de venta", required = true, example = "1"),
+            parameters = @Parameter(name = "id",description = "ID de venta (Long)", required = true, example = "1"),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content(mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Venta no encontrada", content = @Content),
@@ -172,22 +152,14 @@ public class VentaResource {
         Map<String, Object> response = new HashMap<>();
         try{
             VentaDTO venta= ventaService.findById(id);
-            if(venta==null){
-                log.info("No se encontraron venta que con el id "+id);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
             response.put("venta", venta);
-            response.put("mensaje","Venta encontrada con exito");
+            response.put(MENSAJE,"Venta encontrada con exito");
             return ResponseEntity.ok(response);
 
         }catch (NegocioException e) {
-            response.put("mensaje", "Error al buscar la venta");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        } catch (Exception e) {
-            response.put("mensaje", "Error al buscar la venta");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            response.put(MENSAJE, "Error al buscar la venta");
+            response.put(ERROR, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 

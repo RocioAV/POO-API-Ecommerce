@@ -47,21 +47,14 @@ public class ProductoResource {
     public ResponseEntity<?> getAllProductos() {
         log.info("/api/v1/producto/list");
         Map<String, Object> response = new HashMap<>();
-        try {
-            List<ProductoDTO> productos = productoService.findAll();
-            if (productos.isEmpty()) {
-                log.info("No se encontraron productos");
-                return ResponseEntity.noContent().build();
-            }
-            response.put("productos", productos);
-            response.put(MENSAJE, "Productos  obtenidos con éxito");
-            return ResponseEntity.ok(response);
-        }catch (DataAccessException e) {
-            log.error("Error de acceso a la base de datos al obtener el producto por ID", e);
-            response.put(MENSAJE, "Error de base de datos al obtener el producto");
-            response.put(ERROR, e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        List<ProductoDTO> productos = productoService.findAll();
+        if (productos.isEmpty()) {
+            log.info("No se encontraron productos");
+            return ResponseEntity.noContent().build();
         }
+        response.put("productos", productos);
+        response.put(MENSAJE, "Productos obtenidos con éxito");
+        return ResponseEntity.ok(response);
 
     }
 
@@ -168,7 +161,7 @@ public class ProductoResource {
             log.error("El proceso de editado se ha interrumpido para producto [{}]",id);
             response.put(MENSAJE, "Error al actualizar el producto");
             response.put(ERROR, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
     }
@@ -221,7 +214,7 @@ public class ProductoResource {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (NegocioException e){
             log.error("Se ha interrumpido la actualizacion de imagen");
-            response.put(MENSAJE, "Error al aliminar el producto");
+            response.put(MENSAJE, "Error al actualizar la imagen del producto");
             response.put(ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
