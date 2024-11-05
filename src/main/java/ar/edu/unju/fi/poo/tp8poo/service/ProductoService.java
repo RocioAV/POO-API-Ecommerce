@@ -52,6 +52,18 @@ public class ProductoService {
             throw new IllegalArgumentException("El producto debe tener un proveedor asignado.");
         }
     }
+    private void actualizarProductoDesdeDTO(Producto producto, ProductoDTO productoDTO) {
+        producto.setCodigo(productoDTO.getCodigo());
+        producto.setNombre(productoDTO.getNombre());
+        producto.setDescripcion(productoDTO.getDescripcion());
+        producto.setPrecio(productoDTO.getPrecio());
+        producto.setCantidad(productoDTO.getCantidad());
+        producto.setEstado(productoDTO.getEstado());
+        if (productoDTO.getImagen() != null && !productoDTO.getImagen().equals("string")) {
+            producto.setImagen(productoDTO.getImagen());
+        }
+        producto.setProveedor(proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor())));
+    }
 
     /**
      * Crea un producto.
@@ -68,6 +80,7 @@ public class ProductoService {
         Producto producto = productoMapper.toProducto(productoDTO);
         producto.setProveedor(proveedor);
         producto.setEstado(EstadoProducto.DISPONIBLE.getEstado());
+        producto.setId(null);
         Producto savedProducto = productoRepository.save(producto);
         log.info("Producto creado con éxito: ID={}, Nombre={}", savedProducto.getId(), savedProducto.getNombre());
         return productoMapper.toProductoDTO(savedProducto);
@@ -87,17 +100,7 @@ public class ProductoService {
                     log.error("Producto no encontrado con ID: {}", id);
                     return new EntityNotFoundException("Producto  no encontrado");
                 });
-        producto.setCodigo(productoDTO.getCodigo());
-        producto.setNombre(productoDTO.getNombre());
-        producto.setDescripcion(productoDTO.getDescripcion());
-        producto.setPrecio(productoDTO.getPrecio());
-        producto.setCantidad(productoDTO.getCantidad());
-        producto.setEstado(productoDTO.getEstado());
-        if(productoDTO.getImagen()!=null){
-            producto.setImagen(productoDTO.getImagen());
-        }
-        producto.setProveedor(productoMapper.toProducto(productoDTO).getProveedor());
-
+        actualizarProductoDesdeDTO(producto,productoDTO);
         Producto updatedProducto = productoRepository.save(producto);
         log.info("Producto editado con éxito con id: {}", updatedProducto.getId());
         return productoMapper.toProductoDTO(updatedProducto);
