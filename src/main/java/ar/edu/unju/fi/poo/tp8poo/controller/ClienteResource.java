@@ -128,7 +128,6 @@ public class ClienteResource {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente estándar actualizado con éxito"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-                    @ApiResponse(responseCode = "500", description = "Error en el servidor")
             }
     )
     public ResponseEntity<?> modificarClienteEstandar(@PathVariable Long id, @RequestBody ClienteEstandarDTO estandarDTO){
@@ -144,11 +143,6 @@ public class ClienteResource {
             response.put("mensaje", "Error al obtener el cliente estándar");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } catch (Exception e) {
-            log.error("Proceso de modificacion interrumpido para el cliente {}", id);
-            response.put("mensaje", "Error interno del servidor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -161,7 +155,6 @@ public class ClienteResource {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente premium actualizado con éxito"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-                    @ApiResponse(responseCode = "500", description = "Error en el servidor")
             }
     )
     public ResponseEntity<?> modificarClientePremium(@PathVariable Long id, @RequestBody ClientePremiumDTO premiumDTO){
@@ -177,11 +170,6 @@ public class ClienteResource {
             response.put("mensaje", "Error al obtener el cliente estándar");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } catch (Exception e) {
-            log.error("Proceso de modificacion interrumpido para el cliente {}", id);
-            response.put("mensaje", "Error interno del servidor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -195,7 +183,6 @@ public class ClienteResource {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente eliminado con éxito"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-                    @ApiResponse(responseCode = "500", description = "Error en el servidor")
             }
     )
     public ResponseEntity<?> eliminarCliente(@PathVariable Long id){
@@ -246,7 +233,15 @@ public class ClienteResource {
         }
     }
 
-    @PostMapping(value = "/upload/estandar/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/upload/estandar/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Subir imagen para cliente Estandar",
+            description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida con éxito"),
+                    @ApiResponse(responseCode = "404", description = "No se encontraron clientes")
+            }
+    )
     public ResponseEntity<?> uploadFotoEstandar(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
         log.info("Subida de imagen");
         Map<String, Object> response = new HashMap<>();
@@ -254,19 +249,23 @@ public class ClienteResource {
             response.put("estandar",clienteService.subirImagenClienteEstandar(id,file));
             response.put("mensaje","Imagen actualizado del cliente");
             return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (EntityNotFoundException e) {
+        } catch (NegocioException e) {
             log.error("No se encontró el cliente");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }catch (Exception e){
-            log.error("Error interno en el servidor");
-            response.put("mensaje", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
 
-    @PostMapping(value = "/upload/premium/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/upload/premium/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Subir imagen para cliente Premium",
+            description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida con éxito"),
+                    @ApiResponse(responseCode = "404", description = "No se encontraron clientes")
+            }
+    )
     public ResponseEntity<?> uploadFotoPremium(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
         log.info("Subida de imagen");
         Map<String, Object> response = new HashMap<>();
@@ -274,14 +273,10 @@ public class ClienteResource {
             response.put("estandar",clienteService.subirImagenClientePremium(id,file));
             response.put("mensaje","Imagen actualizado del cliente");
             return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (EntityNotFoundException e) {
+        } catch (NegocioException e) {
             log.error("No se encontró el cliente");
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }catch (Exception e){
-            log.error("Error interno en el servidor");
-            response.put("mensaje", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
