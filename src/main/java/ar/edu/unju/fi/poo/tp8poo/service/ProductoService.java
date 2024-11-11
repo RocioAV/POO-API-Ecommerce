@@ -119,7 +119,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto NO  encontrado con ID: {}", id);
-                    return new NegocioException("Producto no encontrado");
+                    return new NegocioException(" Producto no encontrado ");
                 });
         producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
         log.info("Borrado lógico realizado con éxito para el producto con ID: {}", id);
@@ -140,7 +140,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Producto NO encontrado con ID: {}", id);
-                    return new NegocioException("Producto no encontrado");
+                    return new NegocioException("Producto NO  encontrado");
                 });
         log.info("Producto encontrado: ID={}, Nombre={}", producto.getId(), producto.getNombre());
         return productoMapper.toProductoDTO(producto);
@@ -171,7 +171,7 @@ public class ProductoService {
         Producto producto = productoRepository.findByCodigo(codigo);
         if (producto == null) {
             log.error("Producto NO encontrado");
-            throw new NegocioException("Producto no encontrado");
+            throw new NegocioException("Producto No encontrado");
         }
         log.info("Producto encontrado: ID={}, Nombre={}, Codigo={}", producto.getId(), producto.getNombre(), producto.getCodigo());
         return productoMapper.toProductoDTO(producto);
