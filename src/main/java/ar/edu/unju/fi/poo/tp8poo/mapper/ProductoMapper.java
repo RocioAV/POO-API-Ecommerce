@@ -21,5 +21,4 @@ public interface ProductoMapper {
 
     List<ProductoDTO> toProductoDTOList (List<Producto> productos);
 
-    List<Producto> toProductoList (List<ProductoDTO> productosDTO);
 }

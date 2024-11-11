@@ -3,13 +3,13 @@ package ar.edu.unju.fi.poo.tp8poo.controller;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
+import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -31,10 +30,12 @@ public class ProductoResource {
     public ProductoResource(ProductoService productoService) {this.productoService = productoService;
     }
 
-    private static final String MENSAJE="mensaje";
-    private static final String ERROR="error";
+    String mensaje = ConstantesMensajes.MENSAJE;
+    String error = ConstantesMensajes.ERROR;
+    String producto=ConstantesMensajes.PRODUCTO;
+    String productos=ConstantesMensajes.PRODUCTOS;
 
-    @GetMapping("/list")
+    @GetMapping("/productos")
     @Operation(
             summary = "Obtener todos los productos",
             description = "Devuelve una lista de todos los productos en la base de datos",
@@ -44,22 +45,17 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error de base de datos al obtener el producto",content = @Content)
             }
     )
-    public ResponseEntity<?> getAllProductos() {
+    public ResponseEntity<Map<String, Object>> getAllProductos() {
         log.info("/api/v1/producto/list");
         Map<String, Object> response = new HashMap<>();
-        List<ProductoDTO> productos = productoService.findAll();
-        if (productos.isEmpty()) {
-            log.info("No se encontraron productos");
-            return ResponseEntity.noContent().build();
-        }
-        response.put("productos", productos);
-        response.put(MENSAJE, "Productos obtenidos con éxito");
+        response.put(productos, productoService.findAll());
+        response.put(mensaje, "Productos obtenidos con exito");
         return ResponseEntity.ok(response);
 
     }
 
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     @Operation(
             summary = "Obtener producto por ID",
             description = "Devuelve un producto específico por su ID",
@@ -70,23 +66,23 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error de base de datos al obtener el producto",content = @Content)
             }
     )
-    public ResponseEntity<?> getProductoById(@PathVariable Long id) {
-        log.info("/api/v1/producto/get/{}", id);
+    public ResponseEntity<Map<String, Object>> getProductoById(@PathVariable Long id) {
+        log.info("/api/v1/producto/{} ", id);
         Map<String, Object> response = new HashMap<>();
         try {
-            response.put("producto", productoService.findById(id));
-            response.put(MENSAJE, "Producto obtenido con éxito");
+            response.put(producto, productoService.findById(id));
+            response.put(mensaje, "Producto obtenido con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("No se encontro el producto con ID [{}]", id);
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
 
 
-    @PostMapping("/create")
+    @PostMapping("")
     @Operation(
             summary = "Crea un producto",
             description =""" 
@@ -107,19 +103,18 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error de base de datos al crear el producto")
             }
     )
-    public ResponseEntity<?> createProducto(
+    public ResponseEntity<Map<String, Object>> createProducto(
             @Parameter(description = "Producto DTO", required = true)
             @RequestBody ProductoDTO productoDTO) {
-        log.info("/api/v1/producto/create");
+        log.info("/api/v1/producto");
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("producto", productoService.createProducto(productoDTO));
-            response.put(MENSAJE, "Producto creado con éxito");
+            response.put(producto, productoService.createProducto(productoDTO));
+            response.put(mensaje, "Producto creado con éxito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NegocioException e) {
             log.warn("Error al crear el producto: {}", e.getMessage());
-            response.put(MENSAJE, "Error al crear el producto");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
@@ -127,7 +122,7 @@ public class ProductoResource {
 
 
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     @Operation(
             summary = "Actualizar un producto",
             description = """
@@ -150,24 +145,23 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error de base de datos al actualizar el producto",content = @Content)
             }
     )
-    public ResponseEntity<?> updateProducto(@PathVariable Long id, @RequestBody ProductoDTO productoDTO) {
-        log.info("/api/v1/producto/update/{}", id);
+    public ResponseEntity<Map<String, Object>> updateProducto(@PathVariable Long id, @RequestBody ProductoDTO productoDTO) {
+        log.info(" /api/v1/producto/{}  ", id);
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("producto", productoService.editProducto(id, productoDTO));
-            response.put(MENSAJE, "Producto actualizado con éxito");
+            response.put(producto, productoService.editProducto(id, productoDTO));
+            response.put(mensaje, "Producto actualizado con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("El proceso de editado se ha interrumpido para producto [{}]",id);
-            response.put(MENSAJE, "Error al actualizar el producto");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
     }
 
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Eliminar un producto",
             description = "Realiza una eliminación lógica del producto especificado por ID",
@@ -178,23 +172,22 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error de base de datos al eliminar el producto", content = @Content)
             }
     )
-    public ResponseEntity<?> deleteProducto(@PathVariable Long id) {
-        log.info("/api/v1/producto/delete/{}", id);
+    public ResponseEntity<Map<String, Object>> deleteProducto(@PathVariable Long id) {
+        log.info(" /api/v1/producto/ {} ", id);
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("producto", productoService.deleteProductoLogico(id));
-            response.put(MENSAJE, "Producto eliminado con éxito");
+            response.put(producto, productoService.deleteProductoLogico(id));
+            response.put(mensaje, "Producto eliminado con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("El proceso de eliminado logico se ha interrumpido para producto [{}]",id);
-            response.put(MENSAJE, "Error al aliminar el producto");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
     }
 
-    @PatchMapping(value= "/upload/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value= "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Subir imagen de un producto",
             description = "Carga una imagen para un producto específico por ID",
@@ -205,22 +198,21 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor al actualizar la imagen")
             }
     )
-    public ResponseEntity<?> uploadFotoProducto (@PathVariable Long id, @RequestParam("file") final MultipartFile file) {
-        log.info("/api/v1/producto/upload/{}/file", id);
+    public ResponseEntity<Map<String, Object>> uploadFotoProducto (@PathVariable Long id, @RequestParam("file") final MultipartFile file) {
+        log.info("/api/v1/producto/{}/imagen", id);
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("producto",productoService.subirImagenProducto(id,file));
-            response.put(MENSAJE, "Imagen actualizada con exito:");
+            response.put(producto,productoService.subirImagenProducto(id,file));
+            response.put(mensaje, "Imagen actualizada con exito:");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (NegocioException e){
             log.error("Se ha interrumpido la actualizacion de imagen");
-            response.put(MENSAJE, "Error al actualizar la imagen del producto");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
-    @GetMapping("/find/nombre")
+    @GetMapping("/nombre")
     @Operation(
             summary = "Buscar productos por nombre",
             description = "Busca productos cuyo nombre coincida con el parámetro proporcionado",
@@ -231,27 +223,21 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "400", description = "Error en la solicitud de búsqueda", content = @Content)
             }
     )
-    public ResponseEntity<?> buscarProductoPorNombre(@RequestParam String nombre) {
-        log.info("/api/v1/producto/find/nombre");
+    public ResponseEntity<Map<String, Object>> buscarProductoPorNombre(@RequestParam String nombre) {
+        log.info("/api/v1/producto/nombre");
         Map<String, Object> response = new HashMap<>();
         try{
-            List<ProductoDTO> productos = productoService.findByNombre(nombre);
-            if (productos.isEmpty()) {
-                log.info("No se encontraron productos coincidentes con el nombre");
-                return ResponseEntity.noContent().build();
-            }
-            response.put("productos", productos);
-            response.put(MENSAJE, "Productos obtenidos con éxito");
+            response.put(productos, productoService.findByNombre(nombre));
+            response.put(mensaje, "Productos obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("Se ha interrumpido la busqueda por nombre");
-            response.put(MENSAJE, "Error al buscar productos por nombre");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
-    @GetMapping("/find/description")
+    @GetMapping("/descripcion")
     @Operation(
             summary = "Buscar productos por descripción",
             description = "Busca productos cuya descripción coincida con el parámetro proporcionado",
@@ -262,27 +248,21 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "400", description = "Error en la solicitud de búsqueda", content = @Content)
             }
     )
-    public ResponseEntity<?> buscarProductoPorDescripcion(@RequestParam String description) {
-        log.info("/api/v1/producto/find/description");
+    public ResponseEntity<Map<String, Object>> buscarProductoPorDescripcion(@RequestParam String description) {
+        log.info("/api/v1/producto/descripcion");
         Map<String, Object> response = new HashMap<>();
         try{
-            List<ProductoDTO> productos = productoService.findByDescripcion(description);
-            if (productos.isEmpty()) {
-                log.info("No se encontraron productos coincidentes con la descripcion");
-                return ResponseEntity.noContent().build();
-            }
-            response.put("productos", productos);
-            response.put(MENSAJE, "Productos obtenidos con éxito");
+            response.put(productos, productoService.findByDescripcion(description));
+            response.put(mensaje, "Productos obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("Se ha interrumpido la busqueda por descripcion");
-            response.put(MENSAJE, "Error al buscar productos por descripcion");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
-    @GetMapping("/find/codigo")
+    @GetMapping("/codigo")
     @Operation(
             summary = "Buscar producto por código",
             description = "Busca un producto cuyo código coincida con el parámetro proporcionado",
@@ -293,17 +273,16 @@ public class ProductoResource {
                     @ApiResponse(responseCode = "400", description = "Error en la solicitud de búsqueda", content = @Content)
             }
     )
-    public ResponseEntity<?> buscarProductoPorCodigo(@RequestParam String codigo) {
-        log.info("/api/v1/producto/find/codigo");
+    public ResponseEntity<Map<String, Object>> buscarProductoPorCodigo(@RequestParam String codigo) {
+        log.info("/api/v1/producto/codigo");
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("producto", productoService.findByCodigo(codigo));
-            response.put(MENSAJE, "Producto obtenidos con éxito");
+            response.put(producto, productoService.findByCodigo(codigo));
+            response.put(mensaje, "Producto obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
             log.error("Se ha interrumpido la busqueda por codigo");
-            response.put(MENSAJE, "Error al buscar producto por codigo");
-            response.put(ERROR, e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }

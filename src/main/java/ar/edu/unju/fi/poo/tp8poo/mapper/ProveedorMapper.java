@@ -1,7 +1,7 @@
 package ar.edu.unju.fi.poo.tp8poo.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
+
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Proveedor;
@@ -16,5 +16,4 @@ public interface ProveedorMapper {
 
     List<ProveedorDTO> toProveedorDTOList (List<Proveedor> proveedores);
 
-    List<Proveedor> toProveedorList (List<ProveedorDTO> proveedoresDTO);
 }

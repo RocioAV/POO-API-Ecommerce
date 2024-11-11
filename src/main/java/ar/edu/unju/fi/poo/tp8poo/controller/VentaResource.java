@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +33,7 @@ public class VentaResource {
     private static final String MENSAJE="mensaje";
     private static final String ERROR="error";
 
-    @GetMapping("/list")
+    @GetMapping("/ventas")
     @Operation(
             summary = "Obtiene todas las ventas",
             description = "Devuelve una lista de todas las ventas registradas en el sistema.",
@@ -44,7 +43,7 @@ public class VentaResource {
                     @ApiResponse(responseCode = "500", description = "Error en el servidor al acceder a la base de datos", content = @Content)
             }
     )
-    public ResponseEntity<?> getAllVentas(){
+    public ResponseEntity<Map<String, Object>> getAllVentas(){
         log.info("/api/v1/venta/list");
         Map<String, Object> response = new HashMap<>();
         List<VentaDTO> ventas = ventaService.findAll();
@@ -58,7 +57,7 @@ public class VentaResource {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     @Operation(
             summary = "Crea una venta",
             description = "Crea una nueva venta registrando el producto y cliente asociados, así como la forma de pago.",
@@ -73,7 +72,7 @@ public class VentaResource {
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
             }
     )
-    public ResponseEntity<?> agregarVenta(@RequestParam Long idProducto,
+    public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,
                                           @RequestParam Long idCliente,
                                           @RequestParam String formaPago) {
         log.info("/api/v1/venta/create");
@@ -90,7 +89,7 @@ public class VentaResource {
         }
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/filtro")
     @Operation(
             summary = "Filtra ventas",
             description = """
@@ -116,7 +115,7 @@ public class VentaResource {
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
             }
     )
-    public ResponseEntity<?> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
+    public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
         log.info("/api/v1/venta/filter");
         Map<String, Object> response = new HashMap<>();
         try{
@@ -136,7 +135,7 @@ public class VentaResource {
         }
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     @Operation(
             summary = "Obtiene una venta por ID",
             description = "Devuelve los detalles de una venta específica a partir de su ID.",
@@ -147,7 +146,7 @@ public class VentaResource {
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
             }
     )
-    public ResponseEntity<?> getVentaById(@PathVariable("id") Long id){
+    public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id){
         log.info("/api/v1/venta/get/{id}");
         Map<String, Object> response = new HashMap<>();
         try{
