@@ -3,6 +3,7 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
+import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,10 @@ import java.time.LocalDate;
 @Slf4j
 @Service
 public class DescuentoService {
+    private final CuponService cuponService;
+
+    public DescuentoService(CuponService cuponService){this.cuponService=cuponService;}
+
     /**
      * Calcula el descuento en base a un porcentaje y precio dado.
      *
@@ -68,9 +73,12 @@ public class DescuentoService {
         log.info("Verificando descuento para cliente estándar con ID {}", clienteEstandarDTO.getId());
         if (clienteEstandarDTO.getCupon()!=null){
             if(!isExpirado(LocalDate.parse(clienteEstandarDTO.getCupon().getFechaExpiracion()))){
-                Double descuento= calcularDescuento(clienteEstandarDTO.getCupon().getPorcentajeDescuento(),precioProducto);
-                log.debug("Descuento aplicado: {}, Precio final: {}", descuento, precioProducto - descuento);
-                return precioProducto-descuento;
+                    Double descuento= calcularDescuento(clienteEstandarDTO.getCupon().getPorcentajeDescuento(),precioProducto);
+                    CuponDTO cuponDTO = clienteEstandarDTO.getCupon();
+                    cuponDTO.setFechaExpiracion(LocalDate.now().minusDays(1).toString());
+                    cuponService.actualizarFechaExpiracion(cuponDTO);
+                    log.debug("Descuento aplicado: {}, Precio final: {}", descuento, precioProducto - descuento);
+                    return precioProducto-descuento;
             }else {
                 log.warn("Cupón expirado para cliente estándar con ID {}", clienteEstandarDTO.getId());
                 return precioProducto;
@@ -89,8 +97,8 @@ public class DescuentoService {
      */
     public Double aplicarDescuento(Double precioProducto, ClienteDTO clienteDTO) {
         log.info("Aplicando descuento para cliente con ID {}", clienteDTO.getId());
-        Double precioFinal = clienteDTO instanceof ClientePremiumDTO
-                ? verificarDescuentoClientePremiun((ClientePremiumDTO) clienteDTO, precioProducto)
+        Double precioFinal = clienteDTO instanceof ClientePremiumDTO clientePremiumDTO
+                ? verificarDescuentoClientePremiun(clientePremiumDTO, precioProducto)
                 : verificarDescuentoClienteEstandar((ClienteEstandarDTO) clienteDTO, precioProducto);
         log.debug("Precio final después del descuento: {}", precioFinal);
         return precioFinal;
