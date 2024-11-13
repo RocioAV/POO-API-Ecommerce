@@ -8,11 +8,12 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import org.mapstruct.Mapper;
 
+
 import java.util.List;
 
 @Mapper(componentModel = "spring",uses = {CuponMapper.class})
 public interface ClienteMapper {
-    // Métodos para objetos individuales
+
     ClienteEstandarDTO toClienteEstandarDTO(ClienteEstandar clienteEstandar);
 
     ClientePremiumDTO toClientePremiunDTO(ClientePremium clientePremium);
@@ -30,18 +31,18 @@ public interface ClienteMapper {
     List<ClientePremium> toClientePremiunEntityList(List<ClientePremiumDTO> clientePremiumDTOList);
 
     default Cliente toClienteEntity(ClienteDTO clienteDTO) {
-        if (clienteDTO instanceof ClienteEstandarDTO) {
-            return toClienteEstandarEntity((ClienteEstandarDTO) clienteDTO);
-        } else if (clienteDTO instanceof ClientePremiumDTO) {
-            return toClientePremiunEntity((ClientePremiumDTO) clienteDTO);
+        if (clienteDTO instanceof ClienteEstandarDTO clienteEstandarDTO) {
+            return toClienteEstandarEntity(clienteEstandarDTO);
+        } else if (clienteDTO instanceof ClientePremiumDTO clientePremiumDTO) {
+            return toClientePremiunEntity(clientePremiumDTO);
         }
         throw new IllegalArgumentException("Tipo de cliente no soportado: " + clienteDTO.getClass().getName());
     }
     default ClienteDTO toClienteDTO(Cliente cliente) {
-        if (cliente instanceof ClienteEstandar) {
-            return toClienteEstandarDTO((ClienteEstandar) cliente);
-        } else if (cliente instanceof ClientePremium) {
-            return toClientePremiunDTO((ClientePremium) cliente);
+        if (cliente instanceof ClienteEstandar clienteEstandar) {
+            return toClienteEstandarDTO(clienteEstandar);
+        } else if (cliente instanceof ClientePremium clientePremium) {
+            return toClientePremiunDTO(clientePremium);
         }
         return null;
     }

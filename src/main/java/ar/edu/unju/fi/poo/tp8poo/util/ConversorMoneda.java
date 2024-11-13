@@ -6,12 +6,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class ConversorMoneda {
-	
+
+	private  ConversorMoneda(){
+
+	}
+
 	@Autowired
 	private static String consumoAPI() throws IOException {
 			int cp;
@@ -20,7 +25,7 @@ public class ConversorMoneda {
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/json");
 			if(connection.getResponseCode()!=200) {
-				throw new RuntimeException("Error con el código HTTP "+connection.getResponseCode());
+				throw new NegocioException("Error con el código HTTP "+connection.getResponseCode());
 			}
 			BufferedReader br= new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			StringBuilder str=new StringBuilder();
@@ -29,7 +34,7 @@ public class ConversorMoneda {
 			}
 			return str.toString();
 	}
-	
+
 	public static double convertirPrecio(double precioActual) throws IOException {
 		double precioVenta;
 		String api=consumoAPI();
@@ -37,6 +42,6 @@ public class ConversorMoneda {
 		precioVenta=json.getDouble("venta")*precioActual;
 		return precioVenta;
 	}
-	
-	
+
+
 }

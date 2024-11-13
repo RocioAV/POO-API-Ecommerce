@@ -4,6 +4,8 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
+
+import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
@@ -12,6 +14,7 @@ import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
 import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
+import ar.edu.unju.fi.poo.tp8poo.repository.CuponRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
 import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,16 +35,22 @@ import java.util.Optional;
 public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
-    private final CuponMapper cuponMapper;
     private final GestorDeImagenesUtil gestorDeImagenesUtil;
+    private final CuponService cuponService;
+    private final CuponRepository cuponRepository;
+    private final CuponMapper cuponMapper;
     public ClienteService(ClienteRepository clienteRepository,
                           ClienteMapper clienteMapper,
                           CuponMapper cuponMapper,
-                          GestorDeImagenesUtil gestorDeImagenesUtil) {
+                          GestorDeImagenesUtil gestorDeImagenesUtil,
+                          CuponService cuponService,
+                          CuponRepository cuponRepository) {
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
-        this.cuponMapper = cuponMapper;
         this.gestorDeImagenesUtil = gestorDeImagenesUtil;
+        this.cuponService=cuponService;
+        this.cuponMapper=cuponMapper;
+        this.cuponRepository=cuponRepository;
     }
    	
    	private static final String FOLDER_NAME = "avatars";
@@ -104,20 +114,18 @@ public class ClienteService {
      * @return ClienteEstandarDTO con los datos del cliente registrado.
      */
     public  ClienteEstandarDTO agregarClienteEstandar(ClienteEstandarDTO newClienteEstandar) {
-    	log.info("Agregando nuevo cliente: {}",newClienteEstandar.getNombre());
+    	log.info("Agregando  cliente: {}",newClienteEstandar.getNombre());
         newClienteEstandar.setFoto(DEFAULT_IMAGE_URL);
         ClienteEstandar clienteEstandar = clienteMapper.toClienteEstandarEntity(newClienteEstandar);
-
         validarEmail(clienteEstandar.getEmail());
         validarCelular(clienteEstandar.getCelular());
         clienteEstandar.setId(null);
+        clienteEstandar.setCupon(null);
 		clienteRepository.save(clienteEstandar);
         log.info("Cliente agregado con exito: {}",newClienteEstandar.getNombre());
         return clienteMapper.toClienteEstandarDTO(clienteEstandar);
 
-
     }
-
 
 
     /**
@@ -128,11 +136,11 @@ public class ClienteService {
      * @throws NegocioException si no se encuentra el cliente.
      */
     public ClienteEstandarDTO getClienteEstandar(Long id){
-    	log.info("Buscando cliente con id: {}", id);
+    	log.info("Buscando cliente : {}", id);
 		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error("ERROR al encontrar el cliente: {}", id);
-	            		return new NegocioException("Cliente no encontrado con ID: " + id);
+	            		return new NegocioException("Cliente no encontrado con");
 	            		});
 		log.info(" Cliente encontrado con éxito: {}", id);
 		return clienteMapper.toClienteEstandarDTO(clienteEstandar);
@@ -151,40 +159,46 @@ public class ClienteService {
     	ClienteEstandar clienteExistente = (ClienteEstandar) clienteRepository.findById(id)
 	            .orElseThrow(() -> {
 	            		log.error(" Error al encontrar el cliente: {}", id);
-	            		return new NegocioException("Cliente no encontrado con ID: " + id);
+	            		return new NegocioException("Cliente estandar no encontrado no registrado con id"+ id);
 	            		});
         validarEmailParaEdicion(clienteExistente,dto);
         validarCelularParaEdicion(clienteExistente,dto);
-
-        clienteExistente.setNombre(dto.getNombre());
-        log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
-        clienteExistente.setApellido(dto.getApellido());
-        log.debug("Cambiando a nuevo apellido: {}", dto.getApellido());
-        clienteExistente.setEmail(dto.getEmail());
-        log.debug("Cambiando a nuevo email: {}", dto.getEmail());
-        clienteExistente.setCelular(dto.getCelular());
-        log.debug("Cambiando a nuevo celular {}", dto.getCelular());
-        clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
-        log.debug("Cambiando a nuevo estado: {}", dto.getEstado());
-        if (dto.getCupon() != null) {
-            Cupon cupon = cuponMapper.toCuponEntity(dto.getCupon());
-            clienteExistente.setCupon(cupon);
-        }else{
-            clienteExistente.setCupon(null);
-        }
-
-        if(dto.getFoto()!=null || dto.getFoto().equals("string")){
-            clienteExistente.setFoto(dto.getFoto());
-        }
+        asignarDatosPersonales(clienteExistente,dto);
         clienteExistente.setUpdated(LocalDateTime.now());
-
         clienteRepository.save(clienteExistente);
         log.info("Datos del cliente modificado con éxito");
         return clienteMapper.toClienteEstandarDTO(clienteExistente);
-
     }
 
 
+    public boolean asignarCupon(Long idCliente, CuponDTO cuponDTO) {
+        ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(idCliente)
+                .orElseThrow(() -> {
+                    log.error("Error al encontrar el cliente estándar con ID: {}", idCliente);
+                    return new NegocioException("Cliente estándar no registrado con ID " + idCliente);
+                });
+        Cupon cuponActual = clienteEstandar.getCupon();
+        if (cuponActual == null || cuponService.isExpirado(cuponActual.getFechaExpiracion())) {
+            LocalDate fechaExpiracionNueva = LocalDate.parse(cuponDTO.getFechaExpiracion());
+            if (!fechaExpiracionNueva.isAfter(LocalDate.now())) {
+                log.warn("La fecha de expiración del nuevo cupón debe ser posterior a la fecha actual.");
+                throw new NegocioException("La fecha de expiración del cupón debe ser posterior a la fecha actual.");
+            }
+            if (cuponDTO.getPorcentajeDescuento() <= 0 || cuponDTO.getPorcentajeDescuento() >= 100) {
+                log.warn("El porcentaje de descuento debe estar entre 0 y 100.");
+                throw new NegocioException("El porcentaje de descuento debe estar entre 0 y 100.");
+            }
+            Cupon nuevoCupon = cuponMapper.toCuponEntity(cuponDTO);
+            nuevoCupon = cuponRepository.save(nuevoCupon);
+            clienteEstandar.setCupon(nuevoCupon);
+            clienteRepository.save(clienteEstandar);
+            log.info("Cupón con ID {} asignado al cliente estándar con ID {}", nuevoCupon.getId(), idCliente);
+            return true;
+        } else {
+            log.info("El cliente ya tiene un cupón asignado o el cupón actual aún es válido");
+            return false;
+        }
+    }
     /*FIN DE SECCION ESTANDAR*/
     
     /*SECCION DE CLIENTE PREMIUM*/
@@ -221,30 +235,16 @@ public class ClienteService {
     	log.info("Iniciando modificacion del cliente: {}", dto.getNombre());
         ClientePremium clienteExistente = (ClientePremium) clienteRepository.findById(id)
         		.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente: {}", id);
-            		return new NegocioException("Cliente no encontrado con ID: " + id);
+            		log.error("Error al encontrar el cliente con id: {}", id);
+            		return new NegocioException("Cliente premium no registrado con ID: " + id);
             		});
-
         validarEmailParaEdicion(clienteExistente, dto);
         validarCelularParaEdicion(clienteExistente, dto);
 
-        clienteExistente.setNombre(dto.getNombre());
-        log.debug("Cambiando nuevo nombre: {}", dto.getNombre());
-        clienteExistente.setApellido(dto.getApellido());
-        log.debug("Cambiando a nuevo apellido: {}", dto.getApellido());
-        clienteExistente.setEmail(dto.getEmail());
-        log.debug("Cambiando a nuevo email: {}", dto.getEmail());
-        clienteExistente.setCelular(dto.getCelular());
-        log.debug("Cambiando a nuevo celular {}", dto.getCelular());
-        clienteExistente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
-        log.debug("Cambiando a nuevo email: {}", dto.getEstado());
+        asignarDatosPersonales(clienteExistente,dto);
+
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
-        if(dto.getFoto()!=null || !dto.getFoto().equals("string")){
-            clienteExistente.setFoto(dto.getFoto());
-        }
         clienteExistente.setUpdated(LocalDateTime.now());
-
-
         clienteRepository.save(clienteExistente);
         log.info("Datos del cliente modifado con éxito");
         return clienteMapper.toClientePremiunDTO(clienteExistente);
@@ -255,7 +255,7 @@ public class ClienteService {
     	log.info("Buscando cliente con id: {}", id);
 		ClientePremium clientePremium = (ClientePremium) clienteRepository.findById(id)
 				.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente: {}", id);
+            		log.error("Error al encontrar el cliente premium: {}", id);
             		return new NegocioException("Cliente no encontrado con ID: " + id);
             		});
 		log.info("Cliente encontrado con éxito: {}", clientePremium.getNombre());
@@ -332,5 +332,18 @@ public class ClienteService {
         String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
         clientePremium.setFoto(url);
         return editarClientePremium(clientePremium.getId(),clientePremium);
+    }
+
+    private void asignarDatosPersonales(Cliente cliente, ClienteDTO dto) {
+        cliente.setNombre(dto.getNombre());
+        cliente.setApellido(dto.getApellido());
+        cliente.setEmail(dto.getEmail());
+        cliente.setCelular(dto.getCelular());
+        cliente.setEstado(EstadoCliente.valueOf(dto.getEstado()));
+        if(dto.getFoto()!=null && !dto.getFoto().equals("string")){
+            cliente.setFoto(dto.getFoto());
+        }
+        log.debug("Datos personales actualizados: Nombre={}, Apellido={}, Email={}, Celular={}, Estado={}, foto={}",
+                dto.getNombre(), dto.getApellido(), dto.getEmail(), dto.getCelular(),dto.getEstado(),dto.getFoto());
     }
 }

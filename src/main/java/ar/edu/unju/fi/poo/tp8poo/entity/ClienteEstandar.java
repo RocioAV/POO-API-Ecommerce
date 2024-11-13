@@ -13,7 +13,7 @@ import lombok.*;
 @DiscriminatorValue("ESTANDAR")
 public class ClienteEstandar extends Cliente {
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "CUPON_ID", referencedColumnName = "ID", unique = true)
+	@OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "CUPON_ID", referencedColumnName = "Id", unique = true)
 	private Cupon cupon;
 }

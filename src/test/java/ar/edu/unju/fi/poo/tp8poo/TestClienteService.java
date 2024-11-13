@@ -19,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.time.LocalDate;
+
 
 @Slf4j
 @Transactional
@@ -30,13 +32,18 @@ class TestClienteService {
 
     static ClienteEstandarDTO clienteEstandarDTO;
     static ClientePremiumDTO clientePremiumDTO;
+    static ClienteEstandarDTO clienteEstandarDTOSinCupon;
+    static CuponDTO cuponValido;
+    static CuponDTO cuponExpirado;
+    static CuponDTO cuponValido2;
+    static CuponDTO cuponConPorcentajeInvalido;
 	MultipartFile multipartFile;
     String workspacePath = System.getProperty("user.dir");
     String rutaArchivo1 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test01.jpeg";
     String rutaArchivo2 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test02.png";
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp() {
         clienteEstandarDTO = new ClienteEstandarDTO();
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
@@ -44,6 +51,18 @@ class TestClienteService {
         clienteEstandarDTO.setCupon(new CuponDTO(null, "2024-12-02", 10.0));
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
+
+        clienteEstandarDTOSinCupon=new ClienteEstandarDTO();
+        clienteEstandarDTOSinCupon.setApellido("Amador");
+        clienteEstandarDTOSinCupon.setNombre("Cristian");
+        clienteEstandarDTOSinCupon.setCelular("987654321");
+        clienteEstandarDTOSinCupon.setEmail("ejemplocorreo1@hotmail.com");
+        clienteEstandarDTOSinCupon.setEstado(EstadoCliente.ACTIVO.name());
+
+        cuponValido= new CuponDTO(null,LocalDate.now().plusDays(15).toString(),20);
+        cuponExpirado=new CuponDTO(null, LocalDate.now().minusDays(1).toString(),45);
+        cuponValido2=new CuponDTO(null,LocalDate.now().plusDays(25).toString(),55);
+        cuponConPorcentajeInvalido=new CuponDTO(null,LocalDate.now().plusDays(12).toString(),101);
 
         clientePremiumDTO = new ClientePremiumDTO();
         clientePremiumDTO.setApellido("Martinez");
@@ -188,7 +207,55 @@ class TestClienteService {
 
     }
 
+    @Test
+    void testAsignarNuevoCupon_SinCuponExistente() {
+        ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
 
+        clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
+
+        ClienteEstandarDTO clienteActualizado = clienteService.getClienteEstandar(clienteGuardado.getId());
+
+        assertNotNull(clienteActualizado.getCupon());
+        assertEquals(20, clienteActualizado.getCupon().getPorcentajeDescuento());
+    }
+
+    @Test
+    void testAsignarNuevoCupon_ConCuponExpirado() {
+        ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
+
+        NegocioException exception = assertThrows(NegocioException.class,
+                () -> clienteService.asignarCupon(clienteGuardado.getId(), cuponExpirado));
+
+        assertEquals("La fecha de expiración del cupón debe ser posterior a la fecha actual.", exception.getMessage());
+
+        boolean result = clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
+        assertTrue(result, "El cupón debería asignarse porque el actual está expirado.");
+
+        ClienteEstandarDTO clienteEstandar = clienteService.getClienteEstandar(clienteGuardado.getId());
+        assertNotNull(clienteEstandar.getCupon(), "El cliente debería tener un nuevo cupón asignado.");
+        assertEquals(20, clienteEstandar.getCupon().getPorcentajeDescuento(), "El porcentaje de descuento debe ser 20.");
+        assertEquals(cuponValido.getFechaExpiracion(), clienteEstandar.getCupon().getFechaExpiracion().toString(),
+                "La fecha de expiración del cupón debería coincidir con la asignada.");
+    }
+
+    @Test
+    void testNoAsignarCupon_CuponValidoExistente() {
+        ClienteEstandarDTO clienteGuardado=clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
+        clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
+        assertFalse(clienteService.asignarCupon(clienteGuardado.getId(), cuponValido2));
+    }
+
+
+
+    @Test
+    void testNoAsignarCupon_PorcentajeDescuentoInvalido() {
+        ClienteEstandarDTO clienteGuardado=clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
+
+        NegocioException exception = assertThrows(NegocioException.class, () -> {
+            clienteService.asignarCupon(clienteGuardado.getId(), cuponConPorcentajeInvalido);
+        });
+        assertEquals("El porcentaje de descuento debe estar entre 0 y 100.", exception.getMessage());
+    }
 
 
 
