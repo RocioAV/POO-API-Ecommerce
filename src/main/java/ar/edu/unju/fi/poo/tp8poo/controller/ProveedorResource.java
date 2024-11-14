@@ -3,6 +3,7 @@ package ar.edu.unju.fi.poo.tp8poo.controller;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
+import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,11 @@ public class ProveedorResource {
     public ProveedorResource(ProveedorService proveedorService) {
         this.proveedorService = proveedorService;
     }
+    
+    String mensaje = ConstantesMensajes.MENSAJE;
+    String error = ConstantesMensajes.ERROR;
+    String proveedor = "proveedor";
+    String proveedores = "proveedores";
 
     @PostMapping("")
     @Operation(
@@ -46,13 +52,12 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorRegistrado = proveedorService.crearProveedor(newProveedor);
-            response.put("proveedor", proveedorRegistrado);
+            response.put(proveedor, proveedorRegistrado);
             log.info("Proveedor {} registrado con éxito", newProveedor.getNombre());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NegocioException e) {
-            log.error("Problemas al registrar proveedor {}", newProveedor.getNombre());
-            response.put("mensaje", "Error al crear el proveedor");
-            response.put("error", e.getMessage());
+        	log.warn("Error al crear el proveedor: {}", e.getMessage());
+            response.put(error, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -73,13 +78,13 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorEncontrado = proveedorService.obtenerProveedorPorId(id);
-            response.put("proveedor", proveedorEncontrado);
+            response.put(proveedor, proveedorEncontrado);
             log.info("Proveedor con id {} encontrado con éxito", id);
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
-            response.put("mensaje", "Error al encontrar el proveedor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        	log.warn("Error al obtener el proveedor: {}", e.getMessage());
+            response.put(error, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
@@ -101,14 +106,13 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorEditado = proveedorService.actualizarProveedor(id, proveedorDTO);
-            response.put("proveedor", proveedorEditado);
+            response.put(proveedor, proveedorEditado);
             log.info("Proveedor con id {} modificado con éxito", id);
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
-            log.error("Problemas al modificar el proveedor con id {}", id);
-            response.put("mensaje", "Error al modificar el proveedor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        	log.warn("Error al modificar el proveedor: {}", e.getMessage());
+            response.put(error, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
@@ -132,10 +136,9 @@ public class ProveedorResource {
             log.info("Proveedor con id {} eliminado lógicamente", id);
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
-            log.error("Problemas al eliminar el proveedor con id {}", id);
-            response.put("mensaje", "Error al eliminar el proveedor");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        	log.warn("Error al eliminar logicamente el proveedor: {}", e.getMessage());
+            response.put(error, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
@@ -152,15 +155,14 @@ public class ProveedorResource {
         log.info("Obteniendo listado de proveedores");
         Map<String, Object> response = new HashMap<>();
         try {
-            List<ProveedorDTO> proveedores = proveedorService.obtenerProveedores();
-            response.put("proveedores", proveedores);
+            List<ProveedorDTO> proveedoresdto = proveedorService.obtenerProveedores();
+            response.put(proveedores, proveedoresdto);
             log.info("Listado de proveedores obtenido con éxito");
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
-            log.warn("Error al obtener la lista de proveedores");
-            response.put("mensaje", "Error al obtener la lista de proveedores");
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        	log.warn("Error al obtener la lista de proveedores: {}", e.getMessage());
+            response.put(error, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 }
