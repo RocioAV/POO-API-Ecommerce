@@ -9,6 +9,8 @@ import java.util.Map;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
+import ar.edu.unju.fi.poo.tp8poo.service.TokenService;
+import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,9 +37,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class ClienteResource {
 
 	private final ClienteService clienteService;
+    private final TokenService tokenService;
 
-    public ClienteResource(ClienteService clienteService) {
+    public ClienteResource(ClienteService clienteService, TokenService tokenService) {
         this.clienteService = clienteService;
+        this.tokenService = tokenService;
     }
 
     @PostMapping(value = "/estandar")
@@ -305,6 +309,36 @@ public class ClienteResource {
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+    }
+
+
+    @PostMapping("/{id}/token")
+    @Operation(
+            summary = "Generar token para cliente",
+            description = "Genera un token único asociado al cliente con un valor aleatorio y lo registra en el sistema.",
+            parameters = {
+                    @Parameter(name = "id", description = "ID del cliente a generar el nuevo token (Long)", required = true, example = "1"),
+            },
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Token generado con éxito"),
+                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
+            }
+    )
+    public ResponseEntity<Map<String,Object>> generarTokenCliente(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try{
+            ClienteDTO cliente = clienteService.buscarPorID(id);
+            if (cliente!=null){
+                response.put(ConstantesMensajes.MENSAJE, "Token generado para el cliente {}");
+                response.put("token", tokenService.generarTokenParaCliente(id));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (NegocioException e){
+            log.error("Error al generar el token");
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
     }
 
 }
