@@ -1,19 +1,22 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
+import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
+import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
+import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
+import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
-import ar.edu.unju.fi.poo.tp8poo.util.FormaPago;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import java.util.Arrays;
@@ -27,63 +30,80 @@ public class VentaService {
     private final VentaRepository ventaRepository;
     private final VentaMapper ventaMapper;
     private final EmailService emailService;
-    private final DescuentoService descuentoService;
     private final TokenService tokenService;
+    private final ClienteRepository clienteRepository;
+    private final ProductoRepository productoRepository;
+    private final CuponService cuponService;
 
     public VentaService(ClienteService clienteService,
                         ProductoService productoService,
                         VentaRepository ventaRepository,
                         VentaMapper ventaMapper,
                         EmailService emailService,
-                        DescuentoService descuentoService,
-                        TokenService tokenService) {
+                        TokenService tokenService,
+                        ClienteRepository clienteRepository,
+                        ProductoRepository productoRepository,
+                        CuponService cuponService) {
         this.clienteService = clienteService;
         this.productoService = productoService;
         this.ventaRepository = ventaRepository;
         this.ventaMapper = ventaMapper;
         this.emailService = emailService;
-        this.descuentoService = descuentoService;
         this.tokenService = tokenService;
+        this.clienteRepository = clienteRepository;
+        this.productoRepository = productoRepository;
+        this.cuponService = cuponService;
     }
 
 
     /**
      * Valida que el cliente y el producto estén disponibles para la venta.
      *
-     * @param idCliente ID del cliente.
-     * @param idProducto ID del producto.
+     * @param cliente  cliente a validar.
+     * @param producto ID del producto a validar.
      */
-    private void validarDatosVenta(Long idCliente, Long idProducto) {
-        log.info("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", idCliente, idProducto);
-        clienteService.validarClienteActivo(idCliente);
-        productoService.validarProductoSinStock(idProducto);
-        log.info("Validaciones de cliente y producto completadas para Cliente ID: {} y Producto ID: {}", idCliente, idProducto);
+    private void validarDatosVenta(Cliente cliente, Producto producto) {
+        log.info("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", cliente.getId(), producto.getId());
+        clienteService.validarClienteActivo(cliente);
+        productoService.validarProductoSinStock(producto);
+        log.info("Validaciones de cliente y producto completadas para Cliente ID: {} y Producto ID: {}",  cliente.getId(), producto.getId());
     }
-    private String parsearFechaHoy(){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return LocalDateTime.now().format(formatter);
+
+
+    /**
+     * Aplica el descuento adecuado al precio del producto según el tipo de cliente.
+     *
+     * @param precioProducto Precio original del producto.
+     * @param cliente Cliente al que se le aplicará el descuento.
+     * @return Precio final después de aplicar el descuento.
+     */
+    public Double aplicarDescuento(Double precioProducto, Cliente cliente) {
+        log.info("Aplicando descuento para cliente con ID {}", cliente.getId());
+        Double precioFinal = precioProducto - cliente.calcularDescuento(precioProducto);
+        log.info("Cupon utilizado");
+        cuponService.expirarCuponPorUso(cliente);
+        log.debug("Precio final después del descuento: {}", precioFinal);
+        return precioFinal;
     }
     /**
      * Prepara el objeto VentaDTO con los datos necesarios para registrar una venta.
      *
-     * @param clienteDTO Cliente que realiza la compra.
-     * @param productoDTO Producto a vender.
+     * @param cliente Cliente que realiza la compra.
+     * @param producto Producto a vender.
      * @param formaDePago Forma de pago elegida para la compra.
-     * @return Objeto VentaDTO con los datos de la venta preparada.
      * @throws IOException Si ocurre un error al preparar los datos.
      */
-    private VentaDTO prepararVentaDTO(ClienteDTO clienteDTO, ProductoDTO productoDTO, String formaDePago) throws IOException {
-        VentaDTO ventaDTO = new VentaDTO();
-        log.debug("Preparando venta para cliente con ID {}", clienteDTO.getId());
-        ventaDTO.setFechaYHora(parsearFechaHoy());
-        ventaDTO.setProducto(productoDTO);
-        ventaDTO.setCliente(clienteDTO);
+    private Venta prepararVentaDTO(Cliente cliente, Producto producto, String formaDePago) throws IOException {
+        Venta venta = new Venta();
+        log.debug("Preparando venta para cliente con ID {}", cliente.getId());
+        venta.setProducto(producto);
+        venta.setCliente(cliente);
         validarFormaPago(formaDePago);
-        ventaDTO.setFormaPago(formaDePago);
-        Double precioFinalConDescuento = descuentoService.aplicarDescuento(productoDTO.getPrecio(), clienteDTO);
+        venta.setFormaPago(FormaPago.valueOf(formaDePago.toUpperCase()));
+        Double precioFinalConDescuento = aplicarDescuento(producto.getPrecio(), cliente);
         Double precioConvertidoAPesos = ConversorMoneda.convertirPrecio(precioFinalConDescuento);
-        ventaDTO.setPrecioProducto(precioConvertidoAPesos);
-        return ventaDTO;
+        venta.setPrecioProducto(precioConvertidoAPesos);
+        return venta;
     }
     /**
      * Busca una venta por su ID.
@@ -101,6 +121,7 @@ public class VentaService {
         return ventaMapper.toVentaDTO(ventaEntity);
     }
 
+
     /**
      * Crea una nueva venta, realizando todas las validaciones necesarias, aplicando descuentos,
      * y descontando stock del producto.
@@ -113,13 +134,14 @@ public class VentaService {
      */
     public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken) throws IOException {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
-        validarDatosVenta(idCliente, idProducto);
+        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(() -> new NegocioException("Cliente no encontrado para la Venta."));
+        Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new NegocioException("Producto no encontrado para la Venta."));
+        validarDatosVenta(cliente, producto);
         tokenService.validarToken(idCliente,valorToken);
-        ClienteDTO clienteDTO= clienteService.buscarPorID(idCliente);
-        ProductoDTO productoDTO=productoService.findById(idProducto);
-        VentaDTO ventaDTO = prepararVentaDTO(clienteDTO, productoDTO, formaDePago);
-        Venta ventaEntity = ventaRepository.save(ventaMapper.toVentaEntity(ventaDTO));
+        Venta ventaEntity = prepararVentaDTO(cliente, producto, formaDePago);
+        ventaEntity = ventaRepository.save(ventaEntity);
         productoService.descontarStock(idProducto);
+        VentaDTO ventaDTO = ventaMapper.toVentaDTO(ventaEntity);
         emailService.enviarFacturaPorEmail(ventaDTO);
         log.info("Venta creada y guardada con éxito para el cliente ID {}", idCliente);
         return ventaMapper.toVentaDTO(ventaEntity);

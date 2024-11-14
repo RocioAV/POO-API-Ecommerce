@@ -7,7 +7,7 @@ import ar.edu.unju.fi.poo.tp8poo.mapper.ProductoMapper;
 import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ProveedorMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoProducto;
 import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -210,14 +210,13 @@ public class ProductoService {
     /**
      * Verifica si el producto con el ID especificado tiene stock disponible.
      *
-     * @param id ID del producto a verificar.
+     * @param producto producto a verificar su stock
      * @throws NegocioException si el producto no tiene stock disponible.
      */
-    public void validarProductoSinStock(Long id){
-        log.info("Validando stock del producto con ID {}", id);
-        ProductoDTO producto= findById(id);
+    public void validarProductoSinStock(Producto producto){
+        log.info("Validando stock del producto con ID {}", producto.getId());
         if (producto.getCantidad()<=0){
-            log.warn("El producto con ID {} no tiene stock", id);
+            log.warn("El producto con ID {} no tiene stock", producto.getId());
             throw new NegocioException("El producto NO tiene stock");
         }
     }

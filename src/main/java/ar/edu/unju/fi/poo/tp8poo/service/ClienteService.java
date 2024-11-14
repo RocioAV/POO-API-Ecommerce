@@ -12,10 +12,8 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
-import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
-import ar.edu.unju.fi.poo.tp8poo.repository.CuponRepository;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
 import ar.edu.unju.fi.poo.tp8poo.util.GestorDeImagenesUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,20 +36,14 @@ public class ClienteService {
     private final ClienteMapper clienteMapper;
     private final GestorDeImagenesUtil gestorDeImagenesUtil;
     private final CuponService cuponService;
-    private final CuponRepository cuponRepository;
-    private final CuponMapper cuponMapper;
     public ClienteService(ClienteRepository clienteRepository,
                           ClienteMapper clienteMapper,
-                          CuponMapper cuponMapper,
                           GestorDeImagenesUtil gestorDeImagenesUtil,
-                          CuponService cuponService,
-                          CuponRepository cuponRepository) {
+                          CuponService cuponService) {
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
         this.gestorDeImagenesUtil = gestorDeImagenesUtil;
         this.cuponService=cuponService;
-        this.cuponMapper=cuponMapper;
-        this.cuponRepository=cuponRepository;
     }
    	
    	private static final String FOLDER_NAME = "avatars";
@@ -171,36 +164,54 @@ public class ClienteService {
     }
 
 
+    /**
+     * Asigna o actualiza un cupon para un ClienteEstandar, este verifica antes si esta vencido o si aun tiene validez su
+     * anterior cupon
+      * @param idCliente ID del cliente a actualizar el cupon
+     * @param cuponDTO nuevo cupon
+     * @return retorna true si Se ha asignado el nuevo cupon o false si todavia tiene un cupon valido
+     * @throws NegocioException lanza la exception si llega un formato de fecha invalido
+     */
     public boolean asignarCupon(Long idCliente, CuponDTO cuponDTO) {
-        ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(idCliente)
-                .orElseThrow(() -> {
-                    log.error("Error al encontrar el cliente estándar con ID: {}", idCliente);
-                    return new NegocioException("Cliente estándar no registrado con ID " + idCliente);
-                });
-        Cupon cuponActual = clienteEstandar.getCupon();
-        if (cuponActual == null || cuponService.isExpirado(cuponActual.getFechaExpiracion())) {
-            LocalDate fechaExpiracionNueva = LocalDate.parse(cuponDTO.getFechaExpiracion());
-            if (!fechaExpiracionNueva.isAfter(LocalDate.now())) {
-                log.warn("La fecha de expiración del nuevo cupón debe ser posterior a la fecha actual.");
-                throw new NegocioException("La fecha de expiración del cupón debe ser posterior a la fecha actual.");
+        try{
+            ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(idCliente).orElseThrow(() -> {
+                log.error("Error al encontrar el cliente estándar con ID: {}", idCliente);
+                return new NegocioException("Cliente estándar no registrado con ID " + idCliente);
+            });
+            Cupon cuponActual = clienteEstandar.getCupon();
+            if (cuponActual == null || clienteEstandar.cuponVencido()) {
+                cuponService.validarNuevoCupon(LocalDate.parse(cuponDTO.getFechaExpiracion()),cuponDTO.getPorcentajeDescuento());
+                Cupon nuevoCupon = cuponService.crearCupon(cuponDTO);
+                clienteEstandar.setCupon(nuevoCupon);
+                clienteRepository.save(clienteEstandar);
+                log.info("Cupón con ID {} asignado al cliente estándar con ID {}", nuevoCupon.getId(), idCliente);
+                return true;
+            } else {
+                log.info("El cliente ya tiene un cupón asignado o el cupón actual aún es válido");
+                return false;
             }
-            if (cuponDTO.getPorcentajeDescuento() <= 0 || cuponDTO.getPorcentajeDescuento() >= 100) {
-                log.warn("El porcentaje de descuento debe estar entre 0 y 100.");
-                throw new NegocioException("El porcentaje de descuento debe estar entre 0 y 100.");
-            }
-            Cupon nuevoCupon = cuponMapper.toCuponEntity(cuponDTO);
-            nuevoCupon = cuponRepository.save(nuevoCupon);
-            clienteEstandar.setCupon(nuevoCupon);
-            clienteRepository.save(clienteEstandar);
-            log.info("Cupón con ID {} asignado al cliente estándar con ID {}", nuevoCupon.getId(), idCliente);
-            return true;
-        } else {
-            log.info("El cliente ya tiene un cupón asignado o el cupón actual aún es válido");
-            return false;
+        }catch (DateTimeParseException e) {
+            log.error("Formato fecha invalido");
+            throw new NegocioException("Formato de fecha inválido. Debe ser YYYY-MM-DD.");
         }
+
     }
     /*FIN DE SECCION ESTANDAR*/
-    
+
+    /**
+     * Valida que el porcentaje no sea nulo y que deba estar entre 0 y 100
+     * @param porcentajeDescuento porcentaje de descuento para premiun
+     */
+    private void validarPorcentajeDescuento(Double porcentajeDescuento){
+        try{
+            if(porcentajeDescuento<0 || porcentajeDescuento>100){
+                throw new NegocioException("El porcentaje de descuento debe ser entre 0 y 100");
+            }
+        }catch (NullPointerException e){
+            throw new NegocioException("El porcentaje de descuento NO puede ser null");
+        }
+
+    }
     /*SECCION DE CLIENTE PREMIUM*/
     /**
      * Agrega un nuevo cliente de tipo premium al sistema.
@@ -217,6 +228,7 @@ public class ClienteService {
 
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
+        validarPorcentajeDescuento(clientePremium.getPorcentajeDescuento());
         clientePremium.setId(null);
         log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         clienteRepository.save(clientePremium);
@@ -240,7 +252,7 @@ public class ClienteService {
             		});
         validarEmailParaEdicion(clienteExistente, dto);
         validarCelularParaEdicion(clienteExistente, dto);
-
+        validarPorcentajeDescuento(dto.getPorcentajeDescuento());
         asignarDatosPersonales(clienteExistente,dto);
 
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
@@ -307,32 +319,25 @@ public class ClienteService {
     /**
      * Valida si el cliente con el ID especificado está activo para realizar compras.
      *
-     * @param id ID del cliente a validar.
+     * @param cliente cliente a validar su estado.
      * @throws NegocioException si el cliente no está activo.
      */
-    public void validarClienteActivo(Long id){
-        log.info("Validando si el cliente con ID {} está activo", id);
-        ClienteDTO cliente = buscarPorID(id);
-        if (!cliente.getEstado().equals(EstadoCliente.ACTIVO.name())) {
-            log.warn("El cliente con ID {} no está activo para hacer una compra", id);
+    public void validarClienteActivo(Cliente cliente){
+        log.info("Validando si el cliente con ID {} está activo",cliente.getId());
+        if (!cliente.getEstado().equals(EstadoCliente.ACTIVO)) {
+            log.warn("El cliente con ID {} no está activo para hacer una compra", cliente.getId());
             throw new NegocioException("El cliente no esta activo para hacer una compra");
         }
     }
 
-
-    public ClienteEstandarDTO subirImagenClienteEstandar(Long clienteId, MultipartFile imagen)  {
-        ClienteEstandarDTO clienteEstandar=getClienteEstandar(clienteId);
+    public String subirImagenCliente(Long idCliente,MultipartFile imagen){
+        Cliente cliente= clienteRepository.findById(idCliente).orElseThrow(()-> new NegocioException("Cliente no encontrado"));
         String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
-        clienteEstandar.setFoto(url);
-        return editarClienteEstandar(clienteEstandar.getId(),clienteEstandar);
+        cliente.setFoto(url);
+        clienteRepository.save(cliente);
+        return url;
     }
 
-    public ClientePremiumDTO subirImagenClientePremium(Long clienteId, MultipartFile imagen)  {
-        ClientePremiumDTO clientePremium=getClientePremium(clienteId);
-        String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
-        clientePremium.setFoto(url);
-        return editarClientePremium(clientePremium.getId(),clientePremium);
-    }
 
     private void asignarDatosPersonales(Cliente cliente, ClienteDTO dto) {
         cliente.setNombre(dto.getNombre());

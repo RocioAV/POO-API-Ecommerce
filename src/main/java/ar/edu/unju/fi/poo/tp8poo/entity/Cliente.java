@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.entity;
 
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -50,10 +50,14 @@ public abstract class Cliente {
 		@UpdateTimestamp
 		private LocalDateTime updated;
 
+	public abstract double verificarDescuento();
+	public double calcularDescuento(double monto) {
+		return monto * verificarDescuento()/100;
+	}
 
 
 
-	    
 
-	    
+
+
 }

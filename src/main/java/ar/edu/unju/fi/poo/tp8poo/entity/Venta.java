@@ -1,6 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.entity;
 
-import ar.edu.unju.fi.poo.tp8poo.util.FormaPago;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class Venta {
     private Long id;
 
     @Column
-    private LocalDateTime fechaYHora;
+    private LocalDateTime fechaYHora=LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="cliente_id", nullable=false)

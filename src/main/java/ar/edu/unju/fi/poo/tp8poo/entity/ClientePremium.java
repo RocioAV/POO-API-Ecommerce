@@ -16,4 +16,9 @@ public class ClientePremium extends Cliente{
 
 	@Column
 	private Double porcentajeDescuento;
+
+	@Override
+	public double verificarDescuento() {
+		return porcentajeDescuento == null ? 0 : porcentajeDescuento;
+	}
 }

@@ -171,7 +171,7 @@ public class ClienteResource {
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
             log.error("Proceso de modificacion interrumpido para el cliente {}", id);
-            response.put("mensaje 3: ", "Error al obtener el cliente estándar");
+            response.put("mensaje 3: ", "Error al obtener el cliente premiun");
             response.put("error 3: ", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
@@ -235,49 +235,25 @@ public class ClienteResource {
         }
     }
 
-    @PatchMapping(value = "/estandar/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
-            summary = "Subir imagen para cliente Estandar",
+            summary = "Subir imagen para cliente ",
             description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Archivo subido con éxito"),
                     @ApiResponse(responseCode = "404", description = "No se encontro el cliente")
             }
     )
-    public ResponseEntity<Map<String, Object>> uploadFotoEstandar(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
+    public ResponseEntity<Map<String, Object>> uploadFoto(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
         log.info("Subida de imagen de cliente Estandar");
         Map<String, Object> response = new HashMap<>();
         try {
-            response.put("estandar",clienteService.subirImagenClienteEstandar(id,file));
-            response.put("mensaje de Imagen Estandar","Imagen actualizado del cliente");
+            response.put("url",clienteService.subirImagenCliente(id,file));
+            response.put(" mensaje ","Imagen actualizado del cliente");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (NegocioException e) {
             log.error("No se encontró el cliente con id :{} ",id);
             response.put("error encontrado", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-    }
-
-
-    @PatchMapping(value = "/premium/{id}/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "Subir imagen para cliente Premium",
-            description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Archivo subido con exito"),
-                    @ApiResponse(responseCode = "404", description = "No se econtró el cliente")
-            }
-    )
-    public ResponseEntity<Map<String, Object>> uploadFotoPremium(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
-        log.info("Subida de imagen de cliente premium");
-        Map<String, Object> response = new HashMap<>();
-        try {
-            response.put("estandar",clienteService.subirImagenClientePremium(id,file));
-            response.put("mensaje de Imagen Premium","Imagen actualizado del cliente");
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (NegocioException e) {
-            log.error("No se encontró el cliente");
-            response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
