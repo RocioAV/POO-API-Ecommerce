@@ -28,19 +28,22 @@ public class VentaService {
     private final VentaMapper ventaMapper;
     private final EmailService emailService;
     private final DescuentoService descuentoService;
+    private final TokenService tokenService;
 
     public VentaService(ClienteService clienteService,
                         ProductoService productoService,
                         VentaRepository ventaRepository,
                         VentaMapper ventaMapper,
                         EmailService emailService,
-                        DescuentoService descuentoService) {
+                        DescuentoService descuentoService,
+                        TokenService tokenService) {
         this.clienteService = clienteService;
         this.productoService = productoService;
         this.ventaRepository = ventaRepository;
         this.ventaMapper = ventaMapper;
         this.emailService = emailService;
         this.descuentoService = descuentoService;
+        this.tokenService = tokenService;
     }
 
 
@@ -108,9 +111,10 @@ public class VentaService {
      * @return VentaDTO con los detalles de la venta creada.
      * @throws IOException si ocurre un error en el proceso.
      */
-    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago) throws IOException {
+    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken) throws IOException {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
         validarDatosVenta(idCliente, idProducto);
+        tokenService.validarToken(idCliente,valorToken);
         ClienteDTO clienteDTO= clienteService.buscarPorID(idCliente);
         ProductoDTO productoDTO=productoService.findById(idProducto);
         VentaDTO ventaDTO = prepararVentaDTO(clienteDTO, productoDTO, formaDePago);

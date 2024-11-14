@@ -9,7 +9,4 @@ public class ConstantesMensajes {
     private ConstantesMensajes() {
     }
 
-    public static ConstantesMensajes createConstantesMensajes() {
-        return new ConstantesMensajes();
-    }
 }
