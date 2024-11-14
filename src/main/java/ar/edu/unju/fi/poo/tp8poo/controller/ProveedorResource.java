@@ -30,7 +30,7 @@ public class ProveedorResource {
         this.proveedorService = proveedorService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     @Operation(
             summary = "Crear proveedor",
             description = "Registra un nuevo proveedor en el sistema",
@@ -39,7 +39,7 @@ public class ProveedorResource {
                 @ApiResponse(responseCode = "400", description = "Datos inválidos")
             }
         )
-    public ResponseEntity<?> crearProveedor(
+    public ResponseEntity<Map<String, Object>> crearProveedor(
     		@Parameter(description = "Proveedor DTO", required = true) 
     		@RequestBody ProveedorDTO newProveedor) {
         log.info("Registrando nuevo proveedor: {}", newProveedor.getNombre());
@@ -57,7 +57,7 @@ public class ProveedorResource {
         }
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     @Operation(
             summary = "Obtener proveedor por ID",
             description = "Devuelve un proveedor basado en el ID proporcionado",
@@ -66,7 +66,7 @@ public class ProveedorResource {
                 @ApiResponse(responseCode = "404", description = "Proveedor no encontrado")
             }
         )
-    public ResponseEntity<?> obtenerProveedor(
+    public ResponseEntity<Map<String, Object>> obtenerProveedor(
     		@Parameter(description = "ID del proveedor", required = true)
     		@PathVariable Long id) {
         log.info("Iniciando búsqueda de proveedor con id {}", id);
@@ -83,7 +83,7 @@ public class ProveedorResource {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     @Operation(
             summary = "Modificar proveedor",
             description = "Actualiza la información de un proveedor existente en el sistema",
@@ -92,7 +92,7 @@ public class ProveedorResource {
                 @ApiResponse(responseCode = "404", description = "Proveedor no encontrado")
             }
         )
-    public ResponseEntity<?> modificarProveedor(
+    public ResponseEntity<Map<String, Object>> modificarProveedor(
     		@Parameter(description = "ID del proveedor", required = true) 
     		@PathVariable Long id,
             @Parameter(description = "Proveedor DTO con los datos actualizados", required = true) 
@@ -112,7 +112,7 @@ public class ProveedorResource {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Eliminar proveedor",
             description = "Realiza la eliminación lógica de un proveedor en el sistema",
@@ -121,7 +121,7 @@ public class ProveedorResource {
                 @ApiResponse(responseCode = "404", description = "Proveedor no encontrado")
             }
         )
-    public ResponseEntity<?> eliminarProveedor(
+    public ResponseEntity<Map<String, Object>> eliminarProveedor(
     		@Parameter(description = "ID del proveedor", required = true)
     		@PathVariable Long id) {
         log.info("Iniciando eliminación lógica del proveedor con id {}", id);
@@ -139,7 +139,7 @@ public class ProveedorResource {
         }
     }
 
-    @GetMapping("/list")
+    @GetMapping("/proveedores")
     @Operation(
             summary = "Listar proveedores",
             description = "Devuelve una lista de todos los proveedores registrados en el sistema",
@@ -148,7 +148,7 @@ public class ProveedorResource {
                 @ApiResponse(responseCode = "500", description = "Error interno al obtener la lista de proveedores")
             }
         )
-    public ResponseEntity<?> obtenerProveedores() {
+    public ResponseEntity<Map<String, Object>> obtenerProveedores() {
         log.info("Obteniendo listado de proveedores");
         Map<String, Object> response = new HashMap<>();
         try {
