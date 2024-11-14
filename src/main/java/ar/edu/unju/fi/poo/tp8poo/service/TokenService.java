@@ -1,8 +1,10 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
+import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.entity.Token;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.repository.TokenRepository;
+import ar.edu.unju.fi.poo.tp8poo.service.EmailService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,7 +14,16 @@ import java.util.Random;
 @Service
 public class TokenService {
     private final TokenRepository tokenRepository;
-    public TokenService(TokenRepository tokenRepository) {this.tokenRepository = tokenRepository;}
+    private final ClienteService clienteService;
+    private final EmailService emailService;
+    
+    public TokenService(TokenRepository tokenRepository, 
+    		ClienteService clienteService,
+    		EmailService emailService) {
+    	this.tokenRepository = tokenRepository;
+    	this.clienteService = clienteService;
+    	 this.emailService = emailService;
+    	}
 
     private final Random random = new Random();
 
@@ -58,7 +69,11 @@ public class TokenService {
      */
     public Token generarTokenParaCliente(Long clienteId) {
         String valorToken = Integer.toString(random.nextInt(1000000));
-        int expiracionSegundos = 120;
+        
+        ClienteDTO clienteDTO= clienteService.buscarPorID(clienteId);   
+		emailService.enviarTokenPorEmail(clienteDTO.getEmail(), valorToken);
+        
+		int expiracionSegundos = 120;
         LocalDateTime fechaExpiracion = LocalDateTime.now().plusSeconds(expiracionSegundos);
 
         verificarExistencia(clienteId);
