@@ -210,7 +210,7 @@ public class ProductoService {
     /**
      * Verifica si el producto con el ID especificado tiene stock disponible.
      *
-     * @param id ID del producto a verificar.
+     * @param producto producto a verificar su stock
      * @throws NegocioException si el producto no tiene stock disponible.
      */
     public void validarProductoSinStock(Producto producto){
