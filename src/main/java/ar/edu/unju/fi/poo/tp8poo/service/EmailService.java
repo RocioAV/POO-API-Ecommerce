@@ -1,15 +1,14 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.VentaDTO;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 /**
@@ -20,13 +19,8 @@ import java.nio.file.Paths;
 public class EmailService {
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine  templateEngine;
-
-    @Autowired
-    public EmailService(JavaMailSender mailSender,
-                        TemplateEngine  templateEngine) {
+    public EmailService(JavaMailSender mailSender){
         this.mailSender = mailSender;
-        this.templateEngine = templateEngine;
     }
     /**
      * Envía la factura por email al cliente.
@@ -67,8 +61,39 @@ public class EmailService {
              */
             mailSender.send(message);
             log.info("Factura enviada exitosamente a {}", venta.getCliente().getEmail());
+        } catch (NoSuchFileException e) {
+        	throw new NegocioException("Error al leer la plantilla HTML: " + e.getMessage()); 
+        } catch (Exception e) {  
+        	throw new NegocioException("Error al enviar la factura: " + e.getMessage()); 
+        }
+    }
+    
+    /**
+     * Envía el token por email al cliente.
+     *
+     * @param email del cliente y el token generado
+     */
+    public void enviarTokenPorEmail(String email, String token) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(email);
+            helper.setSubject("Su Token de Acceso");
+            /**
+             * Se genera el contenido del mensaje en formato html
+             */
+            String htmlContent = "<p>Estimado cliente,</p>"
+                    + "<p>Su token de acceso es: <strong>" + token + "</strong></p>"
+                    + "<p>Este token es válido por 120 segundos.</p>";
+
+            helper.setText(htmlContent, true);
+            /**
+             * Enviar el email
+             */
+            mailSender.send(message);
+            log.info("Token enviado exitosamente a {}", email);
         } catch (Exception e) {
-            log.error("Error al enviar la factura: {}", e.getMessage());
+            throw new NegocioException("Error al enviar el token: {}" + e.getMessage());
         }
     }
 }
