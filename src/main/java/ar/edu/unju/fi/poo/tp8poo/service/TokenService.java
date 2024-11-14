@@ -69,17 +69,16 @@ public class TokenService {
      */
     public Token generarTokenParaCliente(Long clienteId) {
         String valorToken = Integer.toString(random.nextInt(1000000));
-        
         ClienteDTO clienteDTO= clienteService.buscarPorID(clienteId);   
-		emailService.enviarTokenPorEmail(clienteDTO.getEmail(), valorToken);
-        
-		int expiracionSegundos = 120;
+        int expiracionSegundos = 120;
         LocalDateTime fechaExpiracion = LocalDateTime.now().plusSeconds(expiracionSegundos);
 
         verificarExistencia(clienteId);
 
         Token token = new Token(valorToken, fechaExpiracion, clienteId);
-        return tokenRepository.save(token);
+        token = tokenRepository.save(token);
+        emailService.enviarTokenPorEmail(clienteDTO.getEmail(), valorToken);
+        return token;
     }
 
     /**
