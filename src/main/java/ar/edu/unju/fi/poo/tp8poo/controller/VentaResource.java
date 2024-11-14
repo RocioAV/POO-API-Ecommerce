@@ -64,7 +64,8 @@ public class VentaResource {
             parameters = {
                     @Parameter(name = "idProducto",description = "ID del producto (Long)", required = true, example = "1"),
                     @Parameter(name = "idCliente",description = "ID del cliente (Long)", required = true, example = "1"),
-                    @Parameter(name = "formaPago",description = "Forma de  (CREDITO,DEBITO,TRANSFERENCIA)", required = true, example = "DEBITO")
+                    @Parameter(name = "formaPago",description = "Forma de  (CREDITO,DEBITO,TRANSFERENCIA)", required = true, example = "DEBITO"),
+                    @Parameter(name = "tokenCodigo",description = "Codigo del token generado", required = true)
             },
             responses = {
                     @ApiResponse(responseCode = "201", description = "Venta creada con éxito", content = @Content),
@@ -74,11 +75,11 @@ public class VentaResource {
     )
     public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,
                                           @RequestParam Long idCliente,
-                                          @RequestParam String formaPago) {
-        log.info("/api/v1/venta/create");
+                                          @RequestParam String formaPago, @RequestParam String tokenCodigo) {
+        log.info("/api/v1/venta");
         Map<String, Object> response = new HashMap<>();
         try{
-            response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago));
+            response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago,tokenCodigo));
             response.put(MENSAJE, "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }catch (NegocioException | IOException e) {
