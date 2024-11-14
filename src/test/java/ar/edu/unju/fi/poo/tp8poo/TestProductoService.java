@@ -5,7 +5,7 @@ import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
 import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
 import ar.edu.unju.fi.poo.tp8poo.testUtil.TestUtils;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoProducto;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

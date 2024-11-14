@@ -6,7 +6,7 @@ import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
 import ar.edu.unju.fi.poo.tp8poo.testUtil.TestUtils;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,8 +77,8 @@ class TestClienteService {
      void testAgregarClienteEstandar() throws  IOException{
         ClienteEstandarDTO nuevoCliente = clienteService.agregarClienteEstandar(clienteEstandarDTO);
         multipartFile = TestUtils.generarMultipartFile(rutaArchivo1);
-        nuevoCliente = clienteService.subirImagenClienteEstandar(nuevoCliente.getId(), multipartFile);
-        assertNotNull(nuevoCliente.getFoto());
+        String url = clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url);
         assertEquals("Raul", nuevoCliente.getNombre());
     }
 
@@ -86,8 +86,16 @@ class TestClienteService {
      void testEditarClienteEstandar() throws IOException {
         ClienteEstandarDTO nuevoCliente = clienteService.agregarClienteEstandar(clienteEstandarDTO);
         multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
-        nuevoCliente = clienteService.subirImagenClienteEstandar(nuevoCliente.getId(), multipartFile);
-        assertNotNull(nuevoCliente.getFoto(), "La foto debería haber sido establecida");
+        String url= clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url, "La foto debería haber sido establecida");
+        ClienteEstandarDTO clienteEstandarEditado = getClienteEstandarDTO(nuevoCliente);
+        clienteService.editarClienteEstandar(nuevoCliente.getId(), clienteEstandarEditado);
+        ClienteEstandarDTO result = clienteService.getClienteEstandar(nuevoCliente.getId());
+        assertEquals("Daniel", result.getNombre());
+        assertEquals(nuevoCliente.getFoto(), result.getFoto()); // Verificar que la foto sigue siendo la mi
+    }
+
+    private static ClienteEstandarDTO getClienteEstandarDTO(ClienteEstandarDTO nuevoCliente) {
         ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
         clienteEstandarEditado.setApellido("Lopez");
         clienteEstandarEditado.setNombre("Daniel");
@@ -96,10 +104,7 @@ class TestClienteService {
         clienteEstandarEditado.setFoto(nuevoCliente.getFoto()); // Mantener la URL de la foto actual
         clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
         clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
-        clienteService.editarClienteEstandar(nuevoCliente.getId(), clienteEstandarEditado);
-        ClienteEstandarDTO result = clienteService.getClienteEstandar(nuevoCliente.getId());
-        assertEquals("Daniel", result.getNombre());
-        assertEquals(nuevoCliente.getFoto(), result.getFoto()); // Verificar que la foto sigue siendo la mi
+        return clienteEstandarEditado;
     }
 
     @Test
@@ -116,17 +121,15 @@ class TestClienteService {
     @Test
      void testAgregarClientePremium() throws IOException{
         ClientePremiumDTO nuevoCliente = clienteService.agregarClientePremium(clientePremiumDTO);
-        multipartFile = TestUtils.generarMultipartFile(rutaArchivo1);
-        nuevoCliente = clienteService.subirImagenClientePremium(nuevoCliente.getId(), multipartFile);
-        assertNotNull(nuevoCliente.getFoto());
+        multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
+        String url= clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url);
         assertEquals("Maria", nuevoCliente.getNombre());
     }
 
     @Test
-    void testEditarClientePremium() throws  IOException{
+    void testEditarClientePremium() {
         clientePremiumDTO = clienteService.agregarClientePremium(clientePremiumDTO);
-        multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
-        clientePremiumDTO = clienteService.subirImagenClientePremium(clientePremiumDTO.getId(), multipartFile);
         assertNotNull(clientePremiumDTO.getFoto(), "La foto debería haber sido establecida");
         ClientePremiumDTO clientePremiumEditado = new ClientePremiumDTO();
         clientePremiumEditado.setApellido("Martinez");

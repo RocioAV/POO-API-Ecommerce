@@ -198,10 +198,19 @@ public class ClienteService {
     }
     /*FIN DE SECCION ESTANDAR*/
 
+    /**
+     * Valida que el porcentaje no sea nulo y que deba estar entre 0 y 100
+     * @param porcentajeDescuento porcentaje de descuento para premiun
+     */
     private void validarPorcentajeDescuento(Double porcentajeDescuento){
-        if(porcentajeDescuento<0 || porcentajeDescuento>100 ){
-            throw new NegocioException("El porcentaje de descuento debe ser entre 0 y 100");
+        try{
+            if(porcentajeDescuento<0 || porcentajeDescuento>100){
+                throw new NegocioException("El porcentaje de descuento debe ser entre 0 y 100");
+            }
+        }catch (NullPointerException e){
+            throw new NegocioException("El porcentaje de descuento NO puede ser null");
         }
+
     }
     /*SECCION DE CLIENTE PREMIUM*/
     /**

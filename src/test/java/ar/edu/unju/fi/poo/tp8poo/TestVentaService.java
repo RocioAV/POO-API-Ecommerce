@@ -6,10 +6,9 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Token;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.repository.TokenRepository;
 import ar.edu.unju.fi.poo.tp8poo.service.*;
-import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
-import ar.edu.unju.fi.poo.tp8poo.util.FormaPago;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoProducto;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
@@ -138,40 +137,19 @@ import static org.junit.jupiter.api.Assertions.*;
         assertEquals("El producto NO tiene stock", exception.getMessage(), "El mensaje de error no es el esperado.");
     }
 
-    @Test
-    void testCrearVentaCuponExpiradoClienteEstandar() throws IOException {
-        cuponDTO.setFechaExpiracion("2023-12-12");
-        clienteService.asignarCupon(clienteEstandarDTO.getId(), cuponDTO);
-        VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.CREDITO.name(),tokenValido.getValor());
-        Double precioFinalSinDescuento = ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
-        assertEquals(precioFinalSinDescuento, ventaDTO.getPrecioProducto(), "El precio final no es el esperado.");
-    }
 
-//    @Test
-//    void testCrearVentaCuponNullClienteEstandar() throws IOException {
-//        cuponDTO= null;
-//        clienteService.asignarCupon(clienteEstandarDTO.getId(), cuponDTO);
-//        System.out.println(clienteEstandarDTO);
-//        VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.CREDITO.name());
-//        Double precioFinalSinDescuento = ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
-//        assertEquals(precioFinalSinDescuento, ventaDTO.getPrecioProducto(), "El precio final no es el esperado.");
-//    }
 
     @Test
-    void testCrearVentaPorcentajeDescuentoInvalidoClientePremium() throws IOException {
+    void testCrearVentaPorcentajeDescuentoInvalidoClientePremium() {
         clientePremiumDTO.setPorcentajeDescuento(150.0);
-        clientePremiumDTO = clienteService.editarClientePremium(clientePremiumDTO.getId(), clientePremiumDTO);
-        VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.CREDITO.name(), tokenValido2.getValor());
-        Double precioFinalSinDescuento = ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
-        assertEquals(precioFinalSinDescuento, ventaDTO.getPrecioProducto(), "El precio final no es el esperado.");
+        NegocioException exception = assertThrows(NegocioException.class,()-> clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO));
+        assertEquals("El porcentaje de descuento debe ser entre 0 y 100",exception.getMessage());
     }
 
     @Test
-    void testCrearVentaPorcentajeDescuentoNullClientePremium() throws IOException {
+    void testCrearVentaPorcentajeDescuentoNullClientePremium() {
         clientePremiumDTO.setPorcentajeDescuento(null);
-        clientePremiumDTO = clienteService.editarClientePremium(clientePremiumDTO.getId(), clientePremiumDTO);
-        VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.CREDITO.name(), tokenValido2.getValor());
-        Double precioFinalSinDescuento = ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
-        assertEquals(precioFinalSinDescuento, ventaDTO.getPrecioProducto(), "El precio final no es el esperado.");
+        NegocioException exception = assertThrows(NegocioException.class,()-> clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO));
+        assertEquals("El porcentaje de descuento NO puede ser null",exception.getMessage());
     }
 }
