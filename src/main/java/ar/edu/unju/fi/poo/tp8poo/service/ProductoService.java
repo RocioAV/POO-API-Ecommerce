@@ -43,15 +43,21 @@ public class ProductoService {
      * Verifica que el producto tenga un proveedor asignado.
      *
      * @param productoDTO El objeto  ProductoDTO a validar.
-     * @throws IllegalArgumentException si el proveedor no está asignado.
+     * @throws NegocioException si el proveedor no está asignado.
      */
     private void validarProveedor(ProductoDTO productoDTO) {
-
+        log.debug("Validando existencia de proveedor para el producto nuevo");
         if (productoDTO.getIdProveedor() == null) {
             log.error("El producto debe tener un proveedor.");
             throw new NegocioException("El producto debe tener un proveedor asignado.");
         }
     }
+
+    /**
+     * Actualiza los datos de Producto con datos nuevos al producto persistido en la base de datos
+     * @param producto Producto persistido en la base de datos
+     * @param productoDTO Producto con nuevas actualizaciones de datos
+     */
     private void actualizarProductoDesdeDTO(Producto producto, ProductoDTO productoDTO) {
         producto.setCodigo(productoDTO.getCodigo());
         producto.setNombre(productoDTO.getNombre());
@@ -65,12 +71,21 @@ public class ProductoService {
         producto.setProveedor(proveedorMapper.toProveedor(proveedorService.obtenerProveedorPorId(productoDTO.getIdProveedor())));
     }
 
+    public Producto findProductoEntityById(Long id) {
+        log.info("Buscando producto por ID en la entidad: {}", id);
+        return productoRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Producto NO encontrado con ID: {}", id);
+                    return new NegocioException("Producto no encontrado");
+                });
+    }
+
     /**
      * Crea un producto.
      *
      * @param productoDTO Objeto que contiene los datos del producto a crear o actualizar.
      * @return El producto creado o actualizado como un objeto DTO.
-     * @throws IllegalArgumentException Si el proveedor del producto es nulo.
+     * @throws NegocioException Si el proveedor del producto es nulo.
      */
     public ProductoDTO createProducto(ProductoDTO productoDTO) {
         log.info("Creando producto: Nombre={}", productoDTO.getNombre());
@@ -81,6 +96,7 @@ public class ProductoService {
         producto.setProveedor(proveedor);
         producto.setEstado(EstadoProducto.DISPONIBLE.getEstado());
         producto.setId(null);
+        log.debug("Guardando producto en la base de datos");
         Producto savedProducto = productoRepository.save(producto);
         log.info("Producto creado con éxito: ID={}, Nombre={}", savedProducto.getId(), savedProducto.getNombre());
         return productoMapper.toProductoDTO(savedProducto);
@@ -116,16 +132,14 @@ public class ProductoService {
      */
     public ProductoDTO deleteProductoLogico(Long id) {
         log.info("Realizando borrado lógico de producto con ID: {}", id);
-        Producto producto = productoRepository.findById(id)
-                .orElseThrow(() -> {
+        Producto producto = productoRepository.findById(id).orElseThrow(() -> {
                     log.error("Producto NO  encontrado con ID: {}", id);
                     return new NegocioException(" Producto no encontrado ");
                 });
         producto.setEstado(EstadoProducto.NO_DISPONIBLE.getEstado());
-        log.info("Borrado lógico realizado con éxito para el producto con ID: {}", id);
-        return productoMapper.toProductoDTO(productoRepository.save(producto));
-
-
+        producto = productoRepository.save(producto);
+        log.info("Borrado lógico realizado con éxito para el producto con ID: {}", producto.getId());
+        return productoMapper.toProductoDTO(producto);
     }
 
     /**
@@ -152,8 +166,7 @@ public class ProductoService {
      * @return Una lista de productos como objetos DTO.
      */
     public List<ProductoDTO> findAll() {
-        log.info("Obteniendo todos los productos disponibles");
-
+        log.info("Obteniendo todos los productos");
         List<ProductoDTO> productosDTO = productoMapper.toProductoDTOList(productoRepository.findAll());
         log.info("Productos encontrados: {}", productosDTO.size());
         return productosDTO;
@@ -173,7 +186,7 @@ public class ProductoService {
             log.error("Producto NO encontrado");
             throw new NegocioException("Producto No encontrado");
         }
-        log.info("Producto encontrado: ID={}, Nombre={}, Codigo={}", producto.getId(), producto.getNombre(), producto.getCodigo());
+        log.info("Producto encontrado: ID={}, Codigo={}", producto.getId(), producto.getCodigo());
         return productoMapper.toProductoDTO(producto);
     }
 
@@ -199,10 +212,6 @@ public class ProductoService {
     public List<ProductoDTO> findByDescripcion(String descripcion) {
         log.info("Buscando productos por descripción: {}", descripcion);
         List<Producto> productos = productoRepository.findByDescripcionContainingIgnoreCase(descripcion);
-        if (productos.isEmpty()) {
-            log.error("Producto no encontrado");
-            throw new NegocioException("Producto no encontrado");
-        }
         log.info("Productos  encontrados: {}", productos.size());
         return productoMapper.toProductoDTOList(productos);
     }
@@ -213,34 +222,33 @@ public class ProductoService {
      * @param producto producto a verificar su stock
      * @throws NegocioException si el producto no tiene stock disponible.
      */
-    public void validarProductoSinStock(Producto producto){
-        log.info("Validando stock del producto con ID {}", producto.getId());
+    public void validarProducto(Producto producto){
+        log.debug("Validando stock y disponibiliadad del producto con ID {}", producto.getId());
         if (producto.getCantidad()<=0){
             log.warn("El producto con ID {} no tiene stock", producto.getId());
             throw new NegocioException("El producto NO tiene stock");
         }
-    }
-
-    public void validarProductoDisponible(Long id){
-        log.info("Validando disponibilidad del producto con ID {}", id);
-        ProductoDTO producto= findById(id);
         if (producto.getEstado().equals(EstadoProducto.NO_DISPONIBLE.getEstado())){
-            log.warn("El producto con ID {} no esta disponible", id);
+            log.warn("El producto con ID {} no esta disponible", producto.getId());
             throw new NegocioException("El producto NO se encuentra disponible");
         }
+        log.info("El producto con ID {} fue validado con exito", producto.getId());
     }
+
+
 
     /**
      * Descuenta una unidad del stock del producto. Si el stock llega a cero, actualiza el estado del producto.
      *
-     * @param id  ID del producto a descontar del stock.
+     * @param producto producto a descontar del stock.
      */
-    public void descontarStock(Long id){
-        log.info("Descontando stock para el producto con ID {}", id);
-        ProductoDTO producto= findById(id);
+    public void descontarStock(Producto producto){
+        log.info("Descontando stock para el producto con ID {}", producto.getId());
         producto.setCantidad(producto.getCantidad()-1);
-        editProducto(producto.getId(), producto);
+        log.debug("Guardando cambios de stock para producto con ID={}", producto.getId());
+        productoRepository.save(producto);
         if(producto.getCantidad()==0){
+            log.info("Stock agotado para producto con ID={}, realizando borrado lógico", producto.getId());
             deleteProductoLogico(producto.getId());
         }
 
@@ -251,6 +259,7 @@ public class ProductoService {
             ProductoDTO producto= findById(id);
             String url= gestorDeImagenesUtil.subirImagen(file,FOLDER_NAME);
             producto.setImagen(url);
+        log.debug("Actualizando URL de imagen en producto: ID={}, Nueva URL={}", producto.getId(), url);
             return editProducto(producto.getId(), producto);
 
     }

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 @Service
 @Slf4j
@@ -31,9 +30,10 @@ public class CuponService {
      */
     public void expirarCuponPorUso(Cliente cliente){
         if(cliente instanceof ClienteEstandar clienteEstandar && !clienteEstandar.cuponVencido()){
+            log.info("Expirando cupón para el cliente con ID: {}", cliente.getId());
             clienteEstandar.expirarCupon();
         }
-
+        log.info("El cupón para el cliente con ID: {}, ya está vencido.", cliente.getId());
     }
 
     /**
@@ -43,8 +43,11 @@ public class CuponService {
      */
     public Cupon crearCupon(CuponDTO cuponDTO) {
         cuponDTO.setId(null);
+        log.info("Creando un nuevo cupón ");
         Cupon cupon = cuponMapper.toCuponEntity(cuponDTO);
-        return cuponRepository.save(cupon);
+        cupon= cuponRepository.save(cupon);
+        log.info("Cupón creado exitosamente con ID: {}", cupon.getId());
+        return cupon;
     }
 
     /**

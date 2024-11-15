@@ -6,8 +6,6 @@ import ar.edu.unju.fi.poo.tp8poo.entity.Producto;
 import ar.edu.unju.fi.poo.tp8poo.entity.Venta;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.VentaMapper;
-import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
-import ar.edu.unju.fi.poo.tp8poo.repository.ProductoRepository;
 import ar.edu.unju.fi.poo.tp8poo.repository.VentaRepository;
 import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
 import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
@@ -31,8 +29,6 @@ public class VentaService {
     private final VentaMapper ventaMapper;
     private final EmailService emailService;
     private final TokenService tokenService;
-    private final ClienteRepository clienteRepository;
-    private final ProductoRepository productoRepository;
     private final CuponService cuponService;
 
     public VentaService(ClienteService clienteService,
@@ -41,8 +37,6 @@ public class VentaService {
                         VentaMapper ventaMapper,
                         EmailService emailService,
                         TokenService tokenService,
-                        ClienteRepository clienteRepository,
-                        ProductoRepository productoRepository,
                         CuponService cuponService) {
         this.clienteService = clienteService;
         this.productoService = productoService;
@@ -50,8 +44,6 @@ public class VentaService {
         this.ventaMapper = ventaMapper;
         this.emailService = emailService;
         this.tokenService = tokenService;
-        this.clienteRepository = clienteRepository;
-        this.productoRepository = productoRepository;
         this.cuponService = cuponService;
     }
 
@@ -63,9 +55,9 @@ public class VentaService {
      * @param producto ID del producto a validar.
      */
     private void validarDatosVenta(Cliente cliente, Producto producto) {
-        log.info("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", cliente.getId(), producto.getId());
+        log.debug("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", cliente.getId(), producto.getId());
         clienteService.validarClienteActivo(cliente);
-        productoService.validarProductoSinStock(producto);
+        productoService.validarProducto(producto);
         log.info("Validaciones de cliente y producto completadas para Cliente ID: {} y Producto ID: {}",  cliente.getId(), producto.getId());
     }
 
@@ -80,7 +72,6 @@ public class VentaService {
     public Double aplicarDescuento(Double precioProducto, Cliente cliente) {
         log.info("Aplicando descuento para cliente con ID {}", cliente.getId());
         Double precioFinal = precioProducto - cliente.calcularDescuento(precioProducto);
-        log.info("Cupon utilizado");
         cuponService.expirarCuponPorUso(cliente);
         log.debug("Precio final después del descuento: {}", precioFinal);
         return precioFinal;
@@ -101,8 +92,7 @@ public class VentaService {
         validarFormaPago(formaDePago);
         venta.setFormaPago(FormaPago.valueOf(formaDePago.toUpperCase()));
         Double precioFinalConDescuento = aplicarDescuento(producto.getPrecio(), cliente);
-        Double precioConvertidoAPesos = ConversorMoneda.convertirPrecio(precioFinalConDescuento);
-        venta.setPrecioProducto(precioConvertidoAPesos);
+        venta.setPrecioProducto(ConversorMoneda.convertirPrecio(precioFinalConDescuento));
         return venta;
     }
     /**
@@ -134,13 +124,12 @@ public class VentaService {
      */
     public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken) throws IOException {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
-        Cliente cliente = clienteRepository.findById(idCliente).orElseThrow(() -> new NegocioException("Cliente no encontrado para la Venta."));
-        Producto producto = productoRepository.findById(idProducto).orElseThrow(() -> new NegocioException("Producto no encontrado para la Venta."));
+        Cliente cliente = clienteService.findClienteEntityById(idCliente);
+        Producto producto = productoService.findProductoEntityById(idProducto);
         validarDatosVenta(cliente, producto);
         tokenService.validarToken(idCliente,valorToken);
-        Venta ventaEntity = prepararVentaDTO(cliente, producto, formaDePago);
-        ventaEntity = ventaRepository.save(ventaEntity);
-        productoService.descontarStock(idProducto);
+        Venta ventaEntity = ventaRepository.save(prepararVentaDTO(cliente, producto, formaDePago));
+        productoService.descontarStock(producto);
         VentaDTO ventaDTO = ventaMapper.toVentaDTO(ventaEntity);
         emailService.enviarFacturaPorEmail(ventaDTO);
         log.info("Venta creada y guardada con éxito para el cliente ID {}", idCliente);
@@ -185,7 +174,7 @@ public class VentaService {
     public List<VentaDTO> filtrarVentas(FiltroVentaDTO filtro) {
         log.debug("Filtrando ventas con los criterios: {}", filtro);
         validarNoNulo(filtro);
-        validarFiltros(filtro);
+        filtro.setNombreCliente(filtro.getNombreCliente() != null && filtro.getIdCliente() != null ? null : filtro.getNombreCliente());
         LocalDateTime[] fechas = validarFechas(filtro.getFechaDesde(), filtro.getFechaHasta());
         LocalDateTime fechaInicio = fechas[0];
         LocalDateTime fechaFin = fechas[1];
@@ -238,14 +227,6 @@ public class VentaService {
         if (filtro.getNombreCliente() == null && filtro.getFechaDesde() == null && filtro.getFechaHasta() == null && filtro.getIdCliente()==null) {
             log.error("Todos los filtros no deben ser nulos");
             throw new NegocioException("Todos los filtros no deben ser nulos");
-        }
-    }
-
-    private void validarFiltros(FiltroVentaDTO filtro) throws NegocioException {
-        log.debug("Validando filtros: nombreCliente={}, idCliente={}", filtro.getNombreCliente(), filtro.getIdCliente());
-        if (filtro.getNombreCliente() != null && filtro.getIdCliente() != null) {
-            log.error("Solo se permite usar uno de los filtros");
-            throw new NegocioException("Solo se permite usar uno de los filtros: 'nombreCliente' o 'idCliente'.");
         }
     }
 

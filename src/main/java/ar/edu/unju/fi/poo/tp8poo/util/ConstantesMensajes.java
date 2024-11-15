@@ -5,6 +5,8 @@ public class ConstantesMensajes {
     public static final String ERROR = "error";
     public static final String PRODUCTO = "producto";
     public static final String PRODUCTOS = "productos";
+    public static final String PROVEEDOR = "proveedor";
+    public static final String PROVEEDORES = "proveedores";
 
     private ConstantesMensajes() {
     }

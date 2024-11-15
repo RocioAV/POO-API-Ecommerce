@@ -130,8 +130,7 @@ public class ClienteService {
      */
     public ClienteEstandarDTO getClienteEstandar(Long id){
     	log.info("Buscando cliente : {}", id);
-		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id)
-	            .orElseThrow(() -> {
+		ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(id).orElseThrow(() -> {
 	            		log.error("ERROR al encontrar el cliente: {}", id);
 	            		return new NegocioException("Cliente no encontrado con");
 	            		});
@@ -174,10 +173,7 @@ public class ClienteService {
      */
     public boolean asignarCupon(Long idCliente, CuponDTO cuponDTO) {
         try{
-            ClienteEstandar clienteEstandar = (ClienteEstandar) clienteRepository.findById(idCliente).orElseThrow(() -> {
-                log.error("Error al encontrar el cliente estándar con ID: {}", idCliente);
-                return new NegocioException("Cliente estándar no registrado con ID " + idCliente);
-            });
+            ClienteEstandar clienteEstandar = (ClienteEstandar) findClienteEntityById(idCliente);
             Cupon cuponActual = clienteEstandar.getCupon();
             if (cuponActual == null || clienteEstandar.cuponVencido()) {
                 cuponService.validarNuevoCupon(LocalDate.parse(cuponDTO.getFechaExpiracion()),cuponDTO.getPorcentajeDescuento());
@@ -203,13 +199,17 @@ public class ClienteService {
      * @param porcentajeDescuento porcentaje de descuento para premiun
      */
     private void validarPorcentajeDescuento(Double porcentajeDescuento){
+        log.debug("Validando porcentaje de descuento para Cliente premiun");
         try{
             if(porcentajeDescuento<0 || porcentajeDescuento>100){
+                log.error("El porcentaje de descuento esta fuera de rango");
                 throw new NegocioException("El porcentaje de descuento debe ser entre 0 y 100");
             }
         }catch (NullPointerException e){
+            log.error("El porcentaje de descuento no puede ser null");
             throw new NegocioException("El porcentaje de descuento NO puede ser null");
         }
+        log.info("Procentaje de descuento validado correctamente");
 
     }
     /*SECCION DE CLIENTE PREMIUM*/
@@ -225,13 +225,12 @@ public class ClienteService {
     	log.info("Agregando nuevo cliente: {}",newClientePremium.getNombre());
 		newClientePremium.setFoto(DEFAULT_IMAGE_URL);
         ClientePremium clientePremium = clienteMapper.toClientePremiunEntity(newClientePremium);
-
         validarEmail(clientePremium.getEmail());
         validarCelular(clientePremium.getCelular());
         validarPorcentajeDescuento(clientePremium.getPorcentajeDescuento());
         clientePremium.setId(null);
-        log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         clienteRepository.save(clientePremium);
+        log.info("Cliente: {} Agregado con extio", newClientePremium.getNombre());
         return clienteMapper.toClientePremiunDTO(clientePremium);
     }
 
@@ -245,16 +244,11 @@ public class ClienteService {
      */
     public ClientePremiumDTO editarClientePremium(Long id, ClientePremiumDTO dto) {
     	log.info("Iniciando modificacion del cliente: {}", dto.getNombre());
-        ClientePremium clienteExistente = (ClientePremium) clienteRepository.findById(id)
-        		.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente con id: {}", id);
-            		return new NegocioException("Cliente premium no registrado con ID: " + id);
-            		});
+        ClientePremium clienteExistente = (ClientePremium) findClienteEntityById(id);
         validarEmailParaEdicion(clienteExistente, dto);
         validarCelularParaEdicion(clienteExistente, dto);
         validarPorcentajeDescuento(dto.getPorcentajeDescuento());
         asignarDatosPersonales(clienteExistente,dto);
-
         clienteExistente.setPorcentajeDescuento(dto.getPorcentajeDescuento());
         clienteExistente.setUpdated(LocalDateTime.now());
         clienteRepository.save(clienteExistente);
@@ -262,14 +256,16 @@ public class ClienteService {
         return clienteMapper.toClientePremiunDTO(clienteExistente);
     }
 
-    
+    /**
+     * Obtiene un cliente Premium por su ID y lo convierte en un DTO.
+     *
+     * @param id El ID del cliente Premium que se desea obtener.
+     * @return El ClientePremiumDTO correspondiente al cliente encontrado.
+     * @throws NegocioException si no se encuentra el cliente.
+     */
     public ClientePremiumDTO getClientePremium(Long id){
     	log.info("Buscando cliente con id: {}", id);
-		ClientePremium clientePremium = (ClientePremium) clienteRepository.findById(id)
-				.orElseThrow(() -> {
-            		log.error("Error al encontrar el cliente premium: {}", id);
-            		return new NegocioException("Cliente no encontrado con ID: " + id);
-            		});
+		ClientePremium clientePremium = (ClientePremium) findClienteEntityById(id);
 		log.info("Cliente encontrado con éxito: {}", clientePremium.getNombre());
 		return clienteMapper.toClientePremiunDTO(clientePremium);
 	}
@@ -277,33 +273,47 @@ public class ClienteService {
     
     /*FIN DE SECCION PREMIUM*/
 
+    /**
+     * Elimina lógicamente un cliente (cambia su estado a INACTIVO).
+     *
+     * @param clienteId El ID del cliente que se desea eliminar lógicamente.
+     * @return true si la eliminación fue exitosa, false si no se encontró el cliente.
+     * @throws NegocioException si no se encuentra el cliente con el ID proporcionado.
+     */
     public boolean eliminarLogicamente(Long clienteId) {
     	log.info("Iniciando eliminacion del cliente con id: {}",clienteId);
         Optional<Cliente> clienteOpt = clienteRepository.findById(clienteId);
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
             cliente.setEstado(EstadoCliente.INACTIVO);
-            clienteRepository.save(cliente); // Actualiza el estado del cliente
+            clienteRepository.save(cliente);
             log.info("Cliente con id {} eliminado con exito", clienteId);
             return true;
         }
         log.error("No se encontro cliente con id: {}", clienteId);
-        return false; // Retorna false si el cliente no se encuentra
+        return false;
     }
 
-
+    /**
+     * Busca un cliente por su ID y lo convierte en un DTO.
+     *
+     * @param id El ID del cliente que se desea buscar.
+     * @return El ClienteDTO correspondiente al cliente encontrado.
+     * @throws NegocioException si no se encuentra el cliente.
+     */
     public ClienteDTO buscarPorID(Long id) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Error al encontrar el cliente: {}", id);
-                    return new NegocioException("Cliente no encontrado con ID: " + id);
-                });
+        Cliente cliente = findClienteEntityById(id);
 
         return clienteMapper.toClienteDTO(cliente);
     }
-    
-    
-    // Metodo para obtener todos los clientes y convertirlos a DTOs
+
+
+    /**
+     * Obtiene todos los clientes registrados y los convierte en una lista de DTOs.
+     *
+     * @return Una lista de ClienteDTOs con todos los clientes.
+     * @throws NegocioException si no se encuentran clientes registrados.
+     */
     public List<ClienteDTO> obtenerClientes() {
         log.info("Obteniendo clientes");
         List<Cliente> clientes = clienteRepository.findAll();
@@ -317,10 +327,10 @@ public class ClienteService {
     }
 
     /**
-     * Valida si el cliente con el ID especificado está activo para realizar compras.
+     * Valida si el cliente especificado está activo para realizar compras.
      *
-     * @param cliente cliente a validar su estado.
-     * @throws NegocioException si el cliente no está activo.
+     * @param cliente El cliente a validar.
+     * @throws NegocioException si el cliente no está activo para realizar compras.
      */
     public void validarClienteActivo(Cliente cliente){
         log.info("Validando si el cliente con ID {} está activo",cliente.getId());
@@ -330,15 +340,31 @@ public class ClienteService {
         }
     }
 
+    /**
+     * Sube una imagen para un cliente y actualiza su URL en la base de datos.
+     *
+     * @param idCliente El ID del cliente al que se le asociará la imagen.
+     * @param imagen El archivo de la imagen a subir.
+     * @return La URL de la imagen subida.
+     * @throws NegocioException si no se encuentra el cliente o ocurre un error al subir la imagen.
+     */
     public String subirImagenCliente(Long idCliente,MultipartFile imagen){
-        Cliente cliente= clienteRepository.findById(idCliente).orElseThrow(()-> new NegocioException("Cliente no encontrado"));
+        Cliente cliente= findClienteEntityById(idCliente);
         String url= gestorDeImagenesUtil.subirImagen(imagen,FOLDER_NAME);
         cliente.setFoto(url);
         clienteRepository.save(cliente);
+        log.info("Imagen nueva del cliente ha sido actualizada y subida al servidor");
         return url;
     }
 
 
+
+    /**
+     * Asigna los datos personales de un ClienteDTO a la entidad Cliente.
+     *
+     * @param cliente La entidad Cliente a la que se le asignarán los datos.
+     * @param dto El ClienteDTO con los nuevos datos personales.
+     */
     private void asignarDatosPersonales(Cliente cliente, ClienteDTO dto) {
         cliente.setNombre(dto.getNombre());
         cliente.setApellido(dto.getApellido());
@@ -350,5 +376,21 @@ public class ClienteService {
         }
         log.debug("Datos personales actualizados: Nombre={}, Apellido={}, Email={}, Celular={}, Estado={}, foto={}",
                 dto.getNombre(), dto.getApellido(), dto.getEmail(), dto.getCelular(),dto.getEstado(),dto.getFoto());
+    }
+
+    /**
+     * Busca un cliente por su ID en la base de datos.
+     *
+     * @param id El ID del cliente que se desea buscar.
+     * @return La entidad Cliente correspondiente al ID.
+     * @throws NegocioException si no se encuentra el cliente con el ID proporcionado.
+     */
+    public Cliente findClienteEntityById(Long id) {
+        log.info("Buscando cliente por ID en la entidad: {}", id);
+        return clienteRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Cliente NO encontrado con ID: {}", id);
+                    return new NegocioException("Cliente no encontrado");
+                });
     }
 }

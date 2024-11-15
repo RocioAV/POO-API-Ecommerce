@@ -66,7 +66,7 @@ public interface IDocVentaResource {
                     
                     Criterios a tener en cuenta:
                     - Elimina atributos por los cuales no se quiera buscar.
-                    - La búsqueda simultánea por nombre y ID lanzará una excepción.
+                    - La búsqueda simultánea por nombre y ID se priorizara el ID.
                     - Ambas fechas deben estar presentes si se desea buscar por rango de fecha.
                     - La fecha de inicio no debe ser posterior a la fecha fin.
                     

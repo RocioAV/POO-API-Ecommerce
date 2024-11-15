@@ -303,11 +303,8 @@ public class ClienteResource {
     public ResponseEntity<Map<String,Object>> generarTokenCliente(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try{
-            ClienteDTO cliente = clienteService.buscarPorID(id);
-            if (cliente!=null){
-                response.put(ConstantesMensajes.MENSAJE, "Token generado para el cliente {}");
-                response.put("token", tokenService.generarTokenParaCliente(id));
-            }
+            response.put("token", tokenService.generarTokenParaCliente(id));
+            response.put(ConstantesMensajes.MENSAJE, "Token generado para el cliente {}");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (NegocioException e){
             log.error("Error al generar el token");
