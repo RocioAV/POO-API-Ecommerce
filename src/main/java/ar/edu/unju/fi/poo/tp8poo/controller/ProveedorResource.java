@@ -28,11 +28,7 @@ public class ProveedorResource {
     public ProveedorResource(ProveedorService proveedorService) {
         this.proveedorService = proveedorService;
     }
-    
-    String mensaje = ConstantesMensajes.MENSAJE;
-    String error = ConstantesMensajes.ERROR;
-    String proveedor = "proveedor";
-    String proveedores = "proveedores";
+
 
     @PostMapping("")
     @Operation(
@@ -50,12 +46,12 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorRegistrado = proveedorService.crearProveedor(newProveedor);
-            response.put(proveedor, proveedorRegistrado);
+            response.put(ConstantesMensajes.PROVEEDOR, proveedorRegistrado);
             log.info("Proveedor {} registrado con éxito", newProveedor.getNombre());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NegocioException e) {
         	log.warn("Error al crear el proveedor: {}", e.getMessage());
-            response.put(error, e.getMessage());
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -76,12 +72,12 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorEncontrado = proveedorService.obtenerProveedorPorId(id);
-            response.put(proveedor, proveedorEncontrado);
+            response.put(ConstantesMensajes.PROVEEDOR, proveedorEncontrado);
             log.info("Proveedor con id {} encontrado con éxito", id);
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
         	log.warn("Error al obtener el proveedor: {}", e.getMessage());
-            response.put(error, e.getMessage());
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -104,12 +100,12 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             ProveedorDTO proveedorEditado = proveedorService.actualizarProveedor(id, proveedorDTO);
-            response.put(proveedor, proveedorEditado);
+            response.put(ConstantesMensajes.PROVEEDOR, proveedorEditado);
             log.info("Proveedor con id {} modificado con éxito", id);
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
         	log.warn("Error al modificar el proveedor: {}", e.getMessage());
-            response.put(error, e.getMessage());
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -135,7 +131,7 @@ public class ProveedorResource {
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
         	log.warn("Error al eliminar logicamente el proveedor: {}", e.getMessage());
-            response.put(error, e.getMessage());
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
@@ -154,12 +150,12 @@ public class ProveedorResource {
         Map<String, Object> response = new HashMap<>();
         try {
             List<ProveedorDTO> proveedoresdto = proveedorService.obtenerProveedores();
-            response.put(proveedores, proveedoresdto);
+            response.put(ConstantesMensajes.PROVEEDORES, proveedoresdto);
             log.info("Listado de proveedores obtenido con éxito");
             return ResponseEntity.ok(response);
         } catch (NegocioException e) {
         	log.warn("Error al obtener la lista de proveedores: {}", e.getMessage());
-            response.put(error, e.getMessage());
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
