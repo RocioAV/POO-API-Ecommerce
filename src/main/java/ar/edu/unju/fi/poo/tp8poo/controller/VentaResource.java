@@ -1,9 +1,11 @@
 package ar.edu.unju.fi.poo.tp8poo.controller;
 
+import ar.edu.unju.fi.poo.tp8poo.controller.interfaces.IDocVentaResource;
 import ar.edu.unju.fi.poo.tp8poo.dto.FiltroVentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.VentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.VentaService;
+import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,57 +24,27 @@ import java.util.Map;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/venta")
-@Tag(name = "Gestion de Venta", description = "Operaciones relacionadas a Venta, creacion y filtrado")
-public class VentaResource {
+public class VentaResource implements IDocVentaResource {
 
     private final VentaService ventaService;
 
     public VentaResource(VentaService ventaService) {
         this.ventaService = ventaService;
     }
-    private static final String MENSAJE="mensaje";
-    private static final String ERROR="error";
 
+    @Override
     @GetMapping("/ventas")
-    @Operation(
-            summary = "Obtiene todas las ventas",
-            description = "Devuelve una lista de todas las ventas registradas en el sistema.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas obtenidas exitosamente", content = @Content),
-                    @ApiResponse(responseCode = "404", description = "No se encontraron ventas", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error en el servidor al acceder a la base de datos", content = @Content)
-            }
-    )
     public ResponseEntity<Map<String, Object>> getAllVentas(){
-        log.info("/api/v1/venta/list");
+        log.info("/api/v1/venta/ventas");
         Map<String, Object> response = new HashMap<>();
         List<VentaDTO> ventas = ventaService.findAll();
-        if (ventas.isEmpty()) {
-            log.info("No se encontraron ventas");
-            response.put("message", "No se encontraron ventas");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
         response.put("ventas", ventas);
-        response.put(MENSAJE, "Ventas obtenidas con éxito");
+        response.put(ConstantesMensajes.MENSAJE, "Ventas obtenidas con éxito");
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @PostMapping("")
-    @Operation(
-            summary = "Crea una venta",
-            description = "Crea una nueva venta registrando el producto y cliente asociados, así como la forma de pago.",
-            parameters = {
-                    @Parameter(name = "idProducto",description = "ID del producto (Long)", required = true, example = "1"),
-                    @Parameter(name = "idCliente",description = "ID del cliente (Long)", required = true, example = "1"),
-                    @Parameter(name = "formaPago",description = "Forma de  (CREDITO,DEBITO,TRANSFERENCIA)", required = true, example = "DEBITO"),
-                    @Parameter(name = "tokenCodigo",description = "Codigo del token generado", required = true)
-            },
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Venta creada con éxito", content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Error en los datos proporcionados", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
     public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,
                                           @RequestParam Long idCliente,
                                           @RequestParam String formaPago, @RequestParam String tokenCodigo) {
@@ -80,85 +52,46 @@ public class VentaResource {
         Map<String, Object> response = new HashMap<>();
         try{
             response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago,tokenCodigo));
-            response.put(MENSAJE, "Venta creada con exito");
+            response.put(ConstantesMensajes.MENSAJE, "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }catch (NegocioException | IOException e) {
             log.error("Problemas al registrar la venta");
-            response.put(MENSAJE, "Error al crear la venta");
-            response.put(ERROR, e.getMessage());
+            response.put(ConstantesMensajes.MENSAJE, "Error al crear la venta");
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
+    @Override
     @GetMapping("/filtro")
-    @Operation(
-            summary = "Filtra ventas",
-            description = """
-                    Filtra las ventas según los criterios proporcionados en el filtro.
-                    
-                    Criterios a tener en cuenta:
-                    - Elimina atributos por los cuales no se quiera buscar.
-                    - La búsqueda simultánea por nombre y ID lanzará una excepción.
-                    - Ambas fechas deben estar presentes si se desea buscar por rango de fecha.
-                    - La fecha de inicio no debe ser posterior a la fecha fin.
-                    
-                    Combinaciones posibles:
-                    - Nombre y rango de fechas
-                    - ID y rango de fechas
-                    - Solo rango de fechas (String)
-                    - Solo nombre (String)
-                    - Solo ID (Long)
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content),
-                    @ApiResponse(responseCode = "204", description = "No se encontraron ventas que coincidan con el filtro", content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Error en los criterios de filtro", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
     public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
-        log.info("/api/v1/venta/filter");
+        log.info("/api/v1/venta/filtro");
         Map<String, Object> response = new HashMap<>();
         try{
-            List<VentaDTO> ventasFiltradas= ventaService.filtrarVentas(filtroDTO);
-            if(ventasFiltradas.isEmpty()){
-                log.info("No se encontraron ventas que concuerden con el filtro");
-                return ResponseEntity.noContent().build();
-            }
-            response.put("ventas", ventasFiltradas);
-            response.put(MENSAJE,"Ventas de acuerdo al filtro obtenidas con exito ");
+            response.put("ventas", ventaService.filtrarVentas(filtroDTO));
+            response.put(ConstantesMensajes.MENSAJE,"Ventas de acuerdo al filtro obtenidas con exito ");
             return ResponseEntity.ok(response);
-
         }catch (NegocioException e) {
-            response.put(MENSAJE, "Error al aplicar filtros");
-            response.put(ERROR, e.getMessage());
+            log.error("No se ha podido realizar el filtro de ventas");
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 
+    @Override
     @GetMapping("/{id}")
-    @Operation(
-            summary = "Obtiene una venta por ID",
-            description = "Devuelve los detalles de una venta específica a partir de su ID.",
-            parameters = @Parameter(name = "id",description = "ID de venta (Long)", required = true, example = "1"),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content),
-                    @ApiResponse(responseCode = "404", description = "Venta no encontrada", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
     public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id){
-        log.info("/api/v1/venta/get/{id}");
+        log.info("/api/v1/venta/{id}");
         Map<String, Object> response = new HashMap<>();
         try{
             VentaDTO venta= ventaService.findById(id);
             response.put("venta", venta);
-            response.put(MENSAJE,"Venta encontrada con exito");
+            response.put(ConstantesMensajes.MENSAJE,"Venta encontrada con exito");
             return ResponseEntity.ok(response);
 
         }catch (NegocioException e) {
-            response.put(MENSAJE, "Error al buscar la venta");
-            response.put(ERROR, e.getMessage());
+            log.error("No se ha podido encotrar la venta");
+            response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
