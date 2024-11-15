@@ -6,15 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ar.edu.unju.fi.poo.tp8poo.controller.interfaces.IDocClienteResource;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
 import ar.edu.unju.fi.poo.tp8poo.service.TokenService;
 import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
@@ -33,8 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/cliente")
-@Tag(name = "Gestion de clientes", description = "Operaciones relacionadas con los clientes")
-public class ClienteResource {
+public class ClienteResource implements IDocClienteResource {
 
 	private final ClienteService clienteService;
     private final TokenService tokenService;
@@ -44,19 +40,8 @@ public class ClienteResource {
         this.tokenService = tokenService;
     }
 
+    @Override
     @PostMapping(value = "/estandar")
-    @Operation(
-            summary = "Crear cliente estándar",
-            description = """
-                    Para poder crear correctamente el cliente Estandar debe:
-                    - Eliminar el atributo del cupon, o la fecha de expiración del cupón.
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Cliente estándar creado con éxito"),
-                    @ApiResponse(responseCode = "400", description = "Datos inválidos")
-            }
-    )
-
     public ResponseEntity<Map<String, Object>> crearClienteEstandar(@RequestBody ClienteEstandarDTO newEstandar) {
         log.info("Nuevo cliente: {}",newEstandar.getNombre());
         Map<String, Object> response = new HashMap<>();
@@ -72,16 +57,8 @@ public class ClienteResource {
         }
     }
 
-
+    @Override
     @PostMapping(value="/premium")
-    @Operation(
-            summary = "Crear cliente premium",
-            description = "Registra un nuevo cliente premium en el sistema",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Cliente premium creado con éxito"),
-                    @ApiResponse(responseCode = "400", description = "Datos inválidos")
-            }
-    )
     public ResponseEntity<Map<String, Object>> crearClientePremium(@RequestBody ClientePremiumDTO newPremium){
         log.info("Registrando nuevo cliente estandar: {}",newPremium.getNombre());
         Map<String, Object> response = new HashMap<>();
@@ -97,17 +74,8 @@ public class ClienteResource {
         }
     }
 
+    @Override
     @GetMapping("/{id}")
-    @Operation(
-            summary = "Obtener cliente por ID",
-            description = "Busca un cliente en el sistema usando su ID",
-            parameters = @Parameter(name = "id", description = "ID del cliente a buscar", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente encontrado"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
-            }
-    )
-
     public ResponseEntity<Map<String, Object>> obtenerCliente(@PathVariable Long id){
         log.info("Iniciando búsqueda de cliente con id {}", id);
         Map<String, Object> response = new HashMap<>();
@@ -124,16 +92,8 @@ public class ClienteResource {
         }
     }
 
+    @Override
     @PutMapping("/estandar/{id}")
-    @Operation(
-            summary = "Actualizar cliente estándar",
-            description = "Modifica los datos de un cliente estándar existente",
-            parameters = @Parameter(name = "id", description = "ID del cliente estándar a actualizar", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente estándar actualizado con éxito"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-            }
-    )
     public ResponseEntity<Map<String, Object>> modificarClienteEstandar(@PathVariable Long id, @RequestBody ClienteEstandarDTO estandarDTO){
         Map<String, Object> response = new HashMap<>();
         log.info("Iniciando proceso de modificacion de datos para el cliente estandar con id: {}", id);
@@ -150,17 +110,8 @@ public class ClienteResource {
         }
     }
 
-
+    @Override
     @PutMapping("/premium/{id}")
-    @Operation(
-            summary = "Actualizar cliente premium",
-            description = "Modifica los datos de un cliente premium existente",
-            parameters = @Parameter(name = "id", description = "ID del cliente premium a actualizar", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente premium actualizado con éxito"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-            }
-    )
     public ResponseEntity<Map<String, Object>> modificarClientePremium(@PathVariable Long id, @RequestBody ClientePremiumDTO premiumDTO){
         Map<String, Object> response = new HashMap<>();
         log.info("Iniciando proceso de modificacion de datos para el cliente premium con id: {}", id);
@@ -177,16 +128,8 @@ public class ClienteResource {
         }
     }
 
+    @Override
     @DeleteMapping("/clientes/{id}")
-    @Operation(
-            summary = "Eliminar cliente lógicamente",
-            description = "Elimina un cliente de manera lógica usando su ID",
-            parameters = @Parameter(name = "id", description = "ID del cliente a eliminar", required = true),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cliente eliminado con éxito"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-            }
-    )
     public ResponseEntity<Map<String, Object>> eliminarCliente(@PathVariable Long id){
         log.info("Eliminar lógicamente cliente de id {}", id);
         Map<String, Object> response = new HashMap<>();
@@ -210,15 +153,8 @@ public class ClienteResource {
         }
     }
 
+    @Override
     @GetMapping("/clientes")
-    @Operation(
-            summary = "Obtener todos los clientes",
-            description = "Recupera una lista de todos los clientes registrados en el sistema",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida con éxito"),
-                    @ApiResponse(responseCode = "404", description = "No se encontraron clientes")
-            }
-    )
     public ResponseEntity<Map<String, Object>> obtenerClientes(){
         log.info("Obteniendo listado de los clientes");
         Map<String, Object> response = new HashMap<>();
@@ -235,15 +171,8 @@ public class ClienteResource {
         }
     }
 
+    @Override
     @PatchMapping(value = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(
-            summary = "Subir imagen para cliente ",
-            description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Archivo subido con éxito"),
-                    @ApiResponse(responseCode = "404", description = "No se encontro el cliente")
-            }
-    )
     public ResponseEntity<Map<String, Object>> uploadFoto(@PathVariable Long id, @RequestParam("file") final MultipartFile file){
         log.info("Subida de imagen de cliente Estandar");
         Map<String, Object> response = new HashMap<>();
@@ -259,15 +188,8 @@ public class ClienteResource {
     }
 
 
+    @Override
     @PatchMapping(value = "/estandar/{idCliente}/cupon", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(
-            summary = "Asignar cupón a cliente estándar",
-            description = "Asigna un nuevo cupón a un cliente estándar si no tiene uno o si el actual ha expirado.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Cupón asignado con éxito al cliente estándar"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado o error de negocio")
-            }
-    )
     public ResponseEntity<Map<String, Object>> asignarCuponAClienteEstandar(@PathVariable Long idCliente, @RequestBody CuponDTO cupon) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -287,19 +209,8 @@ public class ClienteResource {
         }
     }
 
-
+    @Override
     @PostMapping("/{id}/token")
-    @Operation(
-            summary = "Generar token para cliente",
-            description = "Genera un token único asociado al cliente con un valor aleatorio y lo registra en el sistema.",
-            parameters = {
-                    @Parameter(name = "id", description = "ID del cliente a generar el nuevo token (Long)", required = true, example = "1"),
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Token generado con éxito"),
-                    @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-            }
-    )
     public ResponseEntity<Map<String,Object>> generarTokenCliente(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try{
