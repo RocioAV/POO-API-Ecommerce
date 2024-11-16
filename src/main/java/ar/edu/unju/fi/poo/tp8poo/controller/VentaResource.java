@@ -12,10 +12,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.http.*;
 
 @RestController
 @Slf4j
@@ -97,39 +103,54 @@ public class VentaResource implements IDocVentaResource {
     
     @Override
     @GetMapping("/documento")
-    public ResponseEntity<Map<String, Object>> exportar(
+    public ResponseEntity<byte[]> exportar(
             @ModelAttribute FiltroVentaDTO filtroDTO,
             @RequestParam String nombreArchivo,
             @RequestParam String formato) {
 
-        log.info("/api/v1/venta/documento");
-        Map<String, Object> response = new HashMap<>();
+        log.info("/api/v1/venta/documento solicitado en formato: {}", formato);
 
         try {
             List<VentaDTO> ventasFiltradas = ventaService.filtrarVentas(filtroDTO);
+            if (ventasFiltradas.isEmpty()) {
+                log.warn("No se encontraron ventas para exportar");
+                return ResponseEntity.noContent().build();
+            }
+
+            byte[] archivoBytes = null;
+            String contentType = "";
+            String extension = ""; 
 
             if ("pdf".equalsIgnoreCase(formato)) {
-                exportService.exportarAPdf(ventasFiltradas, nombreArchivo + ".pdf", filtroDTO);
-                response.put(ConstantesMensajes.MENSAJE, "Ventas exportadas a PDF con éxito.");
+                archivoBytes = exportService.exportarAPdfComoBytes(ventasFiltradas, filtroDTO);
+                contentType = "application/pdf";
+                extension = ".pdf";
             } else if ("excel".equalsIgnoreCase(formato)) {
-                exportService.exportarAExcel(ventasFiltradas, nombreArchivo + ".xlsx", filtroDTO);
-                response.put(ConstantesMensajes.MENSAJE, "Ventas exportadas a Excel con éxito.");
+                archivoBytes = exportService.exportarAExcelComoBytes(ventasFiltradas, filtroDTO);
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                extension = ".xlsx";
             } else if ("ambos".equalsIgnoreCase(formato)) {
-                exportService.exportarAPdf(ventasFiltradas, nombreArchivo + ".pdf", filtroDTO);
-                exportService.exportarAExcel(ventasFiltradas, nombreArchivo + ".xlsx", filtroDTO);
-                response.put(ConstantesMensajes.MENSAJE, "Ventas exportadas a PDF y Excel con éxito.");
+                archivoBytes = exportService.exportarAmbosComoZip(ventasFiltradas, filtroDTO, nombreArchivo);
+                contentType = "application/zip";
+                extension = ".zip";
             } else {
-                response.put(ConstantesMensajes.ERROR, "Formato inválido. Debe ser 'pdf', 'excel' o 'ambos'.");
+                log.error("Formato inválido: {}", formato);
+                return ResponseEntity.badRequest().body(null);
             }
-            response.put("ventasExportadas", ventasFiltradas);
-            return ResponseEntity.ok(response);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                    .filename(nombreArchivo + extension).build());
+
+            return ResponseEntity.ok().headers(headers).body(archivoBytes);
 
         } catch (NegocioException e) {
-            log.error("No se ha podido realizar el filtro de ventas", e);
-            response.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            log.error("Error en la exportación: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Error interno al exportar", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 }
