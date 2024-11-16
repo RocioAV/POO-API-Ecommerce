@@ -113,7 +113,12 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Subir imagen para cliente ",
-            description = "Por medio del id del cliente, se busca al mismo para subir su imagen",
+            description = """
+                         Por medio del id del cliente, se busca al mismo para subir su imagen
+                         PARAMETROS OBLIGATORIOS
+                    - Id del producto (Long/number)
+                    - Archivo Imagen (éste debe ser .jpg .jpeg .webp .png)
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Archivo subido con éxito"),
                     @ApiResponse(responseCode = "404", description = "No se encontro el cliente")
