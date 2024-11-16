@@ -3,6 +3,8 @@ package ar.edu.unju.fi.poo.tp8poo.service;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import org.apache.poi.ss.usermodel.*;
@@ -26,17 +28,6 @@ public class ExportService {
 
     private static final String ERROR = "error";
     private static final String LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/tp8poo2024.firebasestorage.app/o/logo%2FlogoG2.png?alt=media&token=c1ac110f-6b05-4090-851e-8986b2252aba";
-    private static final String EXPORT_DIR = "src/main/resources/export/";
-
-    /**
-     * Crea la carpeta de exportación si no existe.
-     */
-    private void crearCarpetaSiNoExiste() {
-        File carpeta = new File(EXPORT_DIR);
-        if (!carpeta.exists()) {
-            carpeta.mkdirs();
-        }
-    }
 
     /**
      * Exporta datos de ventas a un archivo Excel.
@@ -45,10 +36,9 @@ public class ExportService {
      * @param archivoExcel Nombre del archivo Excel.
      * @param filtroDTO   Filtros aplicados a las ventas.
      */
-    public void exportarAExcel(List<VentaDTO> ventas, String archivoExcel, FiltroVentaDTO filtroDTO) {
-        crearCarpetaSiNoExiste();
+    public byte[] exportarAExcelComoBytes(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO) {
         try (Workbook workbook = new XSSFWorkbook();
-             FileOutputStream fileOut = new FileOutputStream(EXPORT_DIR + archivoExcel)) {
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Ventas");
             agregarLogoExcel(workbook, sheet);
@@ -56,13 +46,14 @@ public class ExportService {
             agregarEncabezadoExcel(workbook, sheet);
             agregarDatosVentasExcel(sheet, ventas, workbook);
 
-            workbook.write(fileOut);
-            log.info("Archivo Excel creado con éxito");
+            workbook.write(baos);
+            return baos.toByteArray();
         } catch (Exception e) {
-            log.error(ERROR, "Error durante la operación: {}", e.getMessage());
-            throw new NegocioException("Operación interrumpida: " + e.getMessage());
+            log.error(ERROR,"Error al generar Excel: {}", e.getMessage());
+            throw new NegocioException("Error al generar Excel: " + e.getMessage());
         }
     }
+
 
     /**
      * Exporta datos de ventas a un archivo PDF.
@@ -71,23 +62,47 @@ public class ExportService {
      * @param archivoPdf Nombre del archivo PDF.
      * @param filtroDTO  Filtros aplicados a las ventas.
      */
-    public void exportarAPdf(List<VentaDTO> ventas, String archivoPdf, FiltroVentaDTO filtroDTO) {
-        crearCarpetaSiNoExiste();
-        try (FileOutputStream fos = new FileOutputStream(EXPORT_DIR + archivoPdf)) {
+    public byte[] exportarAPdfComoBytes(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Document document = new Document();
-            PdfWriter.getInstance(document, fos);
+            PdfWriter.getInstance(document, baos);
             document.open();
+
             agregarLogoPdf(document);
             agregarTituloPdf(document, filtroDTO);
             agregarTablaPdf(document, ventas);
-            document.close();
 
-            log.info("Archivo PDF creado con éxito");
+            document.close();
+            return baos.toByteArray();
         } catch (Exception e) {
-            log.error(ERROR, "Error durante la operación: {}", e.getMessage());
-            throw new NegocioException("Operación interrumpida: " + e.getMessage());
+            log.error(ERROR,"Error al generar PDF: {}", e.getMessage());
+            throw new NegocioException("Error al generar PDF: " + e.getMessage());
         }
     }
+    
+    public byte[] exportarAmbosComoZip(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO, String nombreArchivo) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zipOut = new ZipOutputStream(baos)) {
+
+            ZipEntry pdfEntry = new ZipEntry(nombreArchivo + ".pdf");
+            zipOut.putNextEntry(pdfEntry);
+            zipOut.write(exportarAPdfComoBytes(ventas, filtroDTO));
+            zipOut.closeEntry();
+
+            ZipEntry excelEntry = new ZipEntry(nombreArchivo + ".xlsx");
+            zipOut.putNextEntry(excelEntry);
+            zipOut.write(exportarAExcelComoBytes(ventas, filtroDTO));
+            zipOut.closeEntry();
+
+            zipOut.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            log.error(ERROR,"Error al generar ZIP: {}", e.getMessage());
+            throw new NegocioException("Error al generar ZIP: " + e.getMessage());
+        }
+    }
+
+
 
     private void agregarLogoExcel(Workbook workbook, Sheet sheet) throws IOException {
         BufferedImage logoImage = ImageIO.read(new URL(LOGO_URL));
