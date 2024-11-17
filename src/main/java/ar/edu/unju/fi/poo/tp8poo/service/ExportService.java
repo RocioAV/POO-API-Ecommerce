@@ -18,6 +18,7 @@ import ar.edu.unju.fi.poo.tp8poo.dto.FiltroVentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.VentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 
 /**
  * Servicio para exportar datos de ventas en formatos Excel y PDF.
@@ -79,7 +80,13 @@ public class ExportService {
             throw new NegocioException("Error al generar PDF: " + e.getMessage());
         }
     }
-    
+    /**
+     * Exporta datos de ventas a un archivo ZIP y contiene un pdf y un excel.
+     *
+     * @param ventas     Lista de ventas a exportar.
+     * @param archivoZip Nombre del archivo Zip.
+     * @param filtroDTO  Filtros aplicados a las ventas.
+     */
     public byte[] exportarAmbosComoZip(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO, String nombreArchivo) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ZipOutputStream zipOut = new ZipOutputStream(baos)) {
@@ -102,7 +109,52 @@ public class ExportService {
         }
     }
 
+    public byte[] exportarArchivo(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO, String nombreArchivo, String formato) {
+        byte[] archivoBytes = null;
 
+        switch (formato.toLowerCase()) {
+            case "pdf":
+                archivoBytes = exportarAPdfComoBytes(ventas, filtroDTO);
+                break;
+            case "excel":
+                archivoBytes = exportarAExcelComoBytes(ventas, filtroDTO);
+                break;
+            case "ambos":
+                archivoBytes = exportarAmbosComoZip(ventas, filtroDTO, nombreArchivo);
+                break;
+            default:
+                log.error("Formato inválido: {}", formato);
+        }
+
+        return archivoBytes;
+    }
+
+    public HttpHeaders establecerEncabezados(String nombreArchivo, String formato) {
+        String contentType = "";
+        String extension = "";
+
+        switch (formato.toLowerCase()) {
+            case "pdf":
+                contentType = "application/pdf";
+                extension = ".pdf";
+                break;
+            case "excel":
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                extension = ".xlsx";
+                break;
+            case "ambos":
+                contentType = "application/zip";
+                extension = ".zip";
+                break;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(contentType));
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(nombreArchivo + extension).build());
+        
+        return headers;
+    }
 
     private void agregarLogoExcel(Workbook workbook, Sheet sheet) throws IOException {
         BufferedImage logoImage = ImageIO.read(new URL(LOGO_URL));
