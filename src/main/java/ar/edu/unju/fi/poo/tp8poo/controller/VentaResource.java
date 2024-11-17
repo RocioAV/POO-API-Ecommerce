@@ -98,28 +98,40 @@ public class VentaResource implements IDocVentaResource {
     
     @Override
     @GetMapping("/documento")
-    public ResponseEntity<byte[]> exportar(
-            @ModelAttribute FiltroVentaDTO filtroDTO,
-            @RequestParam String nombreArchivo,
-            @RequestParam String formato) {
+    public ResponseEntity<Object> exportar(
+            FiltroVentaDTO filtroDTO,
+            @RequestParam(required = false) String nombreArchivo,
+            @RequestParam(required = false) String formato) {
         log.info("/api/v1/venta/documento solicitado en formato: {}", formato);
+
         try {
             List<VentaDTO> ventasFiltradas = ventaService.filtrarVentas(filtroDTO);
             if (ventasFiltradas.isEmpty()) {
-                log.warn("No se encontraron ventas para exportar");
+                log.warn("No se encontraron ventas para exportar.");
                 return ResponseEntity.noContent().build();
+            }
+            if (nombreArchivo == null || nombreArchivo.isBlank() || formato == null || formato.isBlank()) {
+                log.warn("Parámetros 'nombreArchivo' o 'formato' no proporcionados. Devolviendo lista filtrada en formato JSON.");
+                return ResponseEntity.ok(ventasFiltradas);
             }
             byte[] archivoBytes = exportService.exportarArchivo(ventasFiltradas, filtroDTO, nombreArchivo, formato);
             if (archivoBytes == null) {
                 log.error("Formato inválido o error en la exportación.");
-                return ResponseEntity.badRequest().body(null);
+                return ResponseEntity.badRequest().body(Map.of(
+                        "mensaje", "El formato especificado no es válido.",
+                        "estado", HttpStatus.BAD_REQUEST.value()
+                ));
             }
             HttpHeaders headers = exportService.establecerEncabezados(nombreArchivo, formato);
             return ResponseEntity.ok().headers(headers).body(archivoBytes);
         } catch (NegocioException e) {
             log.error("Error en la exportación: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "mensaje", e.getMessage(),
+                    "estado", HttpStatus.BAD_REQUEST.value()
+            ));
         }
     }
+
 
 }
