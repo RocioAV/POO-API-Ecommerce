@@ -104,20 +104,23 @@ public interface IDocVentaResource {
     @Operation(
     	    summary = "Exporta las ventas filtradas",
     	    description = """
-    	        Este endpoint permite exportar las ventas filtradas a PDF, Excel, o ambos formatos.
-    	        Parámetros requeridos:
-    	        - **filtroDTO**: Objeto de tipo FiltroVentaDTO que contiene los criterios de filtrado.
-    	        - **nombreArchivo**: Nombre base del archivo de exportación (sin extensión).
-    	        - **formato**: Formato de exportación. Puede ser:
-    	          - `pdf`: Exporta las ventas en formato PDF.
-    	          - `excel`: Exporta las ventas en formato Excel.
-    	          - `ambos`: Exporta las ventas en ambos formatos.
+    	    		Este endpoint permite exportar una lista de ventas filtrada en diferentes formatos (PDF, Excel)
+    	    		o devolver la lista filtrada directamente en formato JSON si no se especifica el formato.
 
-    	        Detalles adicionales:
-    	        - Sigue los criterios de Filtro
-    	        - Los criterios de filtro deben ser válidos y consistentes.
-    	        - Si no se especifica un formato válido, el endpoint devolverá un error.
-    	        - Los archivos generados tendrán las extensiones `.pdf` y/o `.xlsx` según el formato seleccionado.
+    	    		Comportamiento:
+    	    		- Si el parámetro formato no se proporciona o está vacío, el endpoint devolverá la lista de ventas filtrada en formato `JSON`.
+    	    		- Si se especifica un formato válido (`pdf` o `excel`), el endpoint generará el archivo correspondiente y lo devolverá.
+
+    	    		Parámetros:
+    	    		- **filtroDTO**: Objeto que contiene los criterios de filtrado para las ventas.
+    	    		- **formato**: Opcional. Define el formato de exportación. Puede ser:
+    	    		  - `pdf`: Exporta las ventas en formato PDF.
+    	    		  - `excel`: Exporta las ventas en formato Excel.
+    	    		  - `ambos`: Exporta las ventas en ambos formatos comprimidos en un archivo Zip.
+
+    	    		Respuestas posibles:
+    	    		- Retorna una lista de ventas en JSON si no se especifica un formato.
+    	    		- Retorna un archivo descargable en el formato especificado si el formato es válido.
     	        """,
     	    responses = {
     	        @ApiResponse(
