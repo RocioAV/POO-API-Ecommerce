@@ -137,6 +137,6 @@ public interface IDocVentaResource {
     	        )
     	    }
     	)
-	public ResponseEntity<Object> exportar(FiltroVentaDTO filtroDTO, String nombreArchivo, String formato);
+	public ResponseEntity<Object> exportar(FiltroVentaDTO filtroDTO, String formato);
 
 }

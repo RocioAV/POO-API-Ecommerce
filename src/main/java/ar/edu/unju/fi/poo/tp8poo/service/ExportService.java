@@ -262,12 +262,12 @@ public class ExportService {
         document.add(table);
     }
 
-    private String obtenerTitulo(FiltroVentaDTO filtroDTO) {
+    public String obtenerTitulo(FiltroVentaDTO filtroDTO) {
         StringBuilder titulo = new StringBuilder();
-        if (filtroDTO.getFechaDesde() != null) titulo.append("Fecha Desde: ").append(filtroDTO.getFechaDesde()).append(" ");
-        if (filtroDTO.getFechaHasta() != null) titulo.append("Fecha Hasta: ").append(filtroDTO.getFechaHasta()).append(" ");
-        if (filtroDTO.getIdCliente() != null) titulo.append("ID Cliente: ").append(filtroDTO.getIdCliente()).append(" ");
-        if (filtroDTO.getNombreCliente() != null) titulo.append("Nombre Cliente: ").append(filtroDTO.getNombreCliente());
+        if (filtroDTO.getFechaDesde() != null) titulo.append("Desde: ").append(filtroDTO.getFechaDesde()).append(" ");
+        if (filtroDTO.getFechaHasta() != null) titulo.append(", Hasta: ").append(filtroDTO.getFechaHasta()).append(" ");
+        if (filtroDTO.getIdCliente() != null) titulo.append(", ID Cliente: ").append(filtroDTO.getIdCliente()).append(" ");
+        if (filtroDTO.getNombreCliente() != null) titulo.append(", Nombre Cliente: ").append(filtroDTO.getNombreCliente());
         return titulo.toString().trim();
     }
 

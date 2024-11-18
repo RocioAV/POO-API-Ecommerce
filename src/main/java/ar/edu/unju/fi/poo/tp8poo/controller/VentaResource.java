@@ -100,20 +100,19 @@ public class VentaResource implements IDocVentaResource {
     @GetMapping("/documento")
     public ResponseEntity<Object> exportar(
             FiltroVentaDTO filtroDTO,
-            @RequestParam(required = false) String nombreArchivo,
             @RequestParam(required = false) String formato) {
         log.info("/api/v1/venta/documento solicitado en formato: {}", formato);
-
         try {
             List<VentaDTO> ventasFiltradas = ventaService.filtrarVentas(filtroDTO);
             if (ventasFiltradas.isEmpty()) {
                 log.warn("No se encontraron ventas para exportar.");
                 return ResponseEntity.noContent().build();
             }
-            if (nombreArchivo == null || nombreArchivo.isBlank() || formato == null || formato.isBlank()) {
+            if (formato == null || formato.isBlank()) {
                 log.warn("Parámetros 'nombreArchivo' o 'formato' no proporcionados. Devolviendo lista filtrada en formato JSON.");
                 return ResponseEntity.ok(ventasFiltradas);
             }
+            String nombreArchivo = ("Ventas " + exportService.obtenerTitulo(filtroDTO));
             byte[] archivoBytes = exportService.exportarArchivo(ventasFiltradas, filtroDTO, nombreArchivo, formato);
             if (archivoBytes == null) {
                 log.error("Formato inválido o error en la exportación.");
@@ -132,6 +131,5 @@ public class VentaResource implements IDocVentaResource {
             ));
         }
     }
-
-
+    
 }
