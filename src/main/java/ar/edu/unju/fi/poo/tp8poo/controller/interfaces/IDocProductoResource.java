@@ -55,7 +55,7 @@ public interface IDocProductoResource {
                           "descripcion": "String",
                           "precio": Double,
                           "cantidad": Integer,
-                          "estado": "String", (Disponible, No Disponible)
+                          "estado": "String", (Se crea Disponible por default)
                           "idProveedor": Long
                 """,
             responses = {
