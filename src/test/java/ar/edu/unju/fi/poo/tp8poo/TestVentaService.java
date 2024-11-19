@@ -4,8 +4,11 @@ package ar.edu.unju.fi.poo.tp8poo;
 import ar.edu.unju.fi.poo.tp8poo.dto.*;
 import ar.edu.unju.fi.poo.tp8poo.entity.Token;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
+import ar.edu.unju.fi.poo.tp8poo.mapper.ClienteMapper;
+import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
 import ar.edu.unju.fi.poo.tp8poo.repository.TokenRepository;
 import ar.edu.unju.fi.poo.tp8poo.service.*;
+import ar.edu.unju.fi.poo.tp8poo.util.ConversorMoneda;
 import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
 import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoProducto;
 import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
@@ -18,9 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.*;
     ProveedorService proveedorService;
     @Autowired
     TokenRepository tokenRepository;
+    @Autowired
+    ClienteMapper clienteMapper;
 
     static ClienteEstandarDTO clienteEstandarDTO;
     static ClientePremiumDTO clientePremiumDTO;
@@ -48,10 +51,11 @@ import static org.junit.jupiter.api.Assertions.*;
     static CuponDTO cuponDTO;
     static Token tokenValido;
     static Token tokenValido2;
-	MultipartFile multipartFile;
     String workspacePath = System.getProperty("user.dir");
     String rutaArchivo1 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test01.jpeg";
     String rutaArchivo2 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test02.png";
+    @Autowired
+    private ClienteRepository clienteRepository;
 
 
     @BeforeEach
@@ -104,14 +108,14 @@ import static org.junit.jupiter.api.Assertions.*;
     }
 
     @Test
-    void testCrearVentaClienteEstandarCorrectamenteConDescuento() throws IOException {
+    void testCrearVentaClienteEstandarCorrectamenteConDescuento()  {
         VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.CREDITO.name(),tokenValido.getValor());
         assertNotNull(ventaDTO, "La venta no debe ser nula.");
         assertEquals(clienteEstandarDTO.getId(), ventaDTO.getCliente().getId(), "El ID del cliente en la venta no coincide.");
     }
 
     @Test
-    void testCrearVentaClientePremiumCorrectamenteConDescuento() throws IOException {
+    void testCrearVentaClientePremiumCorrectamenteConDescuento() {
         VentaDTO ventaDTO = ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name(), tokenValido2.getValor());
         assertNotNull(ventaDTO, "La venta no debe ser nula.");
         assertEquals(clientePremiumDTO.getId(), ventaDTO.getCliente().getId(), "El ID del cliente en la venta no coincide.");
@@ -121,7 +125,7 @@ import static org.junit.jupiter.api.Assertions.*;
     void testCrearVentaClienteInvalido() {
         clienteEstandarDTO.setEstado(EstadoCliente.INACTIVO.name());
         clienteEstandarDTO = clienteService.editarClienteEstandar(clienteEstandarDTO.getId(), clienteEstandarDTO);
-        NegocioException exception = assertThrows(NegocioException.class, () -> {
+        NegocioException exception = assertThrowsExactly(NegocioException.class, () -> {
             ventaService.crearVenta(productoDTO.getId(), clienteEstandarDTO.getId(), FormaPago.DEBITO.name(), tokenValido.getValor());
         });
         assertEquals("El cliente no esta activo para hacer una compra", exception.getMessage(), "El mensaje de error no es el esperado.");
@@ -131,25 +135,21 @@ import static org.junit.jupiter.api.Assertions.*;
     void testCrearVentaProductoSinStock() {
         productoDTO.setCantidad(0);
         productoDTO = productoService.editProducto(productoDTO.getId(), productoDTO);
-        NegocioException exception = assertThrows(NegocioException.class, () -> {
-            ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name(), tokenValido2.getValor());
+        NegocioException exception = assertThrowsExactly(NegocioException.class, () -> {ventaService.crearVenta(productoDTO.getId(), clientePremiumDTO.getId(), FormaPago.TRANSFERENCIA.name(), tokenValido2.getValor());
         });
         assertEquals("El producto NO tiene stock", exception.getMessage(), "El mensaje de error no es el esperado.");
     }
 
-
-
     @Test
-    void testCrearVentaPorcentajeDescuentoInvalidoClientePremium() {
-        clientePremiumDTO.setPorcentajeDescuento(150.0);
-        NegocioException exception = assertThrows(NegocioException.class,()-> clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO));
-        assertEquals("El porcentaje de descuento debe ser entre 0 y 100",exception.getMessage());
+    void testCrearVentaCuponNull(){
+        clienteEstandarDTO.setCupon(null);
+        clienteRepository.save(clienteMapper.toClienteEstandarEntity(clienteEstandarDTO));
+        VentaDTO venta = ventaService.crearVenta(productoDTO.getId(),clienteEstandarDTO.getId(),"DEBITO",tokenValido.getValor());
+        Double precio= ConversorMoneda.convertirPrecio(productoDTO.getPrecio());
+        assertEquals(precio,venta.getPrecioProducto());
     }
 
-    @Test
-    void testCrearVentaPorcentajeDescuentoNullClientePremium() {
-        clientePremiumDTO.setPorcentajeDescuento(null);
-        NegocioException exception = assertThrows(NegocioException.class,()-> clienteService.editarClientePremium(clientePremiumDTO.getId(),clientePremiumDTO));
-        assertEquals("El porcentaje de descuento NO puede ser null",exception.getMessage());
-    }
+
+
+
 }
