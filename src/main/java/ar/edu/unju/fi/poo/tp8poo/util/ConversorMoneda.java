@@ -16,12 +16,12 @@ public class ConversorMoneda {
 
 	}
 
-	private static String consumoAPI() throws IOException {
+	private static String consumoAPI()  {
 		int cp;
-		URL url = new URL("https://dolarapi.com/v1/dolares/oficial");
 		HttpURLConnection connection;
 		BufferedReader br;
 		try {
+			URL url = new URL("https://dolarapi.com/v1/dolares/oficial");
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/json");
@@ -41,7 +41,7 @@ public class ConversorMoneda {
 		}
 	}
 
-	public static double convertirPrecio(double precioActual) throws IOException {
+	public static double convertirPrecio(double precioActual) {
 		double precioVenta;
 		String api=consumoAPI();
 		JSONObject json= new JSONObject(api);

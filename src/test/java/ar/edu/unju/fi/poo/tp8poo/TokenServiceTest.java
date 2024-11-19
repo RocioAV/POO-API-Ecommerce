@@ -70,7 +70,6 @@ class TokenServiceTest {
 
         tokenService.verificarExistencia(2L);
 
-        // Verificar que el token expirado ya no existe en la base de datos
         Token tokenEliminado = tokenRepository.findByClienteId(2L).orElse(null);
         assertNull(tokenEliminado);
     }
@@ -87,7 +86,7 @@ class TokenServiceTest {
 
     @Test
      void testValidarTokenExpirado() {
-        NegocioException exception = assertThrows(NegocioException.class, () -> {
+        NegocioException exception = assertThrowsExactly(NegocioException.class, () -> {
             tokenService.validarToken(2L,tokenExpirado.getValor());
         });
 

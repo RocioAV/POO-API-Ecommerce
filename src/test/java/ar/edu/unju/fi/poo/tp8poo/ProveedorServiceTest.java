@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
     @Test
     void testObtenerProveedores() {
-        Proveedor proveedorGuardado = proveedorRepository.save(proveedor);
+        proveedorRepository.save(proveedor);
         List<ProveedorDTO> proveedores = proveedorService.obtenerProveedores();
         assertNotNull(proveedores);
         assertFalse(proveedores.isEmpty());
