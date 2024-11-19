@@ -35,7 +35,7 @@ public class VentaResource implements IDocVentaResource {
     @Override
     @GetMapping("/ventas")
     public ResponseEntity<Map<String, Object>> getAllVentas(){
-        log.info("/api/v1/venta/ventas");
+        log.info("GET /api/v1/venta/ventas");
         Map<String, Object> response = new HashMap<>();
         List<VentaDTO> ventas = ventaService.findAll();
         response.put("ventas", ventas);
@@ -48,15 +48,13 @@ public class VentaResource implements IDocVentaResource {
     public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,
                                           @RequestParam Long idCliente,
                                           @RequestParam String formaPago, @RequestParam String tokenCodigo) {
-        log.info("/api/v1/venta");
+        log.info("POST /api/v1/venta");
         Map<String, Object> response = new HashMap<>();
         try{
             response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago,tokenCodigo));
             response.put(ConstantesMensajes.MENSAJE, "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }catch (NegocioException | IOException e) {
-            log.error("Problemas al registrar la venta");
-            response.put(ConstantesMensajes.MENSAJE, "Error al crear la venta");
+        }catch (NegocioException e) {
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
@@ -81,16 +79,13 @@ public class VentaResource implements IDocVentaResource {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id){
-        log.info("/api/v1/venta/{id}");
+        log.info("GET /api/v1/venta/{id}");
         Map<String, Object> response = new HashMap<>();
         try{
-            VentaDTO venta= ventaService.findById(id);
-            response.put("venta", venta);
+            response.put("venta", ventaService.findById(id));
             response.put(ConstantesMensajes.MENSAJE,"Venta encontrada con exito");
             return ResponseEntity.ok(response);
-
         }catch (NegocioException e) {
-            log.error("No se ha podido encotrar la venta");
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }

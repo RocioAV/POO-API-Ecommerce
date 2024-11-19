@@ -22,13 +22,6 @@ public interface ClienteMapper {
 
     ClientePremium toClientePremiunEntity(ClientePremiumDTO clientePremiumDTO);
 
-    List<ClienteEstandarDTO> toClienteEstandarDTOList(List<ClienteEstandar> clienteEstandarList);
-
-    List<ClientePremiumDTO> toClientePremiunDTOList(List<ClientePremium> clientesPremium);
-
-    List<ClienteEstandar> toClienteEstandarEntityList(List<ClienteEstandarDTO> clienteEstandarDTOList);
-
-    List<ClientePremium> toClientePremiunEntityList(List<ClientePremiumDTO> clientePremiumDTOList);
 
     default Cliente toClienteEntity(ClienteDTO clienteDTO) {
         if (clienteDTO instanceof ClienteEstandarDTO clienteEstandarDTO) {
@@ -48,7 +41,5 @@ public interface ClienteMapper {
     }
 
     List<ClienteDTO> toClienteDtoList(List<Cliente> clienteList);
-
-    List<Cliente> toClienteEntityList(List<ClienteDTO> clienteDTOList);
 
 }

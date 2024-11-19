@@ -6,6 +6,7 @@ import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.mapper.CuponMapper;
 import ar.edu.unju.fi.poo.tp8poo.repository.CuponRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
@@ -28,6 +29,7 @@ public class CuponService {
      * el descuento hasta su renovacion
      * @param cliente cliente con el cupon utilizado
      */
+    @Transactional
     public void expirarCuponPorUso(Cliente cliente){
         if(cliente instanceof ClienteEstandar clienteEstandar && !clienteEstandar.cuponVencido()){
             log.info("Expirando cupón para el cliente con ID: {}", cliente.getId());

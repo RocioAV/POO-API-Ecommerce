@@ -12,7 +12,6 @@ import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -54,7 +53,8 @@ public class VentaService {
      * @param cliente  cliente a validar.
      * @param producto ID del producto a validar.
      */
-    private void validarDatosVenta(Cliente cliente, Producto producto) {
+    private void validarDatosVenta(Cliente cliente, Producto producto,String valorToken) {
+        tokenService.validarToken(cliente.getId(),valorToken);
         log.debug("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", cliente.getId(), producto.getId());
         clienteService.validarClienteActivo(cliente);
         productoService.validarProducto(producto);
@@ -72,7 +72,7 @@ public class VentaService {
     public Double aplicarDescuento(Double precioProducto, Cliente cliente) {
         log.info("Aplicando descuento para cliente con ID {}", cliente.getId());
         Double precioFinal = precioProducto - cliente.calcularDescuento(precioProducto);
-        cuponService.expirarCuponPorUso(cliente);
+
         log.debug("Precio final después del descuento: {}", precioFinal);
         return precioFinal;
     }
@@ -82,9 +82,9 @@ public class VentaService {
      * @param cliente Cliente que realiza la compra.
      * @param producto Producto a vender.
      * @param formaDePago Forma de pago elegida para la compra.
-     * @throws IOException Si ocurre un error al preparar los datos.
+     *
      */
-    private Venta prepararVentaDTO(Cliente cliente, Producto producto, String formaDePago) throws IOException {
+    private Venta prepararVentaDTO(Cliente cliente, Producto producto, String formaDePago) {
         Venta venta = new Venta();
         log.debug("Preparando venta para cliente con ID {}", cliente.getId());
         venta.setProducto(producto);
@@ -119,19 +119,18 @@ public class VentaService {
      * @param idProducto ID del producto a vender.
      * @param idCliente  ID del cliente que realiza la compra.
      * @param formaDePago ID de la forma de pago.
+     * @param valorToken valor de token esperado para realizar la compra
      * @return VentaDTO con los detalles de la venta creada.
-     * @throws IOException si ocurre un error en el proceso.
      */
-    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken) throws IOException {
+    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken)  {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
         Cliente cliente = clienteService.findClienteEntityById(idCliente);
         Producto producto = productoService.findProductoEntityById(idProducto);
-        validarDatosVenta(cliente, producto);
-        tokenService.validarToken(idCliente,valorToken);
+        validarDatosVenta(cliente, producto,valorToken);
         Venta ventaEntity = ventaRepository.save(prepararVentaDTO(cliente, producto, formaDePago));
         productoService.descontarStock(producto);
-        VentaDTO ventaDTO = ventaMapper.toVentaDTO(ventaEntity);
-        emailService.enviarFacturaPorEmail(ventaDTO);
+        cuponService.expirarCuponPorUso(cliente);
+        emailService.enviarFacturaPorEmail(ventaMapper.toVentaDTO(ventaEntity));
         log.info("Venta creada y guardada con éxito para el cliente ID {}", idCliente);
         return ventaMapper.toVentaDTO(ventaEntity);
     }

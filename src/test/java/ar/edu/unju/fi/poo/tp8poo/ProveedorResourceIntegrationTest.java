@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ProveedorResourceIntegrationTest {
+class ProveedorResourceIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

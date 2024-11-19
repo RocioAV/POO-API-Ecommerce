@@ -55,7 +55,7 @@ public interface IDocProductoResource {
                           "descripcion": "String",
                           "precio": Double,
                           "cantidad": Integer,
-                          "estado": "String", (Disponible, No Disponible)
+                          "estado": "String", (Se crea Disponible por default)
                           "idProveedor": Long
                 """,
             responses = {
@@ -121,7 +121,7 @@ public interface IDocProductoResource {
                     Carga una imagen para un producto específico por ID.
                     PARAMETROS OBLIGATORIOS
                     - Id del producto (Long/number)
-                    - Archivo Imagen (éste debe ser .jpg .jpeg .wepb .png)
+                    - Archivo Imagen (éste debe ser .jpg .jpeg .webp .png)
                     """,
             parameters = @Parameter(name = "id",description = "ID del producto", required = true, example = "1"),
             responses = {

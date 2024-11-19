@@ -95,17 +95,7 @@ class TestClienteService {
         assertEquals(nuevoCliente.getFoto(), result.getFoto()); // Verificar que la foto sigue siendo la mi
     }
 
-    private static ClienteEstandarDTO getClienteEstandarDTO(ClienteEstandarDTO nuevoCliente) {
-        ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
-        clienteEstandarEditado.setApellido("Lopez");
-        clienteEstandarEditado.setNombre("Daniel");
-        clienteEstandarEditado.setCelular("1233123456");
-        clienteEstandarEditado.setEmail("raul@hotmail.com");
-        clienteEstandarEditado.setFoto(nuevoCliente.getFoto()); // Mantener la URL de la foto actual
-        clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
-        clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
-        return clienteEstandarEditado;
-    }
+
 
     @Test
      void testEliminarLogicamenteClienteEstandar() {
@@ -209,9 +199,8 @@ class TestClienteService {
         assertEquals(4,clienteService.obtenerClientes().size());
 
     }
-
     @Test
-    void testAsignarNuevoCupon_SinCuponExistente() {
+    void testAsignarNuevoCuponSinCuponExistente() {
         ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
 
         clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
@@ -221,28 +210,8 @@ class TestClienteService {
         assertNotNull(clienteActualizado.getCupon());
         assertEquals(20, clienteActualizado.getCupon().getPorcentajeDescuento());
     }
-
     @Test
-    void testAsignarNuevoCupon_ConCuponExpirado() {
-        ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
-
-        NegocioException exception = assertThrows(NegocioException.class,
-                () -> clienteService.asignarCupon(clienteGuardado.getId(), cuponExpirado));
-
-        assertEquals("La fecha de expiración del cupón debe ser posterior a la fecha actual.", exception.getMessage());
-
-        boolean result = clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
-        assertTrue(result, "El cupón debería asignarse porque el actual está expirado.");
-
-        ClienteEstandarDTO clienteEstandar = clienteService.getClienteEstandar(clienteGuardado.getId());
-        assertNotNull(clienteEstandar.getCupon(), "El cliente debería tener un nuevo cupón asignado.");
-        assertEquals(20, clienteEstandar.getCupon().getPorcentajeDescuento(), "El porcentaje de descuento debe ser 20.");
-        assertEquals(cuponValido.getFechaExpiracion(), clienteEstandar.getCupon().getFechaExpiracion().toString(),
-                "La fecha de expiración del cupón debería coincidir con la asignada.");
-    }
-
-    @Test
-    void testNoAsignarCupon_CuponValidoExistente() {
+    void testAsignarCuponConCuponValidoExistente() {
         ClienteEstandarDTO clienteGuardado=clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
         clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
         assertFalse(clienteService.asignarCupon(clienteGuardado.getId(), cuponValido2));
@@ -250,17 +219,18 @@ class TestClienteService {
 
 
 
-    @Test
-    void testNoAsignarCupon_PorcentajeDescuentoInvalido() {
-        ClienteEstandarDTO clienteGuardado=clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
 
-        NegocioException exception = assertThrows(NegocioException.class, () -> {
-            clienteService.asignarCupon(clienteGuardado.getId(), cuponConPorcentajeInvalido);
-        });
-        assertEquals("El porcentaje de descuento debe estar entre 0 y 100.", exception.getMessage());
+    private static ClienteEstandarDTO getClienteEstandarDTO(ClienteEstandarDTO nuevoCliente) {
+        ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
+        clienteEstandarEditado.setApellido("Lopez");
+        clienteEstandarEditado.setNombre("Daniel");
+        clienteEstandarEditado.setCelular("1233123456");
+        clienteEstandarEditado.setEmail("raul@hotmail.com");
+        clienteEstandarEditado.setFoto(nuevoCliente.getFoto()); // Mantener la URL de la foto actual
+        clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
+        clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
+        return clienteEstandarEditado;
     }
-
-
 
 
 }

@@ -256,11 +256,13 @@ public class ProductoService {
 
     public ProductoDTO subirImagenProducto(Long id, MultipartFile file){
         log.info("Subiendo imagen de producto");
-            ProductoDTO producto= findById(id);
+            Producto producto = findProductoEntityById(id);
             String url= gestorDeImagenesUtil.subirImagen(file,FOLDER_NAME);
             producto.setImagen(url);
         log.debug("Actualizando URL de imagen en producto: ID={}, Nueva URL={}", producto.getId(), url);
-            return editProducto(producto.getId(), producto);
+            producto = productoRepository.save(producto);
+            log.info("Imagen actualizada con exito del producto {}", id);
+            return productoMapper.toProductoDTO(producto);
 
     }
 
