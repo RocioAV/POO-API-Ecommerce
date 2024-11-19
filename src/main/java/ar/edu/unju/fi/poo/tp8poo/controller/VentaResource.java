@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,22 +60,6 @@ public class VentaResource implements IDocVentaResource {
     }
 
     @Override
-    @GetMapping("/filtro")
-    public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
-        log.info("/api/v1/venta/filtro");
-        Map<String, Object> response = new HashMap<>();
-        try{
-            response.put("ventas", ventaService.filtrarVentas(filtroDTO));
-            response.put(ConstantesMensajes.MENSAJE,"Ventas de acuerdo al filtro obtenidas con exito ");
-            return ResponseEntity.ok(response);
-        }catch (NegocioException e) {
-            log.error("No se ha podido realizar el filtro de ventas");
-            response.put(ConstantesMensajes.ERROR, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-    }
-
-    @Override
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id){
         log.info("GET /api/v1/venta/{id}");
@@ -92,11 +75,11 @@ public class VentaResource implements IDocVentaResource {
     }
     
     @Override
-    @GetMapping("/documento")
+    @GetMapping("/filtro")
     public ResponseEntity<Object> exportar(
             FiltroVentaDTO filtroDTO,
             @RequestParam(required = false) String formato) {
-        log.info("/api/v1/venta/documento solicitado en formato: {}", formato);
+        log.info("/api/v1/venta/filtro/documento solicitado en formato: {}", formato);
         try {
             List<VentaDTO> ventasFiltradas = ventaService.filtrarVentas(filtroDTO);
             if (ventasFiltradas.isEmpty()) {
@@ -104,24 +87,24 @@ public class VentaResource implements IDocVentaResource {
                 return ResponseEntity.noContent().build();
             }
             if (formato == null || formato.isBlank()) {
-                log.warn("Parámetros 'nombreArchivo' o 'formato' no proporcionados. Devolviendo lista filtrada en formato JSON.");
+                log.warn("Parámetro 'formato' no proporcionado. Devolviendo lista filtrada en formato JSON.");
                 return ResponseEntity.ok(ventasFiltradas);
             }
             String nombreArchivo = ("Ventas " + exportService.obtenerTitulo(filtroDTO));
             byte[] archivoBytes = exportService.exportarArchivo(ventasFiltradas, filtroDTO, nombreArchivo, formato);
             if (archivoBytes == null) {
-                log.error("Formato inválido o error en la exportación.");
+                log.error(ConstantesMensajes.ERROR,"Formato inválido o error en la exportación.");
                 return ResponseEntity.badRequest().body(Map.of(
-                        "mensaje", "El formato especificado no es válido.",
+                		ConstantesMensajes.ERROR, "El formato especificado no es válido.",
                         "estado", HttpStatus.BAD_REQUEST.value()
                 ));
             }
             HttpHeaders headers = exportService.establecerEncabezados(nombreArchivo, formato);
             return ResponseEntity.ok().headers(headers).body(archivoBytes);
         } catch (NegocioException e) {
-            log.error("Error en la exportación: {}", e.getMessage(), e);
+            log.error(ConstantesMensajes.ERROR,"Error en la exportación: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                    "mensaje", e.getMessage(),
+            		ConstantesMensajes.MENSAJE, e.getMessage(),
                     "estado", HttpStatus.BAD_REQUEST.value()
             ));
         }

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -53,38 +52,6 @@ public interface IDocVentaResource {
     )
     public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,@RequestParam Long idCliente, @RequestParam String formaPago, @RequestParam String tokenCodigo);
     //**********************************************************************
-
-    @Operation(
-            summary = "Filtra ventas",
-            description = """
-                    Filtra las ventas según los criterios proporcionados en el filtro.
-                    BODY
-                    - nombreCliente (String)
-                    - idCliente (Long)
-                    - fechaInicio (String yyyy-MM-dd)
-                    - fechaFin (String yyyy-MM-dd)
-                    
-                    Criterios a tener en cuenta:
-                    - Elimina atributos por los cuales no se quiera buscar.
-                    - La búsqueda simultánea por nombre y ID se priorizara el ID.
-                    - Ambas fechas deben estar presentes si se desea buscar por rango de fecha.
-                    - La fecha de inicio no debe ser posterior a la fecha fin.
-                    
-                    Combinaciones posibles:
-                    - Nombre y rango de fechas
-                    - ID y rango de fechas
-                    - Solo rango de fechas
-                    - Solo nombre
-                    - Solo ID
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Error en los criterios de filtro", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
-    public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO);
-    //**********************************************************************
     @Operation(
             summary = "Obtiene una venta por ID",
             description = "Devuelve los detalles de una venta específica a partir de su ID." +
@@ -106,7 +73,26 @@ public interface IDocVentaResource {
     	    description = """
     	    		Este endpoint permite exportar una lista de ventas filtrada en diferentes formatos (PDF, Excel)
     	    		o devolver la lista filtrada directamente en formato JSON si no se especifica el formato.
-
+    	    		
+                    Body
+                    - nombreCliente (String)
+                    - idCliente (Long)
+                    - fechaInicio (String yyyy-MM-dd)
+                    - fechaFin (String yyyy-MM-dd)
+                    
+                    Criterios a tener en cuenta:
+                    - Elimina atributos por los cuales no se quiera buscar.
+                    - La búsqueda simultánea por nombre y ID se priorizara el ID.
+                    - Ambas fechas deben estar presentes si se desea buscar por rango de fecha.
+                    - La fecha de inicio no debe ser posterior a la fecha fin.
+                    
+                    Combinaciones posibles:
+                    - Nombre y rango de fechas
+                    - ID y rango de fechas
+                    - Solo rango de fechas
+                    - Solo nombre
+                    - Solo ID
+                    
     	    		Comportamiento:
     	    		- Si el parámetro formato no se proporciona o está vacío, el endpoint devolverá la lista de ventas filtrada en formato `JSON`.
     	    		- Si se especifica un formato válido (`pdf` o `excel`), el endpoint generará el archivo correspondiente y lo devolverá.
