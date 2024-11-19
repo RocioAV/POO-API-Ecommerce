@@ -38,8 +38,8 @@ public class ExportService {
      * @param filtroDTO   Filtros aplicados a las ventas.
      */
     public byte[] exportarAExcelComoBytes(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO) {
-        try (Workbook workbook = new XSSFWorkbook();
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        	Workbook workbook = new XSSFWorkbook();
 
             Sheet sheet = workbook.createSheet("Ventas");
             agregarLogoExcel(workbook, sheet);
@@ -48,6 +48,7 @@ public class ExportService {
             agregarDatosVentasExcel(sheet, ventas, workbook);
 
             workbook.write(baos);
+            workbook.close();
             return baos.toByteArray();
         } catch (Exception e) {
             log.error(ERROR,"Error al generar Excel: {}", e.getMessage());
@@ -88,8 +89,8 @@ public class ExportService {
      * @param filtroDTO  Filtros aplicados a las ventas.
      */
     public byte[] exportarAmbosComoZip(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO, String nombreArchivo) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             ZipOutputStream zipOut = new ZipOutputStream(baos)) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+             ZipOutputStream zipOut = new ZipOutputStream(baos);
 
             ZipEntry pdfEntry = new ZipEntry(nombreArchivo + ".pdf");
             zipOut.putNextEntry(pdfEntry);
@@ -100,8 +101,9 @@ public class ExportService {
             zipOut.putNextEntry(excelEntry);
             zipOut.write(exportarAExcelComoBytes(ventas, filtroDTO));
             zipOut.closeEntry();
-
+            
             zipOut.close();
+
             return baos.toByteArray();
         } catch (Exception e) {
             log.error(ERROR,"Error al generar ZIP: {}", e.getMessage());
@@ -146,6 +148,9 @@ public class ExportService {
                 contentType = "application/zip";
                 extension = ".zip";
                 break;
+            default :
+            	log.error("Formato inválido: {}", formato);
+                throw new NegocioException("Formato inválido");
         }
 
         HttpHeaders headers = new HttpHeaders();
