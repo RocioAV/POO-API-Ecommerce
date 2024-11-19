@@ -1,7 +1,8 @@
 package ar.edu.unju.fi.poo.tp8poo.service;
 
 import java.io.*;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -26,15 +27,13 @@ import org.springframework.http.*;
 @Slf4j
 @Service
 public class ExportService {
-
-    private static final String ERROR = "error";
+    private static final String INVALIDO = "Formato invalido : {}";
     private static final String LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/tp8poo2024.firebasestorage.app/o/logo%2FlogoG2.png?alt=media&token=c1ac110f-6b05-4090-851e-8986b2252aba";
 
     /**
      * Exporta datos de ventas a un archivo Excel.
      *
      * @param ventas      Lista de ventas a exportar.
-     * @param archivoExcel Nombre del archivo Excel.
      * @param filtroDTO   Filtros aplicados a las ventas.
      */
     public byte[] exportarAExcelComoBytes(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO) {
@@ -51,7 +50,7 @@ public class ExportService {
             workbook.close();
             return baos.toByteArray();
         } catch (Exception e) {
-            log.error(ERROR,"Error al generar Excel: {}", e.getMessage());
+            log.error("Error al generar Excel: {}", e.getMessage());
             throw new NegocioException("Error al generar Excel: " + e.getMessage());
         }
     }
@@ -61,7 +60,6 @@ public class ExportService {
      * Exporta datos de ventas a un archivo PDF.
      *
      * @param ventas     Lista de ventas a exportar.
-     * @param archivoPdf Nombre del archivo PDF.
      * @param filtroDTO  Filtros aplicados a las ventas.
      */
     public byte[] exportarAPdfComoBytes(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO) {
@@ -77,7 +75,7 @@ public class ExportService {
             document.close();
             return baos.toByteArray();
         } catch (Exception e) {
-            log.error(ERROR,"Error al generar PDF: {}", e.getMessage());
+            log.error("Error al generar PDF: {}", e.getMessage());
             throw new NegocioException("Error al generar PDF: " + e.getMessage());
         }
     }
@@ -85,7 +83,6 @@ public class ExportService {
      * Exporta datos de ventas a un archivo ZIP y contiene un pdf y un excel.
      *
      * @param ventas     Lista de ventas a exportar.
-     * @param archivoZip Nombre del archivo Zip.
      * @param filtroDTO  Filtros aplicados a las ventas.
      */
     public byte[] exportarAmbosComoZip(List<VentaDTO> ventas, FiltroVentaDTO filtroDTO, String nombreArchivo) {
@@ -106,7 +103,7 @@ public class ExportService {
 
             return baos.toByteArray();
         } catch (Exception e) {
-            log.error(ERROR,"Error al generar ZIP: {}", e.getMessage());
+            log.error("Error al generar ZIP: {}", e.getMessage());
             throw new NegocioException("Error al generar ZIP: " + e.getMessage());
         }
     }
@@ -125,33 +122,32 @@ public class ExportService {
                 archivoBytes = exportarAmbosComoZip(ventas, filtroDTO, nombreArchivo);
                 break;
             default:
-                log.error("Formato inválido: {}", formato);
+                log.error("Error con el formato {}", formato);
         }
 
         return archivoBytes;
     }
 
     public HttpHeaders establecerEncabezados(String nombreArchivo, String formato) {
-        String contentType = "";
-        String extension = "";
-
-        switch (formato.toLowerCase()) {
-            case "pdf":
+        String contentType;
+        String extension = switch (formato.toLowerCase()) {
+            case "pdf" -> {
                 contentType = "application/pdf";
-                extension = ".pdf";
-                break;
-            case "excel":
+                yield ".pdf";
+            }
+            case "excel" -> {
                 contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                extension = ".xlsx";
-                break;
-            case "ambos":
+                yield ".xlsx";
+            }
+            case "ambos" -> {
                 contentType = "application/zip";
-                extension = ".zip";
-                break;
-            default :
-            	log.error("Formato inválido: {}", formato);
+                yield ".zip";
+            }
+            default -> {
+                log.error(INVALIDO, formato);
                 throw new NegocioException("Formato inválido");
-        }
+            }
+        };
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(contentType));
@@ -162,16 +158,21 @@ public class ExportService {
     }
 
     private void agregarLogoExcel(Workbook workbook, Sheet sheet) throws IOException {
-        BufferedImage logoImage = ImageIO.read(new URL(LOGO_URL));
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(logoImage, "png", baos);
-            int pictureIdx = workbook.addPicture(baos.toByteArray(), Workbook.PICTURE_TYPE_PNG);
-
-            Drawing<?> drawing = sheet.createDrawingPatriarch();
-            ClientAnchor anchor = workbook.getCreationHelper().createClientAnchor();
-            anchor.setCol1(0); anchor.setRow1(0); anchor.setCol2(1); anchor.setRow2(3);
-            drawing.createPicture(anchor, pictureIdx).resize(1);
-        }
+    	try { URI logoUri = new URI(LOGO_URL); 
+    	BufferedImage logoImage = ImageIO.read(logoUri.toURL()); 
+    	try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+    		ImageIO.write(logoImage, "png", baos); 
+    		int pictureIdx = workbook.addPicture(baos.toByteArray(), Workbook.PICTURE_TYPE_PNG); 
+    		Drawing<?> drawing = sheet.createDrawingPatriarch(); 
+    		ClientAnchor anchor = workbook.getCreationHelper().createClientAnchor(); 
+    		anchor.setCol1(0); 
+    		anchor.setRow1(0); 
+    		anchor.setCol2(1); 
+    		anchor.setRow2(3); 
+    		drawing.createPicture(anchor, pictureIdx).resize(1); 
+    		} 
+    	} catch (URISyntaxException e) { 
+    		throw new IOException("Error al convertir la URL del logo a URI", e); }
     }
 
     private void agregarTituloExcel(Workbook workbook, Sheet sheet, String titulo) {
@@ -230,9 +231,17 @@ public class ExportService {
     }
 
     private void agregarLogoPdf(Document document) throws IOException, DocumentException {
-        Image logo = Image.getInstance(new URL(LOGO_URL));
-        logo.scaleToFit(100, 50);
-        document.add(logo);
+        try {
+            URI uri = new URI(LOGO_URL);
+
+            try (InputStream inputStream = uri.toURL().openStream()) {
+                Image logo = Image.getInstance(inputStream.readAllBytes());
+                logo.scaleToFit(100, 50);
+                document.add(logo);
+            }
+        } catch (URISyntaxException e) {
+            throw new IOException("Error al procesar la URL del logo: " + LOGO_URL, e);
+        }
     }
 
     private void agregarTituloPdf(Document document, FiltroVentaDTO filtroDTO) throws DocumentException {
