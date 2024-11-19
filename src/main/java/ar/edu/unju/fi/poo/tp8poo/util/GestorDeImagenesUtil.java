@@ -1,5 +1,6 @@
 package ar.edu.unju.fi.poo.tp8poo.util;
 
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,7 +28,7 @@ public class GestorDeImagenesUtil {
 	 */
 	public String subirImagen(MultipartFile imagen, String nombreCarpeta) {
 		if (imagen == null || imagen.isEmpty()) {
-			throw new RuntimeException("El archivo MultipartFile no tiene contenido o es nulo");
+			throw new NegocioException("El archivo MultipartFile no tiene contenido o es nulo");
 		}
 		return firebaseStorageUtil.subirArchivo(imagen, nombreCarpeta);
 	}

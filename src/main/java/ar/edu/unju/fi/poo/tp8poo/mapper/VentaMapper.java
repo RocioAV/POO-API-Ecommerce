@@ -11,8 +11,6 @@ import java.util.List;
 public interface VentaMapper {
     @Mapping(source = "fechaYHora", target = "fechaYHora", dateFormat = "yyyy-MM-dd HH:mm:ss")
 
-    Venta toVentaEntity(VentaDTO ventaDTO);
-
     VentaDTO toVentaDTO(Venta venta);
 
     List<VentaDTO> toVentaDTOList (List<Venta> ventas);

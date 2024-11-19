@@ -21,9 +21,21 @@ public interface IDocClienteResource {
     @Operation(
             summary = "Crear cliente estándar",
             description = """
-                    Para poder crear correctamente el cliente Estandar debe:
-                    - Eliminar el atributo del cupon, o la fecha de expiración del cupón.
-                    """,
+            Para poder crear correctamente el cliente Estandar debe:
+            - **Eliminar el atributo del cupon** (Se crea en null por default)
+            - **Eliminar id**
+            - **Eliminar foto** (se crea con una url por default)
+            Campos requeridos:
+            ```json
+            {
+              "nombre": "String",
+              "apellido": "String",
+              "celular": "String",
+              "email": "String",
+              "estado": "String" (Se crea ACTIVO por default)
+            }
+            ```
+            """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cliente estándar creado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos")
@@ -35,7 +47,22 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Crear cliente premium",
-            description = "Registra un nuevo cliente premium en el sistema",
+            description = """
+            Para poder crear correctamente el cliente Premiun debe:
+            - **Eliminar id**
+            - **Eliminar foto** (se crea con una url por default)
+            Campos requeridos:
+            ```json
+            {
+              "nombre": "String",
+              "apellido": "String",
+              "celular": "String",
+              "email": "String",
+              "estado": "String" (Se crea ACTIVO por default)
+              "porcentajeDescuento":Double
+            }
+            ```
+            """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Cliente premium creado con éxito"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos")
@@ -61,7 +88,24 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Actualizar cliente estándar",
-            description = "Modifica los datos de un cliente estándar existente",
+            description = """
+            Modifica los datos de un cliente estándar existente.
+
+            - **Eliminar cupon**
+            - **Eliminar id**
+            - **Eliminar foto** (solo se actualiza con el endpoint `api/v1/cliente/{id}/imagen`)
+
+            Campos requeridos:
+            ```json
+            {
+              "nombre": "String",
+              "apellido": "String",
+              "celular": "String",
+              "email": "String",
+              "estado": "ACTIVO" (ACTIVO, SUSPENDIDO, INACTIVO)
+            }
+            ```
+            """,
             parameters = @Parameter(name = "id", description = "ID del cliente estándar a actualizar", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente estándar actualizado con éxito"),
@@ -74,7 +118,24 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Actualizar cliente premium",
-            description = "Modifica los datos de un cliente premium existente",
+            description =  """
+            Modifica los datos de un cliente PREMIUM existente.
+
+            - **Eliminar id**
+            - **Eliminar foto** (solo se actualiza con el endpoint `api/v1/cliente/{id}/imagen`)
+
+            Campos requeridos:
+            ```json
+            {
+              "nombre": "String",
+              "apellido": "String",
+              "celular": "String",
+              "email": "String",
+              "estado": "ACTIVO" (ACTIVO, SUSPENDIDO, INACTIVO),
+              "porcentajeDescuento": Double
+            }
+            ```
+            """,
             parameters = @Parameter(name = "id", description = "ID del cliente premium a actualizar", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente premium actualizado con éxito"),
@@ -88,7 +149,7 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Eliminar cliente lógicamente",
-            description = "Elimina un cliente de manera lógica usando su ID",
+            description = "Elimina un cliente de manera lógica usando su ID (Long/number)",
             parameters = @Parameter(name = "id", description = "ID del cliente a eliminar", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cliente eliminado con éxito"),
@@ -113,12 +174,13 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Subir imagen para cliente ",
-            description = """
-                         Por medio del id del cliente, se busca al mismo para subir su imagen
-                         PARAMETROS OBLIGATORIOS
-                    - Id del producto (Long/number)
-                    - Archivo Imagen (éste debe ser .jpg .jpeg .webp .png)
-                    """,
+            description ="""
+            Por medio del id del cliente, se busca al mismo para subir su imagen.
+
+            **Parámetros obligatorios:**
+            - **Id del cliente** (Long/Number)
+            - **Archivo Imagen** (este debe ser .jpg, .jpeg, .webp o .png)
+            """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Archivo subido con éxito"),
                     @ApiResponse(responseCode = "404", description = "No se encontro el cliente")
@@ -130,7 +192,21 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Asignar cupón a cliente estándar",
-            description = "Asigna un nuevo cupón a un cliente estándar si no tiene uno o si el actual ha expirado.",
+            description = """
+            Asigna un nuevo cupón a un cliente estándar si no tiene uno o si el actual ha expirado.
+
+            **Parámetros obligatorios:**
+            - **ID cliente** (Long/Number)
+
+            **Cuerpo de la solicitud (Body):**
+            (Eliminar id)
+            ```json
+            {
+                "fechaExpiracion": "String" (formato: YYYY-MM-DD),
+                "porcentajeDescuento": Double
+            }
+            ```
+            """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Cupón asignado con éxito al cliente estándar"),
                     @ApiResponse(responseCode = "404", description = "Cliente no encontrado o error de negocio")
@@ -142,7 +218,12 @@ public interface IDocClienteResource {
 
     @Operation(
             summary = "Generar token para cliente",
-            description = "Genera un token único asociado al cliente con un valor aleatorio y lo registra en el sistema.",
+            description = """
+            Genera un token único asociado al cliente con un valor aleatorio y lo registra en el sistema.
+
+            **Parámetros obligatorios:**
+            - **ID cliente** (Long/Number)
+            """,
             parameters = {
                     @Parameter(name = "id", description = "ID del cliente a generar el nuevo token (Long)", required = true, example = "1"),
             },
