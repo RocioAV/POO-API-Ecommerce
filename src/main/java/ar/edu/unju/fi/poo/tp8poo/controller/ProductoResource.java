@@ -31,7 +31,7 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @GetMapping("/productos")
     public ResponseEntity<Map<String, Object>> getAllProductos() {
-        log.info("/api/v1/producto/productos");
+        log.info("GET /api/v1/producto/productos");
         Map<String, Object> response = new HashMap<>();
         response.put(ConstantesMensajes.PRODUCTOS, productoService.findAll());
         response.put(ConstantesMensajes.MENSAJE, "Productos obtenidos con exito");
@@ -42,14 +42,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getProductoById(@PathVariable Long id) {
-        log.info("/api/v1/producto/{} ", id);
+        log.info(" GET /api/v1/producto/{} ", id);
         Map<String, Object> response = new HashMap<>();
         try {
             response.put(ConstantesMensajes.PRODUCTO, productoService.findById(id));
             response.put(ConstantesMensajes.MENSAJE, "Producto obtenido con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("No se encontro el producto con ID [{}]", id);
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
@@ -61,14 +60,13 @@ public class ProductoResource implements IDocProductoResource {
     public ResponseEntity<Map<String, Object>> createProducto(
             @Parameter(description = "Producto DTO", required = true)
             @RequestBody ProductoDTO productoDTO) {
-        log.info("/api/v1/producto");
+        log.info(" POST /api/v1/producto");
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO, productoService.createProducto(productoDTO));
             response.put(ConstantesMensajes.MENSAJE, "Producto creado con éxito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NegocioException e) {
-            log.warn("Error al crear el producto: {}", e.getMessage());
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
@@ -79,14 +77,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> updateProducto(@PathVariable Long id, @RequestBody ProductoDTO productoDTO) {
-        log.info(" /api/v1/producto/{}  ", id);
+        log.info("PUT /api/v1/producto/{}  ", id);
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO, productoService.editProducto(id, productoDTO));
             response.put(ConstantesMensajes.MENSAJE, "Producto actualizado con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("El proceso de editado se ha interrumpido para producto [{}]",id);
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
@@ -96,14 +93,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteProducto(@PathVariable Long id) {
-        log.info(" /api/v1/producto/ {} ", id);
+        log.info(" DELETE /api/v1/producto/ {} ", id);
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO, productoService.deleteProductoLogico(id));
             response.put(ConstantesMensajes.MENSAJE, "Producto eliminado con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("El proceso de eliminado logico se ha interrumpido para producto [{}]",id);
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
@@ -113,14 +109,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @PatchMapping(value= "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> uploadFotoProducto (@PathVariable Long id, @RequestParam("file") final MultipartFile file) {
-        log.info("/api/v1/producto/{}/imagen", id);
+        log.info("PATCH /api/v1/producto/{}/imagen", id);
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO,productoService.subirImagenProducto(id,file));
             response.put(ConstantesMensajes.MENSAJE, "Imagen actualizada con exito:");
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (NegocioException e){
-            log.error("Se ha interrumpido la actualizacion de imagen");
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
@@ -129,14 +124,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @GetMapping("/nombre")
     public ResponseEntity<Map<String, Object>> buscarProductoPorNombre(@RequestParam String nombre) {
-        log.info("/api/v1/producto/nombre");
+        log.info("GET /api/v1/producto/nombre");
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO, productoService.findByNombre(nombre));
             response.put(ConstantesMensajes.MENSAJE, "Productos obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("Se ha interrumpido la busqueda por nombre");
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
@@ -145,14 +139,13 @@ public class ProductoResource implements IDocProductoResource {
     @Override
     @GetMapping("/descripcion")
     public ResponseEntity<Map<String, Object>> buscarProductoPorDescripcion(@RequestParam String description) {
-        log.info("/api/v1/producto/descripcion");
+        log.info("GET /api/v1/producto/descripcion");
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTOS, productoService.findByDescripcion(description));
             response.put(ConstantesMensajes.MENSAJE, "Productos obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("Se ha interrumpido la busqueda por descripcion");
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
@@ -160,14 +153,13 @@ public class ProductoResource implements IDocProductoResource {
 
     @GetMapping("/codigo")
     public ResponseEntity<Map<String, Object>> buscarProductoPorCodigo(@RequestParam String codigo) {
-        log.info("/api/v1/producto/codigo");
+        log.info("GET /api/v1/producto/codigo");
         Map<String, Object> response = new HashMap<>();
         try{
             response.put(ConstantesMensajes.PRODUCTO, productoService.findByCodigo(codigo));
             response.put(ConstantesMensajes.MENSAJE, "Producto obtenidos con éxito");
             return ResponseEntity.ok(response);
         }catch (NegocioException e){
-            log.error("Se ha interrumpido la busqueda por codigo");
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }

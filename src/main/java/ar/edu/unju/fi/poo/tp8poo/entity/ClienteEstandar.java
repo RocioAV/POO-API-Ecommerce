@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class ClienteEstandar extends Cliente {
 
 	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "CUPON_ID", referencedColumnName = "Id", unique = true)
+	@JoinColumn(name = "CUPON_ID", referencedColumnName = "Id", unique = true,nullable = true)
 	private Cupon cupon;
 
 	@Override
@@ -25,10 +25,10 @@ public class ClienteEstandar extends Cliente {
 	}
 
 	public boolean cuponVencido() {
-		return cupon.getFechaExpiracion().isBefore(LocalDate.now());
+		return cupon != null && cupon.getFechaExpiracion().isBefore(LocalDate.now());
 	}
 	public void expirarCupon(){
-		if (verificarDescuento()!= 0){
+		if (cupon!= null ){
 			cupon.setFechaExpiracion(LocalDate.now().minusDays(1));
 		}
 	}

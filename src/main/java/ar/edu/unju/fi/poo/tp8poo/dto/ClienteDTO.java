@@ -5,17 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.io.Serializable;
-
-import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteDTO implements Serializable {
+public class ClienteDTO {
 
-	private static final long serialVersionUID = 1L;
 
 	@Schema(description = "ID del cliente", example = "1")
 	private Long id;

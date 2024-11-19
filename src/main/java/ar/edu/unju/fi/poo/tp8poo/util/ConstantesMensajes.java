@@ -7,6 +7,8 @@ public class ConstantesMensajes {
     public static final String PRODUCTOS = "productos";
     public static final String PROVEEDOR = "proveedor";
     public static final String PROVEEDORES = "proveedores";
+    public static final String CLIENTE= "cliente";
+    public static final String CLIENTES = "clientes";
 
     private ConstantesMensajes() {
     }

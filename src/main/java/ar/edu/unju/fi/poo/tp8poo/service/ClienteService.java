@@ -303,7 +303,7 @@ public class ClienteService {
      */
     public ClienteDTO buscarPorID(Long id) {
         Cliente cliente = findClienteEntityById(id);
-
+        log.info("Cliente encontrado con exito: {}", cliente.getNombre());
         return clienteMapper.toClienteDTO(cliente);
     }
 

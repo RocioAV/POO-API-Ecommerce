@@ -8,7 +8,6 @@ import java.net.URL;
 
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
 public class ConversorMoneda {
@@ -17,22 +16,29 @@ public class ConversorMoneda {
 
 	}
 
-	@Autowired
 	private static String consumoAPI() throws IOException {
-			int cp;
-			URL url= new URL("https://dolarapi.com/v1/dolares/oficial");
-			HttpURLConnection connection=(HttpURLConnection) url.openConnection();
+		int cp;
+		URL url = new URL("https://dolarapi.com/v1/dolares/oficial");
+		HttpURLConnection connection;
+		BufferedReader br;
+		try {
+			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/json");
-			if(connection.getResponseCode()!=200) {
-				throw new NegocioException("Error con el código HTTP "+connection.getResponseCode());
+			if (connection.getResponseCode() != 200) {
+				throw new NegocioException("Error con el código HTTP " + connection.getResponseCode());
 			}
-			BufferedReader br= new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			StringBuilder str=new StringBuilder();
-			while((cp=br.read())!=-1) {
-				str.append((char)cp);
+			br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			StringBuilder str = new StringBuilder();
+			while ((cp = br.read()) != -1) {
+				str.append((char) cp);
 			}
+			br.close();
+			connection.disconnect();
 			return str.toString();
+		} catch (IOException e) {
+			throw new NegocioException("Error al consumir la API: " + e.getMessage());
+		}
 	}
 
 	public static double convertirPrecio(double precioActual) throws IOException {
