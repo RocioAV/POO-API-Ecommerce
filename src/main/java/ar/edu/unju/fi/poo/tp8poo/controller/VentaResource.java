@@ -4,27 +4,31 @@ import ar.edu.unju.fi.poo.tp8poo.controller.interfaces.IDocVentaResource;
 import ar.edu.unju.fi.poo.tp8poo.dto.FiltroVentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.VentaDTO;
 import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
+import ar.edu.unju.fi.poo.tp8poo.service.ExportService;
 import ar.edu.unju.fi.poo.tp8poo.service.VentaService;
 import ar.edu.unju.fi.poo.tp8poo.util.ConstantesMensajes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.http.*;
 
 @RestController
 @Slf4j
 @RequestMapping("/api/v1/venta")
 public class VentaResource implements IDocVentaResource {
-
+	
     private final VentaService ventaService;
+    private final ExportService exportService;
 
-    public VentaResource(VentaService ventaService) {
+    public VentaResource(VentaService ventaService,
+    					 ExportService exportService) {
         this.ventaService = ventaService;
+        this.exportService = exportService;
     }
 
     @Override
@@ -56,22 +60,6 @@ public class VentaResource implements IDocVentaResource {
     }
 
     @Override
-    @GetMapping("/filtro")
-    public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO){
-        log.info("/api/v1/venta/filtro");
-        Map<String, Object> response = new HashMap<>();
-        try{
-            response.put("ventas", ventaService.filtrarVentas(filtroDTO));
-            response.put(ConstantesMensajes.MENSAJE,"Ventas de acuerdo al filtro obtenidas con exito ");
-            return ResponseEntity.ok(response);
-        }catch (NegocioException e) {
-            log.error("No se ha podido realizar el filtro de ventas");
-            response.put(ConstantesMensajes.ERROR, e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-    }
-
-    @Override
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id){
         log.info("GET /api/v1/venta/{id}");
@@ -85,6 +73,41 @@ public class VentaResource implements IDocVentaResource {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
-
-
+    
+    @Override
+    @GetMapping("/filtro")
+    public ResponseEntity<Object> exportar(
+            FiltroVentaDTO filtroDTO,
+            @RequestParam(required = false) String formato) {
+        log.info("/api/v1/venta/filtro/documento solicitado en formato: {}", formato);
+        try {
+            List<VentaDTO> ventasFiltradas = ventaService.filtrarVentas(filtroDTO);
+            if (ventasFiltradas.isEmpty()) {
+                log.warn("No se encontraron ventas para exportar.");
+                return ResponseEntity.noContent().build();
+            }
+            if (formato == null || formato.isBlank()) {
+                log.warn("Parámetro 'formato' no proporcionado. Devolviendo lista filtrada en formato JSON.");
+                return ResponseEntity.ok(ventasFiltradas);
+            }
+            String nombreArchivo = ("Ventas " + exportService.obtenerTitulo(filtroDTO));
+            byte[] archivoBytes = exportService.exportarArchivo(ventasFiltradas, filtroDTO, nombreArchivo, formato);
+            if (archivoBytes == null) {
+                log.error(ConstantesMensajes.ERROR,"Formato inválido o error en la exportación.");
+                return ResponseEntity.badRequest().body(Map.of(
+                		ConstantesMensajes.ERROR, "El formato especificado no es válido.",
+                        "estado", HttpStatus.BAD_REQUEST.value()
+                ));
+            }
+            HttpHeaders headers = exportService.establecerEncabezados(nombreArchivo, formato);
+            return ResponseEntity.ok().headers(headers).body(archivoBytes);
+        } catch (NegocioException e) {
+            log.error(ConstantesMensajes.ERROR,"Error en la exportación: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+            		ConstantesMensajes.MENSAJE, e.getMessage(),
+                    "estado", HttpStatus.BAD_REQUEST.value()
+            ));
+        }
+    }
+    
 }

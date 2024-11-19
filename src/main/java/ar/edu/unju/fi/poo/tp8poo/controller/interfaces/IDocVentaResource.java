@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -53,12 +52,29 @@ public interface IDocVentaResource {
     )
     public ResponseEntity<Map<String, Object>> agregarVenta(@RequestParam Long idProducto,@RequestParam Long idCliente, @RequestParam String formaPago, @RequestParam String tokenCodigo);
     //**********************************************************************
-
     @Operation(
-            summary = "Filtra ventas",
-            description = """
-                    Filtra las ventas según los criterios proporcionados en el filtro.
-                    BODY
+            summary = "Obtiene una venta por ID",
+            description = "Devuelve los detalles de una venta específica a partir de su ID." +
+                    """
+                            Recibe un unico PARAMETRO
+                            - ID de la venta (Long/number)
+                            """,
+            parameters = @Parameter(name = "id",description = "ID de venta (Long)", required = true, example = "1"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Venta no encontrada", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+            }
+    )
+    public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id);
+    //**********************************************************************
+    @Operation(
+    	    summary = "Exporta las ventas filtradas",
+    	    description = """
+    	    		Este endpoint permite exportar una lista de ventas filtrada en diferentes formatos (PDF, Excel)
+    	    		o devolver la lista filtrada directamente en formato JSON si no se especifica el formato.
+    	    		
+                    Body
                     - nombreCliente (String)
                     - idCliente (Long)
                     - fechaInicio (String yyyy-MM-dd)
@@ -76,30 +92,40 @@ public interface IDocVentaResource {
                     - Solo rango de fechas
                     - Solo nombre
                     - Solo ID
-                    """,
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Ventas filtradas obtenidas exitosamente", content = @Content),
-                    @ApiResponse(responseCode = "400", description = "Error en los criterios de filtro", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
-    public ResponseEntity<Map<String, Object>> filtrarVentas(@ModelAttribute FiltroVentaDTO filtroDTO);
-    //**********************************************************************
-    @Operation(
-            summary = "Obtiene una venta por ID",
-            description = "Devuelve los detalles de una venta específica a partir de su ID." +
-                    """
-                            Recibe un unico PARAMETRO
-                            - ID de la venta (Long/number)
-                            """,
-            parameters = @Parameter(name = "id",description = "ID de venta (Long)", required = true, example = "1"),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Venta obtenida con éxito", content = @Content),
-                    @ApiResponse(responseCode = "404", description = "Venta no encontrada", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
-            }
-    )
-    public ResponseEntity<Map<String, Object>> getVentaById(@PathVariable("id") Long id);
-    //**********************************************************************
+                    
+    	    		Comportamiento:
+    	    		- Si el parámetro formato no se proporciona o está vacío, el endpoint devolverá la lista de ventas filtrada en formato `JSON`.
+    	    		- Si se especifica un formato válido (`pdf` o `excel`), el endpoint generará el archivo correspondiente y lo devolverá.
+
+    	    		Parámetros:
+    	    		- **filtroDTO**: Objeto que contiene los criterios de filtrado para las ventas.
+    	    		- **formato**: Opcional. Define el formato de exportación. Puede ser:
+    	    		  - `pdf`: Exporta las ventas en formato PDF.
+    	    		  - `excel`: Exporta las ventas en formato Excel.
+    	    		  - `ambos`: Exporta las ventas en ambos formatos comprimidos en un archivo Zip.
+
+    	    		Respuestas posibles:
+    	    		- Retorna una lista de ventas en JSON si no se especifica un formato.
+    	    		- Retorna un archivo descargable en el formato especificado si el formato es válido.
+    	        """,
+    	    responses = {
+    	        @ApiResponse(
+    	            responseCode = "200", 
+    	            description = "Ventas exportadas con éxito.", 
+    	            content = @Content
+    	        ),
+    	        @ApiResponse(
+    	            responseCode = "400", 
+    	            description = "Error en los parámetros de solicitud o en los criterios de filtro.", 
+    	            content = @Content
+    	        ),
+    	        @ApiResponse(
+    	            responseCode = "500", 
+    	            description = "Error interno del servidor.", 
+    	            content = @Content
+    	        )
+    	    }
+    	)
+	public ResponseEntity<Object> exportar(FiltroVentaDTO filtroDTO, String formato);
 
 }
