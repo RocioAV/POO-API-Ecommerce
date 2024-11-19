@@ -12,7 +12,6 @@ import ar.edu.unju.fi.poo.tp8poo.util.enumerated.FormaPago;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -83,9 +82,9 @@ public class VentaService {
      * @param cliente Cliente que realiza la compra.
      * @param producto Producto a vender.
      * @param formaDePago Forma de pago elegida para la compra.
-     * @throws IOException Si ocurre un error al preparar los datos.
+     *
      */
-    private Venta prepararVentaDTO(Cliente cliente, Producto producto, String formaDePago) throws IOException {
+    private Venta prepararVentaDTO(Cliente cliente, Producto producto, String formaDePago) {
         Venta venta = new Venta();
         log.debug("Preparando venta para cliente con ID {}", cliente.getId());
         venta.setProducto(producto);
@@ -122,9 +121,8 @@ public class VentaService {
      * @param formaDePago ID de la forma de pago.
      * @param valorToken valor de token esperado para realizar la compra
      * @return VentaDTO con los detalles de la venta creada.
-     * @throws IOException si ocurre un error en el proceso.
      */
-    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken) throws IOException {
+    public VentaDTO crearVenta(Long idProducto, Long idCliente, String formaDePago,String valorToken)  {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
         Cliente cliente = clienteService.findClienteEntityById(idCliente);
         Producto producto = productoService.findProductoEntityById(idProducto);

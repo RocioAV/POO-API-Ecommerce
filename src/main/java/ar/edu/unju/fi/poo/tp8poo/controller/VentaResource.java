@@ -49,7 +49,7 @@ public class VentaResource implements IDocVentaResource {
             response.put("venta", ventaService.crearVenta(idProducto,idCliente,formaPago,tokenCodigo));
             response.put(ConstantesMensajes.MENSAJE, "Venta creada con exito");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }catch (NegocioException | IOException e) {
+        }catch (NegocioException e) {
             response.put(ConstantesMensajes.ERROR, e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
