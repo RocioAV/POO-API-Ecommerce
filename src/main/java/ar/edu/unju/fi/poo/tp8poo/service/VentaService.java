@@ -54,7 +54,8 @@ public class VentaService {
      * @param cliente  cliente a validar.
      * @param producto ID del producto a validar.
      */
-    private void validarDatosVenta(Cliente cliente, Producto producto) {
+    private void validarDatosVenta(Cliente cliente, Producto producto,String valorToken) {
+        tokenService.validarToken(cliente.getId(),valorToken);
         log.debug("Validando datos para la venta. Cliente ID: {}, Producto ID: {}", cliente.getId(), producto.getId());
         clienteService.validarClienteActivo(cliente);
         productoService.validarProducto(producto);
@@ -72,7 +73,7 @@ public class VentaService {
     public Double aplicarDescuento(Double precioProducto, Cliente cliente) {
         log.info("Aplicando descuento para cliente con ID {}", cliente.getId());
         Double precioFinal = precioProducto - cliente.calcularDescuento(precioProducto);
-        cuponService.expirarCuponPorUso(cliente);
+
         log.debug("Precio final después del descuento: {}", precioFinal);
         return precioFinal;
     }
@@ -119,6 +120,7 @@ public class VentaService {
      * @param idProducto ID del producto a vender.
      * @param idCliente  ID del cliente que realiza la compra.
      * @param formaDePago ID de la forma de pago.
+     * @param valorToken valor de token esperado para realizar la compra
      * @return VentaDTO con los detalles de la venta creada.
      * @throws IOException si ocurre un error en el proceso.
      */
@@ -126,12 +128,11 @@ public class VentaService {
         log.info("Iniciando creación de venta para el cliente ID {} y producto ID {}", idCliente, idProducto);
         Cliente cliente = clienteService.findClienteEntityById(idCliente);
         Producto producto = productoService.findProductoEntityById(idProducto);
-        validarDatosVenta(cliente, producto);
-        tokenService.validarToken(idCliente,valorToken);
+        validarDatosVenta(cliente, producto,valorToken);
         Venta ventaEntity = ventaRepository.save(prepararVentaDTO(cliente, producto, formaDePago));
         productoService.descontarStock(producto);
-        VentaDTO ventaDTO = ventaMapper.toVentaDTO(ventaEntity);
-        emailService.enviarFacturaPorEmail(ventaDTO);
+        cuponService.expirarCuponPorUso(cliente);
+        emailService.enviarFacturaPorEmail(ventaMapper.toVentaDTO(ventaEntity));
         log.info("Venta creada y guardada con éxito para el cliente ID {}", idCliente);
         return ventaMapper.toVentaDTO(ventaEntity);
     }
