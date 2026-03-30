@@ -2,283 +2,235 @@ package ar.edu.unju.fi.poo.tp8poo;
 
 import ar.edu.unju.fi.poo.tp8poo.dto.ClienteEstandarDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ClientePremiumDTO;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cliente;
-import ar.edu.unju.fi.poo.tp8poo.entity.ClienteEstandar;
-import ar.edu.unju.fi.poo.tp8poo.entity.ClientePremium;
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.CelularDuplicadoException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteExistenteException;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.ClienteInexixtenteExcepcion;
-import ar.edu.unju.fi.poo.tp8poo.exceptions.EmailDuplicadoException;
-import ar.edu.unju.fi.poo.tp8poo.repository.ClienteRepository;
+import ar.edu.unju.fi.poo.tp8poo.dto.CuponDTO;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ClienteService;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoCliente;
+import ar.edu.unju.fi.poo.tp8poo.testUtil.TestUtils;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoCliente;
 import jakarta.transaction.Transactional;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
+import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.time.LocalDate;
+
+
+@Slf4j
 @Transactional
 @SpringBootTest
 class TestClienteService {
 
     @Autowired
-    private ClienteService clienteService; // Clase bajo prueba
+    ClienteService clienteService;
 
+    static ClienteEstandarDTO clienteEstandarDTO;
+    static ClientePremiumDTO clientePremiumDTO;
+    static ClienteEstandarDTO clienteEstandarDTOSinCupon;
+    static CuponDTO cuponValido;
+    static CuponDTO cuponExpirado;
+    static CuponDTO cuponValido2;
+    static CuponDTO cuponConPorcentajeInvalido;
+	MultipartFile multipartFile;
+    String workspacePath = System.getProperty("user.dir");
+    String rutaArchivo1 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test01.jpeg";
+    String rutaArchivo2 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/avatar-test02.png";
 
-    @Test
-    public void testAgregarClienteEstandar() {
-        ClienteEstandarDTO clienteEstandarDTO = new ClienteEstandarDTO();
+    @BeforeEach
+    public void setUp() {
+        clienteEstandarDTO = new ClienteEstandarDTO();
         clienteEstandarDTO.setApellido("Lopez");
         clienteEstandarDTO.setNombre("Raul");
         clienteEstandarDTO.setCelular("1234561341");
-        clienteEstandarDTO.setCupon(new Cupon(4L,LocalDate.of(2024, 12, 2),15));
-        clienteEstandarDTO.setId(4L);
-        clienteEstandarDTO.setCreated(LocalDateTime.now());
+        clienteEstandarDTO.setCupon(new CuponDTO(null, "2024-12-02", 10.0));
         clienteEstandarDTO.setEmail("raul5@hotmail.com");
-        clienteEstandarDTO.setFoto("123");
-        clienteEstandarDTO.setUpdated(null);
         clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
 
+        clienteEstandarDTOSinCupon=new ClienteEstandarDTO();
+        clienteEstandarDTOSinCupon.setApellido("Amador");
+        clienteEstandarDTOSinCupon.setNombre("Cristian");
+        clienteEstandarDTOSinCupon.setCelular("987654321");
+        clienteEstandarDTOSinCupon.setEmail("ejemplocorreo1@hotmail.com");
+        clienteEstandarDTOSinCupon.setEstado(EstadoCliente.ACTIVO.name());
+
+        cuponValido= new CuponDTO(null,LocalDate.now().plusDays(15).toString(),20);
+        cuponExpirado=new CuponDTO(null, LocalDate.now().minusDays(1).toString(),45);
+        cuponValido2=new CuponDTO(null,LocalDate.now().plusDays(25).toString(),55);
+        cuponConPorcentajeInvalido=new CuponDTO(null,LocalDate.now().plusDays(12).toString(),101);
+
+        clientePremiumDTO = new ClientePremiumDTO();
+        clientePremiumDTO.setApellido("Martinez");
+        clientePremiumDTO.setNombre("Maria");
+        clientePremiumDTO.setCelular("6542342321");
+        clientePremiumDTO.setEmail("maria@hotmail.com");
+        clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
+        clientePremiumDTO.setPorcentajeDescuento(20.0); // Descuento para cliente premium
+    }
+
+    @Test
+     void testAgregarClienteEstandar() throws  IOException{
         ClienteEstandarDTO nuevoCliente = clienteService.agregarClienteEstandar(clienteEstandarDTO);
-        assertNotNull(nuevoCliente);
+        multipartFile = TestUtils.generarMultipartFile(rutaArchivo1);
+        String url = clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url);
         assertEquals("Raul", nuevoCliente.getNombre());
     }
 
     @Test
-    public void testEditarClienteEstandar() {
-        Cupon cupon = new Cupon();
-        cupon.setFechaExpiracion(LocalDate.of(2024, 12, 2));
-        cupon.setPorcentajeDescuento(15);
-        ;  // Asocia el cupon al cliente
-        ClienteEstandarDTO clienteEstandarDTO = new ClienteEstandarDTO();
-        clienteEstandarDTO.setApellido("Lopez");
-        clienteEstandarDTO.setNombre("Raul");
-        clienteEstandarDTO.setCelular("123456312");
-        clienteEstandarDTO.setCreated(LocalDateTime.now());
-        clienteEstandarDTO.setEmail("raul1@hotmail.com");
-        clienteEstandarDTO.setFoto("123");
-        clienteEstandarDTO.setUpdated(null);
-        clienteEstandarDTO.setEstado(EstadoCliente.ACTIVO.name());
-
-        clienteEstandarDTO.setCupon(cupon);
-
-        clienteEstandarDTO=clienteService.agregarClienteEstandar(clienteEstandarDTO);
-
-        // Editar cliente
-        ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
-        clienteEstandarEditado.setApellido("Lopez");
-        clienteEstandarEditado.setNombre("Daniel");
-        clienteEstandarEditado.setCelular("1233123456");
-        clienteEstandarEditado.setCreated(clienteEstandarDTO.getCreated());
-        clienteEstandarEditado.setEmail("raul@hotmail.com");
-        clienteEstandarEditado.setFoto("123");
-        clienteEstandarEditado.setUpdated(LocalDateTime.now());
-        clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
-
-        clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
-
-        clienteService.editarClienteEstandar(clienteEstandarDTO.getId(), clienteEstandarEditado);
-
-        ClienteEstandarDTO result = clienteService.getClienteEstandar(clienteEstandarDTO.getId());
+     void testEditarClienteEstandar() throws IOException {
+        ClienteEstandarDTO nuevoCliente = clienteService.agregarClienteEstandar(clienteEstandarDTO);
+        multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
+        String url= clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url, "La foto debería haber sido establecida");
+        ClienteEstandarDTO clienteEstandarEditado = getClienteEstandarDTO(nuevoCliente);
+        clienteService.editarClienteEstandar(nuevoCliente.getId(), clienteEstandarEditado);
+        ClienteEstandarDTO result = clienteService.getClienteEstandar(nuevoCliente.getId());
         assertEquals("Daniel", result.getNombre());
+        assertEquals(nuevoCliente.getFoto(), result.getFoto()); // Verificar que la foto sigue siendo la mi
     }
 
+
+
     @Test
-    public void testEliminarLogicamenteClienteEstandar() {
-        // 1. Crear un cupón para el cliente estándar
-        Cupon cupon = new Cupon();
-        cupon.setPorcentajeDescuento(10.0);
-        cupon.setFechaExpiracion(LocalDate.now().plusMonths(1));
+     void testEliminarLogicamenteClienteEstandar() {
+        ClienteEstandarDTO nuevoCliente =  clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
-        // 2. Crear un cliente estándar
-        ClienteEstandarDTO clienteEstandar = new ClienteEstandarDTO();
-        clienteEstandar.setNombre("Juan");
-        clienteEstandar.setApellido("Perez");
-        clienteEstandar.setEmail("juan.perez@example.com");
-        clienteEstandar.setCelular("1234567890");
-        clienteEstandar.setFoto("foto.jpg");
-        clienteEstandar.setEstado(EstadoCliente.ACTIVO.name());
-        clienteEstandar.setCupon(cupon);
+        clienteService.eliminarLogicamente(nuevoCliente.getId());
 
-        System.out.println("cupon"+clienteEstandar.getCupon());
-
-        ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandar);
-
-        clienteService.eliminarLogicamente(clienteGuardado.getId());
-
-        ClienteEstandarDTO clienteEliminado = (ClienteEstandarDTO) clienteService.buscarPorID(clienteGuardado.getId());
+        ClienteEstandarDTO clienteEliminado = (ClienteEstandarDTO) clienteService.buscarPorID(nuevoCliente.getId());
         assertNotNull(clienteEliminado);
         assertEquals(EstadoCliente.INACTIVO.name(), clienteEliminado.getEstado(), "El cliente debería estar inactivo.");
     }
 
     @Test
-    public void testAgregarClientePremium() {
-        ClientePremiumDTO clientePremiumDTO = new ClientePremiumDTO();
-        clientePremiumDTO.setApellido("Martinez");
-        clientePremiumDTO.setNombre("Maria");
-        clientePremiumDTO.setCelular("6542342321");
-        clientePremiumDTO.setCreated(LocalDateTime.now());
-        clientePremiumDTO.setEmail("maria@hotmail.com");
-        clientePremiumDTO.setFoto("456");
-        clientePremiumDTO.setUpdated(null);
-        clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumDTO.setPorcentajeDescuento(20); // Descuento para cliente premium
-
-        clientePremiumDTO=clienteService.agregarClientePremium(clientePremiumDTO);
-
-        ClientePremiumDTO nuevoClientePremium = clienteService.getClientePremium(clientePremiumDTO.getId());
-        assertNotNull(nuevoClientePremium);
-        assertEquals("Maria", nuevoClientePremium.getNombre());
+     void testAgregarClientePremium() throws IOException{
+        ClientePremiumDTO nuevoCliente = clienteService.agregarClientePremium(clientePremiumDTO);
+        multipartFile = TestUtils.generarMultipartFile(rutaArchivo2);
+        String url= clienteService.subirImagenCliente(nuevoCliente.getId(), multipartFile);
+        assertNotNull(url);
+        assertEquals("Maria", nuevoCliente.getNombre());
     }
 
     @Test
-    public void testEditarClientePremium() {
-        ClientePremiumDTO clientePremiumDTO = new ClientePremiumDTO();
-        clientePremiumDTO.setApellido("Martinez");
-        clientePremiumDTO.setNombre("Maria");
-        clientePremiumDTO.setCelular("6543324221");
-        clientePremiumDTO.setCreated(LocalDateTime.now());
-        clientePremiumDTO.setEmail("mariaadwd@hotmail.com");
-        clientePremiumDTO.setFoto("456");
-        clientePremiumDTO.setUpdated(null);
-        clientePremiumDTO.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumDTO.setPorcentajeDescuento(20);
-
-        clientePremiumDTO=clienteService.agregarClientePremium(clientePremiumDTO);
-
-        // Editar cliente premium
+    void testEditarClientePremium() {
+        clientePremiumDTO = clienteService.agregarClientePremium(clientePremiumDTO);
+        assertNotNull(clientePremiumDTO.getFoto(), "La foto debería haber sido establecida");
         ClientePremiumDTO clientePremiumEditado = new ClientePremiumDTO();
         clientePremiumEditado.setApellido("Martinez");
         clientePremiumEditado.setNombre("Ana");
         clientePremiumEditado.setCelular("654321");
-        clientePremiumEditado.setCreated(clientePremiumDTO.getCreated());
         clientePremiumEditado.setEmail("mariaawfdf@hotmail.com");
-        clientePremiumEditado.setFoto("456");
-        clientePremiumEditado.setUpdated(LocalDateTime.now());
+        clientePremiumEditado.setFoto(clientePremiumDTO.getFoto());
         clientePremiumEditado.setEstado(EstadoCliente.ACTIVO.name());
-        clientePremiumEditado.setPorcentajeDescuento(20);
-
+        clientePremiumEditado.setPorcentajeDescuento(20.0);
         clienteService.editarClientePremium(clientePremiumDTO.getId(), clientePremiumEditado);
-
         ClientePremiumDTO result = clienteService.getClientePremium(clientePremiumDTO.getId());
         assertEquals("Ana", result.getNombre());
+        assertEquals(clientePremiumDTO.getFoto(), result.getFoto());
     }
 
 
     @Test
-    public void testAgregarClienteEstandar_EmailDuplicado() {
-        // Crear cliente inicial
-        ClienteEstandarDTO clienteEstandarDTO1 = new ClienteEstandarDTO();
-        clienteEstandarDTO1.setApellido("Lopez");
-        clienteEstandarDTO1.setNombre("Juan");
-        clienteEstandarDTO1.setCelular("123456");
-        clienteEstandarDTO1.setCreated(LocalDateTime.now());
-        clienteEstandarDTO1.setEmail("juan123123@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
-        clienteEstandarDTO1.setUpdated(null);
-        clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
+     void testAgregarClienteEstandar_EmailDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
-        // Agregar el primer cliente
-        clienteService.agregarClienteEstandar(clienteEstandarDTO1);
-
-        // Intentar agregar un cliente con el mismo email
         ClienteEstandarDTO clienteEstandarDTO2 = new ClienteEstandarDTO();
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
         clienteEstandarDTO2.setCelular("987654");
-        clienteEstandarDTO2.setCreated(LocalDateTime.now());
-        clienteEstandarDTO2.setEmail("juan123123@gmail.com"); // Mismo email que el primer cliente
-        clienteEstandarDTO2.setFoto("foto_pedro.jpg");
-        clienteEstandarDTO2.setUpdated(null);
+        clienteEstandarDTO2.setEmail("raul5@hotmail.com"); // Mismo email que el primer cliente
+        clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1Mvv0XIqmdgTg3_qG0-jurVnifKHrMiLz");
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
-
-        // Verificar que se lance la excepción
-        assertThrows(EmailDuplicadoException.class, () -> {
+        NegocioException exception = assertThrows(NegocioException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
+
+        assertEquals("El cliente con dicho correo ya existe", exception.getMessage());
     }
 
     @Test
-    public void testAgregarClienteEstandar_CelularDuplicado() {
-        // Crear cliente inicial
-        ClienteEstandarDTO clienteEstandarDTO1 = new ClienteEstandarDTO();
-        clienteEstandarDTO1.setApellido("Lopez");
-        clienteEstandarDTO1.setNombre("Juan");
-        clienteEstandarDTO1.setCelular("123456789");
-        clienteEstandarDTO1.setCreated(LocalDateTime.now());
-        clienteEstandarDTO1.setEmail("juan@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
-        clienteEstandarDTO1.setUpdated(null);
-        clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
+     void testAgregarClienteEstandar_CelularDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
-        // Agregar el primer cliente
-        clienteService.agregarClienteEstandar(clienteEstandarDTO1);
-
-        // Intentar agregar un cliente con el mismo celular
         ClienteEstandarDTO clienteEstandarDTO2 = new ClienteEstandarDTO();
         clienteEstandarDTO2.setApellido("Gonzalez");
         clienteEstandarDTO2.setNombre("Pedro");
-        clienteEstandarDTO2.setCelular("123456789"); // Mismo celular que el primer cliente
-        clienteEstandarDTO2.setCreated(LocalDateTime.now());
+        clienteEstandarDTO2.setCelular("1234561341"); // Mismo celular que el primer cliente
         clienteEstandarDTO2.setEmail("pedro@gmail.com");
-        clienteEstandarDTO2.setFoto("foto_pedro.jpg");
-        clienteEstandarDTO2.setUpdated(null);
+        clienteEstandarDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clienteEstandarDTO2.setEstado(EstadoCliente.ACTIVO.name());
 
-        // Verificar que se lance la excepción
-        assertThrows(CelularDuplicadoException.class, () -> {
+        NegocioException exception= assertThrows(NegocioException.class, () -> {
             clienteService.agregarClienteEstandar(clienteEstandarDTO2);
         });
+        assertEquals("El cliente con dicho número de celular ya existe", exception.getMessage());
     }
 
     @Test
-    public void testAgregarClientePremium_CelularDuplicado() {
-        ClienteEstandarDTO clienteEstandarDTO1 = new ClienteEstandarDTO();
-        clienteEstandarDTO1.setApellido("Lopez");
-        clienteEstandarDTO1.setNombre("Juan");
-        clienteEstandarDTO1.setCelular("987654321");
-        clienteEstandarDTO1.setCreated(LocalDateTime.now());
-        clienteEstandarDTO1.setEmail("juan@gmail.com");
-        clienteEstandarDTO1.setFoto("foto_juan.jpg");
-        clienteEstandarDTO1.setUpdated(null);
-        clienteEstandarDTO1.setEstado(EstadoCliente.ACTIVO.name());
+     void testAgregarClientePremium_CelularDuplicado() {
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
 
-        // Agregar el primer cliente
-        clienteService.agregarClienteEstandar(clienteEstandarDTO1);
-
-        // Intentar agregar un cliente con el mismo celular
         ClientePremiumDTO clientePremiumDTO2 = new ClientePremiumDTO();
         clientePremiumDTO2.setApellido("Garcia");
         clientePremiumDTO2.setNombre("Luis");
-        clientePremiumDTO2.setCelular("987654321"); // Mismo celular que el primer cliente
-        clientePremiumDTO2.setCreated(LocalDateTime.now());
+        clientePremiumDTO2.setCelular("1234561341"); // Mismo celular que el primer cliente
         clientePremiumDTO2.setEmail("luis@gmail.com");
-        clientePremiumDTO2.setFoto("foto_luis.jpg");
-        clientePremiumDTO2.setUpdated(null);
+        clientePremiumDTO2.setFoto("https://drive.google.com/uc?id=1nB1VhKuCFmO6jhiAqiPmUWZo1Iwgm8Fy");
         clientePremiumDTO2.setEstado(EstadoCliente.ACTIVO.name());
         clientePremiumDTO2.setPorcentajeDescuento(50.0);
 
-        // Verificar que se lance la excepción
-        assertThrows(CelularDuplicadoException.class, () -> {
+        NegocioException exception = assertThrows(NegocioException.class, () -> {
             clienteService.agregarClientePremium(clientePremiumDTO2);
         });
+
+        assertEquals("El cliente con dicho número de celular ya existe", exception.getMessage());
     }
 
+    @Test
+    void testListarClientes(){
+        clienteService.agregarClienteEstandar(clienteEstandarDTO);
+        clienteService.agregarClientePremium(clientePremiumDTO);
+        assertEquals(4,clienteService.obtenerClientes().size());
+
+    }
+    @Test
+    void testAsignarNuevoCuponSinCuponExistente() {
+        ClienteEstandarDTO clienteGuardado = clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
+
+        clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
+
+        ClienteEstandarDTO clienteActualizado = clienteService.getClienteEstandar(clienteGuardado.getId());
+
+        assertNotNull(clienteActualizado.getCupon());
+        assertEquals(20, clienteActualizado.getCupon().getPorcentajeDescuento());
+    }
+    @Test
+    void testAsignarCuponConCuponValidoExistente() {
+        ClienteEstandarDTO clienteGuardado=clienteService.agregarClienteEstandar(clienteEstandarDTOSinCupon);
+        clienteService.asignarCupon(clienteGuardado.getId(), cuponValido);
+        assertFalse(clienteService.asignarCupon(clienteGuardado.getId(), cuponValido2));
+    }
+
+
+
+
+    private static ClienteEstandarDTO getClienteEstandarDTO(ClienteEstandarDTO nuevoCliente) {
+        ClienteEstandarDTO clienteEstandarEditado = new ClienteEstandarDTO();
+        clienteEstandarEditado.setApellido("Lopez");
+        clienteEstandarEditado.setNombre("Daniel");
+        clienteEstandarEditado.setCelular("1233123456");
+        clienteEstandarEditado.setEmail("raul@hotmail.com");
+        clienteEstandarEditado.setFoto(nuevoCliente.getFoto()); // Mantener la URL de la foto actual
+        clienteEstandarEditado.setEstado(EstadoCliente.ACTIVO.name());
+        clienteEstandarEditado.setCupon(clienteEstandarDTO.getCupon());
+        return clienteEstandarEditado;
+    }
 
 
 }

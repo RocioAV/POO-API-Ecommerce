@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura de Compra</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+        .header .logo {
+            float: left;
+            width: 50px;
+        }
+        .header .company-info {
+            margin-left: 70px;
+            text-align: left;
+        }
+        .header .company-info h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .header .company-info p {
+            margin: 2px 0;
+            font-size: 14px;
+        }
+        .invoice-details, .customer-details {
+            padding: 20px;
+            background-color: #f1f1f1;
+            overflow: hidden;
+        }
+        .invoice-details {
+            border-bottom: 1px solid #ddd;
+        }
+        .invoice-details p, .customer-details p {
+            margin: 5px 0;
+        }
+        .section-title {
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .items-table th {
+            background-color: #333;
+            color: #fff;
+            font-size: 14px;
+        }
+        .totals {
+            padding: 20px;
+            text-align: right;
+        }
+        .totals p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .footer img {
+            max-width: 150px;
+            margin-top: 10px;
+        }
+        .customer-details .logo {
+            width: 50px;
+            height: auto;
+            float: left;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://firebasestorage.googleapis.com/v0/b/tp8poo2024.firebasestorage.app/o/logo%2FlogoG2.png?alt=media&token=c1ac110f-6b05-4090-851e-8986b2252aba" alt="Logo de la Empresa" class="logo">
+            <div class="company-info">
+                <h2>Grupo 2</h2>
+                <p>Teléfono | Email grupo2poo2024@gmail.com</p>
+            </div>
+            <h1>FACTURA</h1>
+        </div>
+        
+        <div class="invoice-details">
+            <p><strong>No. de Factura:</strong> 000001</p>
+            <p><strong>Fecha y hora :</strong> [[${fechaYHora}]]</p>
+        </div>
+
+        <div class="customer-details">
+            <p><strong>Para:</strong></p>
+            <img src="[[${cliente.foto}]]" alt="FotoCliente" class="logo">
+            <p><strong>Cliente:</strong> [[${cliente.nombre}]] [[${cliente.apellido}]]</p>
+            <p><strong>Email:</strong> [[${cliente.email}]]</p>
+        </div>
+
+        <div class="section-title">DETALLES DE LA FACTURA</div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>PRODUCTO</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th>PRECIO POR UNIDAD</th>
+                    <th>TOTAL DE LA LÍNEA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>[[${producto.nombre}]]</td>
+                    <td>[[${producto.descripcion}]]</td>
+                    <td>USD [[${producto.precio}]]</td>
+                    <td>USD [[${producto.precio}]]</td>
+                </tr>
+                <!-- Más filas de productos pueden añadirse aquí -->
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <p><strong>Cambio de moneda:</strong> $[[${formaPago.importe}]]</p>
+            <p><strong>Forma de Pago:</strong> [[${formaPago.tipo}]]</p>
+            <p><strong>Total:</strong> $[[${formaPago.importe}]]</p>
+        </div>
+
+        <div class="footer">
+            <p>Gracias por su confianza</p>
+        </div>
+    </div>
+</body>
+</html>

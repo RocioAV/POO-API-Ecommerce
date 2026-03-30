@@ -1,75 +1,79 @@
 package ar.edu.unju.fi.poo.tp8poo;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProductoDTO;
 import ar.edu.unju.fi.poo.tp8poo.dto.ProveedorDTO;
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
 import ar.edu.unju.fi.poo.tp8poo.service.ProductoService;
-import ar.edu.unju.fi.poo.tp8poo.util.EstadoProducto;
+import ar.edu.unju.fi.poo.tp8poo.service.ProveedorService;
+import ar.edu.unju.fi.poo.tp8poo.testUtil.TestUtils;
+import ar.edu.unju.fi.poo.tp8poo.util.enumerated.EstadoProducto;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest
-public class TestProductoService {
+ class TestProductoService {
     @Autowired
     ProductoService productoService;
+    @Autowired
+    ProveedorService proveedorService;
 
 
-    @Test
-    public void testCreateProductoCorrecto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null,"Pepsi","pepsi@gmail.com","28853324",true);
+    static ProveedorDTO proveedorDTO;
+    static ProductoDTO productoDTO;
+    MultipartFile multipartFile;
+    String workspacePath = System.getProperty("user.dir");
+    String rutaArchivo1 = workspacePath + "/src/test/java/ar/edu/unju/fi/poo/tp8poo/img/parlante.webp";
 
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD001");
-        productoDTO.setNombre("Producto 1");
-        productoDTO.setDescripcion("Descripción del producto 1");
-        productoDTO.setPrecio(100.0);
-        productoDTO.setCantidad(10);
+    @BeforeEach
+    public void setUp() {
+        proveedorDTO = new ProveedorDTO(null, "Proveedor", "proveedor@gmail.com", "28853324", true);
+
+        productoDTO = new ProductoDTO();
         productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
-
-        ProductoDTO productoCreado=productoService.createProducto(productoDTO);
-        assertEquals("PROD001",productoCreado.getCodigo());
+       proveedorDTO= proveedorService.crearProveedor(proveedorDTO);
+    }
+    private void setUpProducto(String codigo, String nombre, String descripcion, Double precio, Integer cantidad) {
+        productoDTO.setCodigo(codigo);
+        productoDTO.setNombre(nombre);
+        productoDTO.setDescripcion(descripcion);
+        productoDTO.setPrecio(precio);
+        productoDTO.setCantidad(cantidad);
+        productoDTO.setIdProveedor(proveedorDTO.getId());
     }
 
     @Test
-    public void testCreateProductoSinProveedor() {
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD002");
-        productoDTO.setNombre("Producto 2");
-        productoDTO.setDescripcion("Descripción del producto 2");
-        productoDTO.setPrecio(200.0);
-        productoDTO.setCantidad(5);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(null);  // Proveedor nulo
-
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            productoService.createProducto(productoDTO);
-        });
-
-        assertEquals("El producto debe tener un proveedor asignado.", exception.getMessage());
+     void testCreateProductoCorrectoConImagem() throws IOException {
+        multipartFile= TestUtils.generarMultipartFile(rutaArchivo1);
+        setUpProducto("PROD001", "Producto 1", "Descripción del producto 1", 100.0, 10);
+        ProductoDTO productoCreado = productoService.createProducto(productoDTO);
+        productoService.subirImagenProducto(productoCreado.getId(),multipartFile);
+        assertEquals("PROD001", productoCreado.getCodigo());
     }
 
     @Test
-    public void testDeleteLogicoProducto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Coca","coca@gmail.com","28853324",true);
+     void testCreateProductoConProveedorInexistente() {
+        setUpProducto("PROD005", "Producto 2", "Descripción del producto 2", 200.0, 5);
+        productoDTO.setIdProveedor(88L);
 
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD003");
-        productoDTO.setNombre("Producto 3");
-        productoDTO.setDescripcion("Descripción del producto 3");
-        productoDTO.setPrecio(150.0);
-        productoDTO.setCantidad(20);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+        Exception exception = assertThrows(NegocioException.class, () -> productoService.createProducto(productoDTO));
+
+        assertEquals("Proveedor no encontrado", exception.getMessage());
+    }
+
+    @Test
+     void testDeleteLogicoProducto() {
+        setUpProducto("PROD008","Producto 3","Descripción del producto 3",150.0,20);
 
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
-
         productoService.deleteProductoLogico(createdProducto.getId());
 
         ProductoDTO deletedProducto = productoService.findById(createdProducto.getId());
@@ -77,17 +81,11 @@ public class TestProductoService {
     }
 
     @Test
-    public void testUpdateProducto() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Lays","Lays@gmail.com","28853324",true);
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setNombre("Producto 4");
-        productoDTO.setDescripcion("Descripción del producto 4");
-        productoDTO.setPrecio(180.0);
-        productoDTO.setCantidad(15);
-        productoDTO.setProveedor(proveedorDTO);
-
+     void testUpdateProducto() throws IOException {
+        multipartFile= TestUtils.generarMultipartFile(rutaArchivo1);
+        setUpProducto("PROD006","Producto 4","Descripción del producto 4",180.0,15);
         ProductoDTO createdProducto = productoService.createProducto(productoDTO);
-
+        productoService.subirImagenProducto(createdProducto.getId(),multipartFile);
         createdProducto.setNombre("Producto Modificado");
         createdProducto.setDescripcion("Descripción modificada");
 
@@ -97,19 +95,9 @@ public class TestProductoService {
         assertEquals("Descripción modificada", updatedProducto.getDescripcion());
     }
 
-
     @Test
-    public void testFindByCodigo() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Pepsi", "pepsi@gmail.com", "28853324",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD005");
-        productoDTO.setNombre("Producto 5");
-        productoDTO.setDescripcion("Descripción del producto 5");
-        productoDTO.setPrecio(500.0);
-        productoDTO.setCantidad(50);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+     void testFindByCodigo() {
+        setUpProducto("PROD005","Producto 5","Descripción del producto 5",500.0,50);
 
         productoService.createProducto(productoDTO);
 
@@ -120,45 +108,20 @@ public class TestProductoService {
     }
 
     @Test
-    public void testFindByNombre() {
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Coca-Cola", "coca@gmail.com", "12345678",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD006");
-        productoDTO.setNombre("Producto 6");
-        productoDTO.setDescripcion("Descripción del producto 6");
-        productoDTO.setPrecio(650.0);
-        productoDTO.setCantidad(65);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
-
+     void testFindByNombre() {
+        setUpProducto("PROD006","Producto 6","Descripción del producto 6",650.0,65);
         productoService.createProducto(productoDTO);
-
-        // Buscar el producto por nombre
         List<ProductoDTO> result = productoService.findByNombre("Producto 6");
-
-        // Verificar resultados
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Producto 6", result.get(0).getNombre());
     }
 
     @Test
-    public void testFindByDescripcion() {
-        // Crear y guardar un producto
-        ProveedorDTO proveedorDTO = new ProveedorDTO(null, "Sprite", "sprite@gmail.com", "87654321",true);
-
-        ProductoDTO productoDTO = new ProductoDTO();
-        productoDTO.setCodigo("PROD007");
-        productoDTO.setNombre("Producto 7");
-        productoDTO.setDescripcion("Descripción del producto 7");
-        productoDTO.setPrecio(700.0);
-        productoDTO.setCantidad(70);
-        productoDTO.setEstado(EstadoProducto.DISPONIBLE.getEstado());
-        productoDTO.setProveedor(proveedorDTO);
+     void testFindByDescripcion() {
+        setUpProducto("PROD007","Producto 7","Descripción del producto 7",700.0,70);
 
         productoService.createProducto(productoDTO);
-
 
         List<ProductoDTO> result = productoService.findByDescripcion("Descripción del producto 7");
 

@@ -1,21 +1,16 @@
 package ar.edu.unju.fi.poo.tp8poo.dto;
 
-import ar.edu.unju.fi.poo.tp8poo.entity.Cupon;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-
-import java.io.Serializable;
-
 @ToString
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClienteEstandarDTO extends ClienteDTO implements Serializable{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+@EqualsAndHashCode(callSuper = true)
+public class ClienteEstandarDTO extends ClienteDTO {
 
-	private Cupon cupon;
-
+	@Schema(description = "Cupon de descuento asignado al cliente estándar")
+	private CuponDTO cupon;
 }

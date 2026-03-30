@@ -1,0 +1,43 @@
+package ar.edu.unju.fi.poo.tp8poo.config;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import ar.edu.unju.fi.poo.tp8poo.exceptions.NegocioException;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+
+@Configuration
+public class FirebaseConfig {
+
+	private static final String BUCKET_NAME = "tp8poo2024.firebasestorage.app";
+	private static final String WORKSPACE_PATH = System.getProperty("user.dir");
+	private static final String FIREBASE_CREDENTIALS_PATH = WORKSPACE_PATH
+			+ "/src/main/resources/tp8poo2024-firebase-adminsdk-2htn6-5dae6d3691.json";
+
+	@Bean
+	FirebaseApp firebaseApp()  {
+		try {
+			if (FirebaseApp.getApps().isEmpty()) {
+				FileInputStream serviceAccount = new FileInputStream(FIREBASE_CREDENTIALS_PATH);
+
+				@SuppressWarnings("deprecation")
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(serviceAccount)).setStorageBucket(BUCKET_NAME).build();
+
+				return FirebaseApp.initializeApp(options);
+			}
+			else {
+				return FirebaseApp.getInstance();
+			}
+		}
+		catch (IOException e) {
+			throw new NegocioException("Fallo con la inicializacion de Firebase");
+		}
+	}
+
+}
